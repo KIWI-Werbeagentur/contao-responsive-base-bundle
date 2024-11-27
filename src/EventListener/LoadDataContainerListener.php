@@ -9,6 +9,8 @@ class LoadDataContainerListener
 {
     public function __invoke(string $table): void
     {
+        if(!($GLOBALS['responsive'] ?? false)) return;
+
         //Copy DCA-entry for responsive widgets to avoid exception in Ajax requests (e.g. fileTree)
         if (!($GLOBALS['TL_DCA'][$table]['fields'] ?? false)) {
             return;

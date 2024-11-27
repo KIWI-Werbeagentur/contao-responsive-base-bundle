@@ -11,6 +11,8 @@ class OptionalResponsiveWidget extends ResponsiveWidget
 
     public function generate()
     {
+        if(!($GLOBALS['responsive'] ?? false)) return;
+
         $arrValues = StringUtil::deserialize($this->value);
         $strWidget = parent::generate();
         $strChecked = !$arrValues || (isset($arrValues[array_key_first($this->arrBreakpoints)]) && count($arrValues) == 1) || !count($arrValues) ? '' : 'checked';
@@ -20,6 +22,8 @@ class OptionalResponsiveWidget extends ResponsiveWidget
 
     protected function validator($varInput, $arrValues = [])
     {
+        if(!($GLOBALS['responsive'] ?? false)) return;
+
         if (Input::post("{$this->strName}-responsive")) {
             return parent::validator($varInput, $arrValues);
         }
