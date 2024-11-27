@@ -12,5 +12,5 @@ if (System::getContainer()->get('contao.routing.scope_matcher')
     ->isBackendRequest(System::getContainer()->get('request_stack')->getCurrentRequest() ?? Request::create(''))
 )
 {
-    $GLOBALS['TL_CSS'][] = 'files/backend/responsive.css';
+    $GLOBALS['TL_CSS'][] = 'bundles/kiwiresponsivebase/responsive.css';
 }
