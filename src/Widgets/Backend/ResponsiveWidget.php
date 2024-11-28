@@ -28,13 +28,13 @@ class ResponsiveWidget extends Widget
         $this->strLabelIcon = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['label']['icon'] ?? null;
     }
 
-    public function generateLabel()
+    public function generateLabel(): string
     {
         $this->strLabel = $this->strLabelIcon ? \Safe\file_get_contents($this->strLabelIcon) . $this->strLabel : $this->strLabel;
         return parent::generateLabel();
     }
 
-    public function generate()
+    public function generate(): string
     {
         
         System::loadLanguageFile('default', 'de');

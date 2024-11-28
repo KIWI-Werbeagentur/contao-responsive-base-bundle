@@ -9,7 +9,7 @@ class OptionalResponsiveWidget extends ResponsiveWidget
 {
     protected $strCssClass = "responsive-widget";
 
-    public function generate()
+    public function generate(): string
     {
         $arrValues = StringUtil::deserialize($this->value);
         $strWidget = parent::generate();
