@@ -22,8 +22,7 @@ class UpdateDataDefinition
      */
     public function addResponsiveFields(BuildDataDefinitionEvent $event)
     {
-        if(!($GLOBALS['responsive'] ?? false)) return;
-
+        
         // Get the container and all properties.
         $container  = $event->getContainer();
         $properties = $container->getPropertiesDefinition();

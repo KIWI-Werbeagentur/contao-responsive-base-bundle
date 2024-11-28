@@ -2,7 +2,6 @@
 
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
 
-if(!($GLOBALS['responsive'] ?? false)) return;
 
 $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveCols'] = [
     'inputType' => 'responsive',

@@ -19,8 +19,7 @@ class ResponsiveWidget extends Widget
 
     public function __construct($arrAttributes = null)
     {
-        if(!($GLOBALS['responsive'] ?? false)) return;
-
+        
         parent::__construct($arrAttributes);
 
         $this->arrBreakpoints = (new $GLOBALS['responsive'])->arrBreakpoints;
@@ -29,8 +28,7 @@ class ResponsiveWidget extends Widget
 
     public function generate()
     {
-        if(!($GLOBALS['responsive'] ?? false)) return;
-
+        
         System::loadLanguageFile('default', 'de');
         $arrInputs = [];
         $arrConfigurations = [];
