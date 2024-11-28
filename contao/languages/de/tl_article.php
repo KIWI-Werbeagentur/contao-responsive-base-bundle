@@ -17,7 +17,7 @@ $GLOBALS['TL_LANG']['tl_article']['responsiveJustifyContent'] = [
     'icon' => 'bundles/kiwiresponsivebase/justify-content.svg'
 ];
 
-$GLOBALS['TL_LANG']['tl_article']['responsiveAlignmentContent'] = [
+$GLOBALS['TL_LANG']['tl_article']['responsiveAlignContent'] = [
     0 => "Ausrichtung an Gegenachse (alle Elemente)",
     1 => "align-content",
     'icon' => 'bundles/kiwiresponsivebase/align-content.svg'

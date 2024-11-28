@@ -20,11 +20,16 @@ class ResponsiveWidget extends Widget
 
     public function __construct($arrAttributes = null)
     {
-        
         parent::__construct($arrAttributes);
 
         $this->arrBreakpoints = (new $GLOBALS['responsive'])->arrBreakpoints;
         $this->arrDca = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField];
+
+        // bug: default values not working in tl_article
+        if(!$this->value && ($this->arrDca['default'] ?? false)){
+            $this->value = $this->arrDca['default'];
+        }
+
         $this->strLabelIcon = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['label']['icon'] ?? null;
     }
 
@@ -36,7 +41,6 @@ class ResponsiveWidget extends Widget
 
     public function generate(): string
     {
-        
         System::loadLanguageFile('default', 'de');
         $arrInputs = [];
         $arrConfigurations = [];
