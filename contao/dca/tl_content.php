@@ -30,15 +30,16 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveOrder'] = [
     'sql' => "blob NULL"
 ];
 
-$GLOBALS['TL_DCA']['tl_content']['fields']['responsiveAlignment'] = [
+$GLOBALS['TL_DCA']['tl_content']['fields']['responsiveAlignSelf'] = [
     'inputType' => 'optionalResponsive',
     'responsiveInputType' => 'select',
     'options' => ['auto', 'stretch', 'baseline', 'flex-start', 'center', 'flex-end'],
+    'reference' => &$GLOBALS['TL_LANG']['MSC']['flexItems'],
     'default' => ['xs'=>'auto'],
     'eval' => ['tl_class'=>"w50"],
     'sql' => "blob NULL"
 ];
 
 PaletteManipulator::create()
-    ->addField('responsiveOrder,responsiveAlignment,responsiveCols,responsiveOffsets', 'template_legend', PaletteManipulator::POSITION_APPEND)
+    ->addField('responsiveOrder,responsiveAlignSelf,responsiveCols,responsiveOffsets', 'template_legend', PaletteManipulator::POSITION_APPEND)
     ->applyToPalette('text', 'tl_content');

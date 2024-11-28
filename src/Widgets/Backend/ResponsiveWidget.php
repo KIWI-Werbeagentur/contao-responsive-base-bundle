@@ -14,6 +14,7 @@ class ResponsiveWidget extends Widget
     protected $strTemplate = 'be_widget';
 
     protected $arrBreakpoints;
+    protected $strLabelIcon;
 
     protected $arrDca;
 
@@ -24,6 +25,13 @@ class ResponsiveWidget extends Widget
 
         $this->arrBreakpoints = (new $GLOBALS['responsive'])->arrBreakpoints;
         $this->arrDca = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField];
+        $this->strLabelIcon = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['label']['icon'] ?? null;
+    }
+
+    public function generateLabel()
+    {
+        $this->strLabel = $this->strLabelIcon ? \Safe\file_get_contents($this->strLabelIcon) . $this->strLabel : $this->strLabel;
+        return parent::generateLabel();
     }
 
     public function generate()

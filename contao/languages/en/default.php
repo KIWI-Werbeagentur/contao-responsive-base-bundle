@@ -3,12 +3,13 @@
 $GLOBALS['TL_LANG']['MSC']['responsive'] = "Responsive Settings";
 $GLOBALS['TL_LANG']['MSC']['inherit'] = "- Inherit -";
 
-$GLOBALS['TL_LANG']['MSC']['flexDirection']['row'] = "Row";
-$GLOBALS['TL_LANG']['MSC']['flexDirection']['column'] = "Column";
-$GLOBALS['TL_LANG']['MSC']['flexDirection']['row-reverse'] = "Row Reverse";
-$GLOBALS['TL_LANG']['MSC']['flexDirection']['column-reverse'] = "Column Reverse";
+$GLOBALS['TL_LANG']['MSC']['flexDirection']['row'] = "Horizontal";
+$GLOBALS['TL_LANG']['MSC']['flexDirection']['column'] = "Vertical";
+$GLOBALS['TL_LANG']['MSC']['flexDirection']['row-reverse'] = "Horizontal Reverse";
+$GLOBALS['TL_LANG']['MSC']['flexDirection']['column-reverse'] = "Vertical Reverse";
 
 $GLOBALS['TL_LANG']['MSC']['flexItems']['normal'] = "Normal";
+$GLOBALS['TL_LANG']['MSC']['flexItems']['auto'] = "Normal";
 $GLOBALS['TL_LANG']['MSC']['flexItems']['stretch'] = "Stretch";
 $GLOBALS['TL_LANG']['MSC']['flexItems']['baseline'] = "Baseline";
 $GLOBALS['TL_LANG']['MSC']['flexItems']['flex-start'] = "Start";

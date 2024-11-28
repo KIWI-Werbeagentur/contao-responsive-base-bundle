@@ -3,22 +3,23 @@
 $GLOBALS['TL_LANG']['MSC']['responsive'] = "Responsiv einstellen";
 $GLOBALS['TL_LANG']['MSC']['inherit'] = "- Erben -";
 
-$GLOBALS['TL_LANG']['MSC']['flexDirection']['row'] = "Zeile";
-$GLOBALS['TL_LANG']['MSC']['flexDirection']['column'] = "Spalte";
-$GLOBALS['TL_LANG']['MSC']['flexDirection']['row-reverse'] = "Zeile Reverse";
-$GLOBALS['TL_LANG']['MSC']['flexDirection']['column-reverse'] = "Spalte Reverse";
+$GLOBALS['TL_LANG']['MSC']['flexDirection']['row'] = "Horizontal";
+$GLOBALS['TL_LANG']['MSC']['flexDirection']['column'] = "Vertikal";
+$GLOBALS['TL_LANG']['MSC']['flexDirection']['row-reverse'] = "Horizontal Reverse";
+$GLOBALS['TL_LANG']['MSC']['flexDirection']['column-reverse'] = "Vertikal Reverse";
 
 $GLOBALS['TL_LANG']['MSC']['flexItems']['normal'] = "Standard";
+$GLOBALS['TL_LANG']['MSC']['flexItems']['auto'] = "Standard";
 $GLOBALS['TL_LANG']['MSC']['flexItems']['stretch'] = "Wachsend";
 $GLOBALS['TL_LANG']['MSC']['flexItems']['baseline'] = "Grundlinie";
 $GLOBALS['TL_LANG']['MSC']['flexItems']['flex-start'] = "Anfang";
-$GLOBALS['TL_LANG']['MSC']['flexItems']['center'] = "Center";
+$GLOBALS['TL_LANG']['MSC']['flexItems']['center'] = "Mitte";
 $GLOBALS['TL_LANG']['MSC']['flexItems']['flex-end'] = "Ende";
 
 $GLOBALS['TL_LANG']['MSC']['flexContent']['normal'] = "Standard";
 $GLOBALS['TL_LANG']['MSC']['flexContent']['flex-start'] = "Anfang";
 $GLOBALS['TL_LANG']['MSC']['flexContent']['flex-end'] = "Ende";
-$GLOBALS['TL_LANG']['MSC']['flexContent']['center']="Center";
+$GLOBALS['TL_LANG']['MSC']['flexContent']['center']="Mitte";
 $GLOBALS['TL_LANG']['MSC']['flexContent']['space-between'] = "Verteilt";
 $GLOBALS['TL_LANG']['MSC']['flexContent']['space-around'] = "Verteilt mit Platz nach außen";
 $GLOBALS['TL_LANG']['MSC']['flexContent']['space-evenly'] = "Verteilt mit halben Platz nach außen";

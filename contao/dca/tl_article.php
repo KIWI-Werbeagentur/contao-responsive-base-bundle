@@ -3,7 +3,7 @@
 use \Contao\CoreBundle\DataContainer\PaletteManipulator;
 
 
-$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveDirection'] = [
+$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveFlexDirection'] = [
     'inputType' => 'optionalResponsive',
     'responsiveInputType' => 'select',
     'eval' => ['tl_class' => "clr w50"],
@@ -12,25 +12,25 @@ $GLOBALS['TL_DCA']['tl_article']['fields']['responsiveDirection'] = [
     'sql' => "blob NULL"
 ];
 
-$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveItems'] = [
+$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveAlignItems'] = [
     'inputType' => 'optionalResponsive',
     'responsiveInputType' => 'select',
-    'eval' => ['tl_class' => "w50"],
+    'eval' => ['tl_class' => "w50 clr"],
     'options' => ['normal', 'stretch', 'baseline', 'flex-start', 'center', 'flex-end'],
     'reference' => &$GLOBALS['TL_LANG']['MSC']['flexItems'],
     'sql' => "blob NULL"
 ];
 
-$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveVerticalAlignment'] = [
+$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveJustifyContent'] = [
     'inputType' => 'optionalResponsive',
     'responsiveInputType' => 'select',
-    'eval' => ['tl_class' => "clr w50"],
+    'eval' => ['tl_class' => "w50"],
     'options' => ['normal', 'flex-start', 'center', 'flex-end', 'space-between', 'space-around', 'space-evenly'],
     'reference' => &$GLOBALS['TL_LANG']['MSC']['flexContent'],
     'sql' => "blob NULL"
 ];
 
-$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveHorizontalAlignment'] = [
+$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveAlignContent'] = [
     'inputType' => 'optionalResponsive',
     'responsiveInputType' => 'select',
     'eval' => ['tl_class' => "w50"],
@@ -58,5 +58,5 @@ $GLOBALS['TL_DCA']['tl_article']['fields']['responsiveSpacingBottom'] = [
 ];
 
 PaletteManipulator::create()
-    ->addField('responsiveDirection,responsiveItems,responsiveVerticalAlignment,responsiveHorizontalAlignment,responsiveSpacingTop,responsiveSpacingBottom', 'template_legend', PaletteManipulator::POSITION_APPEND)
+    ->addField('responsiveFlexDirection,responsiveJustifyContent,responsiveAlignItems,responsiveAlignContent,responsiveSpacingTop,responsiveSpacingBottom', 'template_legend', PaletteManipulator::POSITION_APPEND)
     ->applyToPalette('default', 'tl_article');

@@ -1,27 +1,23 @@
 <?php
 
-$GLOBALS['TL_LANG']['tl_article']['responsiveElsPerRow'] = [
-    0 => "Elements per row"
-];
-
-$GLOBALS['TL_LANG']['tl_article']['responsiveDirection'] = [
-    0 => "Direction",
+$GLOBALS['TL_LANG']['tl_article']['responsiveFlexDirection'] = [
+    0 => "Main Axis",
     1 => "flex-direction",
 ];
 
-$GLOBALS['TL_LANG']['tl_article']['responsiveItems'] = [
+$GLOBALS['TL_LANG']['tl_article']['responsiveAlignItems'] = [
     0 => "Element Alignment",
     1 => "align-items",
 ];
 
-$GLOBALS['TL_LANG']['tl_article']['responsiveVerticalAlignment'] = [
-    0 => "Vertical Alignment",
-    1 => "align-content / justify-content (Depending on direction)",
+$GLOBALS['TL_LANG']['tl_article']['responsiveJustifyContent'] = [
+    0 => "Alignment on Main Axis",
+    1 => "justify-content",
 ];
 
-$GLOBALS['TL_LANG']['tl_article']['responsiveHorizontalAlignment'] = [
-    0 => "Horizontal Alignment",
-    1 => "justify-content / align-content (Depending on direction)",
+$GLOBALS['TL_LANG']['tl_article']['responsiveAlignContent'] = [
+    0 => "Alignment on Peripheral Axis",
+    1 => "align-content",
 ];
 
 $GLOBALS['TL_LANG']['tl_article']['responsiveSpacingTop'] = [

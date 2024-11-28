@@ -1,23 +1,26 @@
 <?php
 
-$GLOBALS['TL_LANG']['tl_article']['responsiveDirection'] = [
-    0 => "Richtung",
+$GLOBALS['TL_LANG']['tl_article']['responsiveFlexDirection'] = [
+    0 => "Hauptachse",
     1 => "flex-direction",
 ];
 
-$GLOBALS['TL_LANG']['tl_article']['responsiveItems'] = [
-    0 => "Elementanordnung",
+$GLOBALS['TL_LANG']['tl_article']['responsiveAlignItems'] = [
+    0 => "Elementanordnung an Gegenachse (pro Reihe)",
     1 => "align-items",
+    'icon' => 'bundles/kiwiresponsivebase/align-items.svg'
 ];
 
-$GLOBALS['TL_LANG']['tl_article']['responsiveVerticalAlignment'] = [
-    0 => "Vertikale Ausrichtung",
-    1 => "align-content / justify-content (Abhängig von gewählter Richtung)",
+$GLOBALS['TL_LANG']['tl_article']['responsiveJustifyContent'] = [
+    0 => "Ausrichtung an Hauptachse (alle Elemente)",
+    1 => "justify-content",
+    'icon' => 'bundles/kiwiresponsivebase/justify-content.svg'
 ];
 
-$GLOBALS['TL_LANG']['tl_article']['responsiveHorizontalAlignment'] = [
-    0 => "Horizontale Ausrichtung",
-    1 => "justify-content / align-content (Abhängig von gewählter Richtung)",
+$GLOBALS['TL_LANG']['tl_article']['responsiveAlignmentContent'] = [
+    0 => "Ausrichtung an Gegenachse (alle Elemente)",
+    1 => "align-content",
+    'icon' => 'bundles/kiwiresponsivebase/align-content.svg'
 ];
 
 $GLOBALS['TL_LANG']['tl_article']['responsiveSpacingTop'] = [

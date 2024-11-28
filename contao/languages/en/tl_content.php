@@ -5,7 +5,7 @@ $GLOBALS['TL_LANG']['tl_content']['responsiveOrder'] = [
     1 => "order"
 ];
 
-$GLOBALS['TL_LANG']['tl_content']['responsiveAlignment'] = [
+$GLOBALS['TL_LANG']['tl_content']['responsiveAlignSelf'] = [
     0 => "Alignment",
     1 => "align-self"
 ];

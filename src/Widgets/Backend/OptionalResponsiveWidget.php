@@ -11,7 +11,6 @@ class OptionalResponsiveWidget extends ResponsiveWidget
 
     public function generate()
     {
-        
         $arrValues = StringUtil::deserialize($this->value);
         $strWidget = parent::generate();
         $strChecked = !$arrValues || (isset($arrValues[array_key_first($this->arrBreakpoints)]) && count($arrValues) == 1) || !count($arrValues) ? '' : 'checked';
