@@ -38,4 +38,9 @@ abstract class ResponsiveConfiguration
     {
         return array_keys($this->arrSpacings);
     }
+
+    public function getDefaults(){
+        $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveCols']['default'] = (new $GLOBALS['responsive'])->arrColsDefaults;
+        $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveOffsets']['default'] = (new $GLOBALS['responsive'])->arrOffsetsDefaults;
+    }
 }
