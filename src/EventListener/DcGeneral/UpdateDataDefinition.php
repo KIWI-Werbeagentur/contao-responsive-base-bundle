@@ -1,6 +1,6 @@
 <?php
 
-namespace Kiwi\Contao\ResponsiveBase\EventListener\DcGeneral;
+namespace Kiwi\Contao\ResponsiveBaseBundle\EventListener\DcGeneral;
 
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\Properties\DefaultProperty;
 use ContaoCommunityAlliance\DcGeneral\DataDefinition\Definition\Properties\PropertyInterface;

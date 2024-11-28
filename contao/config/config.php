@@ -1,7 +1,7 @@
 <?php
 
-use Kiwi\Contao\ResponsiveBase\Widgets\Backend\OptionalResponsiveWidget;
-use Kiwi\Contao\ResponsiveBase\Widgets\Backend\ResponsiveWidget;
+use Kiwi\Contao\ResponsiveBaseBundle\Widgets\Backend\OptionalResponsiveWidget;
+use Kiwi\Contao\ResponsiveBaseBundle\Widgets\Backend\ResponsiveWidget;
 use Contao\System;
 use Symfony\Component\HttpFoundation\Request;
 

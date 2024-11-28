@@ -1,6 +1,6 @@
 <?php
 
-namespace Kiwi\Contao\ResponsiveBase\EventListener;
+namespace Kiwi\Contao\ResponsiveBaseBundle\EventListener;
 
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 

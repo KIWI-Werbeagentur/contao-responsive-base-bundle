@@ -1,6 +1,6 @@
 <?php
 
-namespace Kiwi\Contao\ResponsiveBase;
+namespace Kiwi\Contao\ResponsiveBaseBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

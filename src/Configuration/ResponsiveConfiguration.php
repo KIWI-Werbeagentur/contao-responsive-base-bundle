@@ -1,6 +1,6 @@
 <?php
 
-namespace Kiwi\Contao\ResponsiveBase\Configuration;
+namespace Kiwi\Contao\ResponsiveBaseBundle\Configuration;
 
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 

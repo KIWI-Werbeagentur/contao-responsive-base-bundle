@@ -1,6 +1,6 @@
 <?php
 
-namespace Kiwi\Contao\ResponsiveBase\Widgets\Backend;
+namespace Kiwi\Contao\ResponsiveBaseBundle\Widgets\Backend;
 
 use Contao\Input;
 use Contao\StringUtil;

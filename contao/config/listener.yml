@@ -1,5 +1,5 @@
 services:
-  Kiwi\Contao\ResponsiveBase\EventListener\DcGeneral\UpdateDataDefinition:
+  Kiwi\Contao\ResponsiveBaseBundle\EventListener\DcGeneral\UpdateDataDefinition:
     tags:
       - name: kernel.event_listener
         event: dc-general.factory.build-data-definition
