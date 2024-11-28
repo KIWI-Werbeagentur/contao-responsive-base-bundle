@@ -44,7 +44,7 @@ $GLOBALS['TL_DCA']['tl_article']['fields']['responsiveSpacingTop'] = [
     'inputType' => 'optionalResponsive',
     'responsiveInputType' => 'select',
     'eval' => ['tl_class' => "w50"],
-    'options_callback' => [$GLOBALS['responsive'], 'getSpacings'],
+    'options_callback' => [&$GLOBALS['responsive'], 'getSpacings'],
     'reference' => &$GLOBALS['TL_LANG']['MSC']['spacings'],
     'sql' => "blob NULL"
 ];
@@ -53,7 +53,7 @@ $GLOBALS['TL_DCA']['tl_article']['fields']['responsiveSpacingBottom'] = [
     'inputType' => 'optionalResponsive',
     'responsiveInputType' => 'select',
     'eval' => ['tl_class' => "w50"],
-    'options_callback' => [$GLOBALS['responsive'], 'getSpacings'],
+    'options_callback' => [&$GLOBALS['responsive'], 'getSpacings'],
     'reference' => &$GLOBALS['TL_LANG']['MSC']['spacings'],
     'sql' => "blob NULL"
 ];
