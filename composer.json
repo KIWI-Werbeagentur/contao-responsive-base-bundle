@@ -22,10 +22,10 @@
     },
     "autoload": {
         "psr-4" : {
-            "Kiwi\\Contao\\ResponsiveBase\\" : "src/"
+            "Kiwi\\Contao\\ResponsiveBaseBundle\\" : "src/"
         }
     },
     "extra":{
-        "contao-manager-plugin": "Kiwi\\Contao\\ResponsiveBase\\ContaoManager\\Plugin"
+        "contao-manager-plugin": "Kiwi\\Contao\\ResponsiveBaseBundle\\ContaoManager\\Plugin"
     }
 }
