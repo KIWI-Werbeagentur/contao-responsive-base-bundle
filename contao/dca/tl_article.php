@@ -4,16 +4,6 @@ use \Contao\CoreBundle\DataContainer\PaletteManipulator;
 
 if(!($GLOBALS['responsive'] ?? false)) return;
 
-$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveElsPerRow'] = [
-    'inputType' => 'responsive',
-    'responsiveInputType' => 'select',
-    'eval' => ['tl_class' => "clr"],
-    'options_callback' => [$GLOBALS['responsive'], 'getElsPerRow'],
-    'reference' => &$GLOBALS['TL_LANG']['MSC']['elsPerRow'],
-    'default' => ['xs' => 1, 'lg' => 2],
-    'sql' => "blob NULL"
-];
-
 $GLOBALS['TL_DCA']['tl_article']['fields']['responsiveDirection'] = [
     'inputType' => 'optionalResponsive',
     'responsiveInputType' => 'select',
@@ -69,5 +59,5 @@ $GLOBALS['TL_DCA']['tl_article']['fields']['responsiveSpacingBottom'] = [
 ];
 
 PaletteManipulator::create()
-    ->addField('responsiveElsPerRow,responsiveDirection,responsiveItems,responsiveVerticalAlignment,responsiveHorizontalAlignment,responsiveSpacingTop,responsiveSpacingBottom', 'template_legend', PaletteManipulator::POSITION_APPEND)
+    ->addField('responsiveDirection,responsiveItems,responsiveVerticalAlignment,responsiveHorizontalAlignment,responsiveSpacingTop,responsiveSpacingBottom', 'template_legend', PaletteManipulator::POSITION_APPEND)
     ->applyToPalette('default', 'tl_article');

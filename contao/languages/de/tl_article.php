@@ -1,9 +1,5 @@
 <?php
 
-$GLOBALS['TL_LANG']['tl_article']['responsiveElsPerRow'] = [
-    0 => "Elemente pro Zeile"
-];
-
 $GLOBALS['TL_LANG']['tl_article']['responsiveDirection'] = [
     0 => "Richtung",
     1 => "flex-direction",
