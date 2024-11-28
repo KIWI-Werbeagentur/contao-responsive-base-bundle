@@ -24,12 +24,6 @@ class ResponsiveWidget extends Widget
 
         $this->arrBreakpoints = (new $GLOBALS['responsive'])->arrBreakpoints;
         $this->arrDca = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField];
-
-        // bug: default values not working in tl_article
-        if(!$this->value && ($this->arrDca['default'] ?? false)){
-            $this->value = $this->arrDca['default'];
-        }
-
         $this->strLabelIcon = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['label']['icon'] ?? null;
     }
 

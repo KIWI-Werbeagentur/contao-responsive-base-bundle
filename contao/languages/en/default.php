@@ -24,13 +24,6 @@ $GLOBALS['TL_LANG']['MSC']['flexContent']['space-between'] = "Space Between";
 $GLOBALS['TL_LANG']['MSC']['flexContent']['space-around'] = "Space Around";
 $GLOBALS['TL_LANG']['MSC']['flexContent']['space-evenly'] = "Space Evenly";
 
-$GLOBALS['TL_LANG']['MSC']['breakpoint']['xs'][0] = "Default (Smartphone)";
-$GLOBALS['TL_LANG']['MSC']['breakpoint']['sm'][0] = "Smartphone Landscape";
-$GLOBALS['TL_LANG']['MSC']['breakpoint']['md'][0] = "Tablet";
-$GLOBALS['TL_LANG']['MSC']['breakpoint']['lg'][0] = "Laptop";
-$GLOBALS['TL_LANG']['MSC']['breakpoint']['xl'][0] = "PC";
-$GLOBALS['TL_LANG']['MSC']['breakpoint']['xxl'][0] = "TV";
-
 $GLOBALS['TL_LANG']['MSC']['spacings']['default'][0] = "Default";
 $GLOBALS['TL_LANG']['MSC']['spacings']['none'][0] = "None";
 $GLOBALS['TL_LANG']['MSC']['spacings']['gap'][0] = "Grid Gap | Half";

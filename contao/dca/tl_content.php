@@ -5,7 +5,7 @@ use Contao\CoreBundle\DataContainer\PaletteManipulator;
 $GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = [$GLOBALS['responsive'], 'getDefaults'];
 
 $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveCols'] = [
-    'inputType' => 'responsive',
+    'inputType' => 'select',
     'responsiveInputType' => 'select',
     'options_callback' => [$GLOBALS['responsive'], 'getCols'],
     'reference' => &$GLOBALS['TL_LANG']['tl_content']['responsiveCols']['options'],
@@ -41,5 +41,5 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveAlignSelf'] = [
 ];
 
 PaletteManipulator::create()
-    ->addField('responsiveOrder,responsiveAlignSelf,responsiveCols,responsiveOffsets', 'template_legend', PaletteManipulator::POSITION_APPEND)
+    ->addField('responsiveCols,responsiveOffsets,responsiveOrder,responsiveAlignSelf', 'template_legend', PaletteManipulator::POSITION_APPEND)
     ->applyToPalette('text', 'tl_content');

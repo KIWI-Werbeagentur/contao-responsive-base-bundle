@@ -46,4 +46,9 @@ abstract class ResponsiveConfiguration
         $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveCols']['default'] = (new $GLOBALS['responsive'])->arrColsDefaults;
         $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveOffsets']['default'] = (new $GLOBALS['responsive'])->arrOffsetsDefaults;
     }
+
+    public function getContainerSizes():array
+    {
+        return $this->arrContainerSizes;
+    }
 }

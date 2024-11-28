@@ -2,6 +2,16 @@
 
 use \Contao\CoreBundle\DataContainer\PaletteManipulator;
 
+$GLOBALS['TL_DCA']['tl_article']['config']['onload_callback'][] = [$GLOBALS['responsive'], 'getDefaults'];
+
+$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveContainerSize'] = [
+    'inputType' => 'select',
+    'eval' => ['tl_class' => "clr"],
+    'options_callback' => [$GLOBALS['responsive'], 'getContainerSizes'],
+    'value' => 'container',
+    'reference' => &$GLOBALS['TL_LANG']['MSC']['flexContainer'],
+    'sql' => "blob NULL"
+];
 
 $GLOBALS['TL_DCA']['tl_article']['fields']['responsiveFlexDirection'] = [
     'inputType' => 'optionalResponsive',
@@ -58,5 +68,5 @@ $GLOBALS['TL_DCA']['tl_article']['fields']['responsiveSpacingBottom'] = [
 ];
 
 PaletteManipulator::create()
-    ->addField('responsiveFlexDirection,responsiveJustifyContent,responsiveAlignItems,responsiveAlignContent,responsiveSpacingTop,responsiveSpacingBottom', 'template_legend', PaletteManipulator::POSITION_APPEND)
+    ->addField('responsiveContainerSize,responsiveFlexDirection,responsiveJustifyContent,responsiveAlignItems,responsiveAlignContent,responsiveSpacingTop,responsiveSpacingBottom', 'template_legend', PaletteManipulator::POSITION_APPEND)
     ->applyToPalette('default', 'tl_article');
