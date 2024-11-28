@@ -8,7 +8,7 @@ use Contao\ManagerPlugin\Bundle\Config\BundleConfig;
 use Contao\ManagerPlugin\Bundle\Parser\ParserInterface;
 use Contao\ManagerPlugin\Config\ConfigPluginInterface;
 use Contao\ManagerPlugin\Routing\RoutingPluginInterface;
-use Kiwi\Contao\ResponsiveBase\KiwiResponsiveBase;
+use Kiwi\Contao\ResponsiveBase\KiwiResponsiveBaseBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Loader\LoaderResolverInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -21,7 +21,7 @@ class Plugin implements BundlePluginInterface, ConfigPluginInterface
     public function getBundles(ParserInterface $parser): array
     {
         return [
-            BundleConfig::create(KiwiResponsiveBase::class)
+            BundleConfig::create(KiwiResponsiveBaseBundle::class)
                 ->setLoadAfter([
                     ContaoCoreBundle::class
                 ]),
