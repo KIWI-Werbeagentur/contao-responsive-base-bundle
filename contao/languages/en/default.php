@@ -1,5 +1,42 @@
 <?php
 
+$GLOBALS['TL_LANG']['MSC']['responsiveContainerSize'] = [
+    0 => "Container Size"
+];
+
+$GLOBALS['TL_LANG']['MSC']['responsiveFlexDirection'] = [
+    0 => "Main Axis",
+    1 => "flex-direction",
+];
+
+$GLOBALS['TL_LANG']['MSC']['responsiveFlexWrap'] = [
+    0 => "Line Break",
+    1 => "flex-wrap",
+];
+
+$GLOBALS['TL_LANG']['MSC']['responsiveAlignItems'] = [
+    0 => "Element Alignment",
+    1 => "align-items",
+];
+
+$GLOBALS['TL_LANG']['MSC']['responsiveJustifyContent'] = [
+    0 => "Alignment on Main Axis",
+    1 => "justify-content",
+];
+
+$GLOBALS['TL_LANG']['MSC']['responsiveAlignContent'] = [
+    0 => "Alignment on Peripheral Axis",
+    1 => "align-content",
+];
+
+$GLOBALS['TL_LANG']['MSC']['responsiveSpacingTop'] = [
+    0 => "Space Top",
+];
+
+$GLOBALS['TL_LANG']['MSC']['responsiveSpacingBottom'] = [
+    0 => "Space Bottom",
+];
+
 $GLOBALS['TL_LANG']['MSC']['responsive'] = "Responsive Settings";
 $GLOBALS['TL_LANG']['MSC']['inherit'] = "- Inherit -";
 
@@ -7,6 +44,12 @@ $GLOBALS['TL_LANG']['MSC']['flexDirection']['row'] = "Horizontal";
 $GLOBALS['TL_LANG']['MSC']['flexDirection']['column'] = "Vertical";
 $GLOBALS['TL_LANG']['MSC']['flexDirection']['row-reverse'] = "Horizontal Reverse";
 $GLOBALS['TL_LANG']['MSC']['flexDirection']['column-reverse'] = "Vertical Reverse";
+
+$GLOBALS['TL_LANG']['MSC']['flexDirection']['default'] = "Default";
+
+$GLOBALS['TL_LANG']['MSC']['flexWrap']['wrap'] = "Wrap";
+$GLOBALS['TL_LANG']['MSC']['flexWrap']['nowrap'] = "Don't wrap";
+$GLOBALS['TL_LANG']['MSC']['flexWrap']['wrap-reverse'] = "Wrap at beginning";
 
 $GLOBALS['TL_LANG']['MSC']['flexItems']['normal'] = "Normal";
 $GLOBALS['TL_LANG']['MSC']['flexItems']['auto'] = "Normal";

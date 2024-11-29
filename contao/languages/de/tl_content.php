@@ -1,5 +1,11 @@
 <?php
 
+$GLOBALS['TL_LANG']['tl_content']['flexContainer']['default'] = "Spalten-Element";
+
+$GLOBALS['TL_LANG']['tl_content']['responsiveContainer'] = [
+    0 => "Layout-Typ"
+];
+
 $GLOBALS['TL_LANG']['tl_content']['responsiveOrder'] = [
     0 => "Reihenfolge als Zahl",
     1 => "order",
