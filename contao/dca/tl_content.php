@@ -5,7 +5,7 @@ use Contao\CoreBundle\DataContainer\PaletteManipulator;
 $GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = [$GLOBALS['responsive'], 'getDefaults'];
 
 $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveCols'] = [
-    'inputType' => 'select',
+    'inputType' => 'responsive',
     'responsiveInputType' => 'select',
     'options_callback' => [$GLOBALS['responsive'], 'getCols'],
     'reference' => &$GLOBALS['TL_LANG']['tl_content']['responsiveCols']['options'],

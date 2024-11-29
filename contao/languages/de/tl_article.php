@@ -1,5 +1,9 @@
 <?php
 
+$GLOBALS['TL_LANG']['tl_article']['responsiveContainerSize'] = [
+    0 => "Container Größe"
+];
+
 $GLOBALS['TL_LANG']['tl_article']['responsiveFlexDirection'] = [
     0 => "Hauptachse",
     1 => "flex-direction",
