@@ -22,7 +22,7 @@ class ResponsiveWidget extends Widget
     {
         parent::__construct($arrAttributes);
 
-        $this->arrBreakpoints = (new $GLOBALS['responsive'])->arrBreakpoints;
+        $this->arrBreakpoints = (new $GLOBALS['responsive']['config'])->arrBreakpoints;
         $this->arrDca = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField];
         $this->strLabelIcon = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['label']['icon'] ?? null;
     }

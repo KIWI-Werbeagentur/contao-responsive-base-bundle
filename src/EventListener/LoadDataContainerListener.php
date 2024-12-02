@@ -16,7 +16,7 @@ class LoadDataContainerListener
         }
         foreach ($GLOBALS['TL_DCA'][$table]['fields'] as $strField => $arrField) {
             if (($arrField['inputType'] ?? false) == "responsive") {
-                foreach ((new $GLOBALS['responsive'])->arrBreakpoints as $arrBreakpoint) {
+                foreach ((new $GLOBALS['responsive']['config'])->arrBreakpoints as $arrBreakpoint) {
                     if($arrBreakpoint['modifier']){
                         $GLOBALS['TL_DCA'][$table]['fields'][$strField . $arrBreakpoint['modifier']] = $GLOBALS['TL_DCA'][$table]['fields'][$strField];
                         unset($GLOBALS['TL_DCA'][$table]['fields'][$strField . $arrBreakpoint['modifier']]['sql']);
