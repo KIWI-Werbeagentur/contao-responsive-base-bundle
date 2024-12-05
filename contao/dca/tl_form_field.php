@@ -22,7 +22,7 @@ $GLOBALS['TL_DCA']['tl_form_field']['fields']['responsiveContainer'] = [
     'options_callback' => function () {
         return ['default'] + (new $GLOBALS['responsive']['config'])->getContainerSizes();
     },
-    'reference' => &$GLOBALS['TL_LANG']['MSC']['flexContainer'],
+    'reference' => &$GLOBALS['TL_LANG']['responsive']['flexContainer'],
     'sql' => "blob NULL"
 ];
 

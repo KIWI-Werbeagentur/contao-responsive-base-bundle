@@ -5,6 +5,7 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\Configuration;
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
+use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
 
 abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterface
 {

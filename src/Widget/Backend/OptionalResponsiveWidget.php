@@ -1,6 +1,6 @@
 <?php
 
-namespace Kiwi\Contao\ResponsiveBaseBundle\Widgets\Backend;
+namespace Kiwi\Contao\ResponsiveBaseBundle\Widget\Backend;
 
 use Contao\Input;
 use Contao\StringUtil;
@@ -15,7 +15,7 @@ class OptionalResponsiveWidget extends ResponsiveWidget
         $strWidget = parent::generate();
         $strChecked = !$arrValues || (isset($arrValues[array_key_first($this->arrBreakpoints)]) && count($arrValues) == 1) || !count($arrValues) ? '' : 'checked';
 
-        return "<input type='checkbox' id='{$this->strName}-responsive' name='{$this->strName}-responsive' {$strChecked}/><label for='{$this->strName}-responsive'>{$GLOBALS['TL_LANG']['MSC']['responsive']}</label>{$strWidget}";
+        return "<input type='checkbox' id='{$this->strName}-responsive' name='{$this->strName}-responsive' {$strChecked}/><label for='{$this->strName}-responsive'>{$GLOBALS['TL_LANG']['responsive']['responsive']}</label>{$strWidget}";
     }
 
     protected function validator($varInput, $arrValues = [])

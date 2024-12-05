@@ -1,6 +1,6 @@
 <?php
 
-namespace Kiwi\Contao\ResponsiveBaseBundle\Widgets\Backend;
+namespace Kiwi\Contao\ResponsiveBaseBundle\Widget\Backend;
 
 use Contao\Input;
 use Contao\StringUtil;
@@ -58,8 +58,8 @@ class ResponsiveWidget extends Widget
             $objWidget->strId = "{$this->strField}{$arrBreakpoint['modifier']}";
             $objWidget->storeValues = true;
             $objWidget->mandatory = $i == 0;
-            $objWidget->options = ($i == 0 ? ($this->arrConfiguration['options'] ?? []) : array_merge([['value' => '', 'label' => ($GLOBALS['TL_LANG']['MSC']['inherit'] ?? 'inherit')]], ($this->arrConfiguration['options'] ?? [])));
-            $objWidget->label = $GLOBALS['TL_LANG']['MSC']['breakpoint'][$strBreakpoint][0] ?? $strBreakpoint;
+            $objWidget->options = ($i == 0 ? ($this->arrConfiguration['options'] ?? []) : array_merge([['value' => '', 'label' => ($GLOBALS['TL_LANG']['responsive']['inherit'] ?? 'inherit')]], ($this->arrConfiguration['options'] ?? [])));
+            $objWidget->label = $GLOBALS['TL_LANG']['responsive']['breakpoint'][$strBreakpoint][0] ?? $strBreakpoint;
             $objWidget->currentRecord = $this->currentRecord;
 
             $strField = $objWidget->parse();

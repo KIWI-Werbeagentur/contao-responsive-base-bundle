@@ -1,6 +1,6 @@
 <?php
 
-namespace Kiwi\Contao\ResponsiveBaseBundle\Configuration;
+namespace Kiwi\Contao\ResponsiveBaseBundle\Interface;
 
 interface ResponsiveConfigurationInterface
 {
