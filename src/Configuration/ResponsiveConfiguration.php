@@ -2,7 +2,6 @@
 
 namespace Kiwi\Contao\ResponsiveBaseBundle\Configuration;
 
-use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
 use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
@@ -45,18 +44,5 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
     public function getContainerSizes(): array
     {
         return $this->arrContainerSizes;
-    }
-
-    #[AsCallback(table: 'tl_content', target: 'config.onload')]
-    public function addToPalettes(DataContainer $objDca):void
-    {
-        foreach ($GLOBALS['TL_DCA'][$objDca->table]['palettes'] as $strPalette => $varFields) {
-            if(!is_string($varFields) || in_array($strPalette, ($GLOBALS['responsive'][$objDca->table]['excludePalettes'] ?? []))) continue;
-
-            PaletteManipulator::create()
-                ->addLegend('layout_legend', ['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
-                ->addField('responsiveCols,responsiveOffsets,responsiveOrder,responsiveAlignSelf', 'layout_legend', PaletteManipulator::POSITION_APPEND)
-                ->applyToPalette($strPalette, $objDca->table);
-        }
     }
 }

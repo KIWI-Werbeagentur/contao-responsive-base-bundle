@@ -2,16 +2,21 @@
 
 use Contao\Controller;
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
+use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\Wrappers;
 
 //Set default values dynamically
 $GLOBALS['TL_DCA']['tl_form_field']['config']['onload_callback'][] = [$GLOBALS['responsive']['config'], 'getDefaults'];
 
-//Add settings to multiple palette
-$GLOBALS['TL_DCA']['tl_form_field']['config']['onload_callback'][] = [$GLOBALS['responsive']['config'], 'addToPalettes'];
-
 Controller::loadDataContainer('responsive');
 $GLOBALS['TL_DCA']['tl_form_field']['fields'] += $GLOBALS['TL_DCA']['column']['fields'];
+
+PaletteManipulatorExtended::create()
+    ->addLegend('layout_legend', ['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
+    ->addField('responsiveCols,responsiveOffsets,responsiveOrder,responsiveAlignSelf', 'layout_legend', PaletteManipulator::POSITION_APPEND)
+    ->applyToAllPalettes('tl_form_field', $GLOBALS['responsive']['tl_form_field']['excludePalettes']['column']);
+
+
 
 // Apply Container-Option to Elementgroup
 $GLOBALS['TL_DCA']['tl_form_field']['config']['onload_callback'][] = [Wrappers::class, 'addContainerSubpalette'];

@@ -16,6 +16,7 @@
     "require": {
         "php": "^8.4",
         "contao/core-bundle": "~5.3.13",
+        "kiwi/contao-cmx": "dev-main",
         "kiwi/contao-responsive-framework": "^1.0"
     },
     "conflict": {
