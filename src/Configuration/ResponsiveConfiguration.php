@@ -54,8 +54,8 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
             if(!is_string($varFields) || in_array($strPalette, ($GLOBALS['responsive'][$objDca->table]['excludePalettes'] ?? []))) continue;
 
             PaletteManipulator::create()
-                ->addLegend('template_legend', ['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
-                ->addField('responsiveCols,responsiveOffsets,responsiveOrder,responsiveAlignSelf', 'template_legend', PaletteManipulator::POSITION_APPEND)
+                ->addLegend('layout_legend', ['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
+                ->addField('responsiveCols,responsiveOffsets,responsiveOrder,responsiveAlignSelf', 'layout_legend', PaletteManipulator::POSITION_APPEND)
                 ->applyToPalette($strPalette, $objDca->table);
         }
     }

@@ -4,6 +4,9 @@ use Contao\Controller;
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\Wrappers;
 
+/*
+    * COLUMNS
+*/
 //Set default values dynamically
 $GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = [$GLOBALS['responsive']['config'], 'getDefaults'];
 
@@ -26,14 +29,20 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveContainer'] = [
     'sql' => "blob NULL"
 ];
 
+/*
+    * CONTAINER
+*/
 $GLOBALS['TL_DCA']['tl_content']['fields'] += $GLOBALS['TL_DCA']['container']['fields'];
 
 $GLOBALS['TL_DCA']['tl_content']['palettes']['__selector__'][] = 'responsiveContainer';
+// BUG: only working with both 'values':
+$GLOBALS['TL_DCA']['tl_content']['subpalettes']['responsiveContainer_'] = 'responsiveCols,responsiveOffsets';
 $GLOBALS['TL_DCA']['tl_content']['subpalettes']['responsiveContainer_0'] = 'responsiveCols,responsiveOffsets';
 
 // Used for all container sizes (Kiwi\Contao\ResponsiveBaseBundle\DataContainer\Content->addContainerSubpalette())
 $GLOBALS['TL_DCA']['tl_content']['subpalettes']['responsiveContainer_responsiveContainerSizes'] = implode(',',array_keys($GLOBALS['TL_DCA']['container']['fields']));
 
 PaletteManipulator::create()
-    ->addField('responsiveContainer', 'customTpl', PaletteManipulator::POSITION_AFTER)
+    ->addLegend('layout_legend',['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
+    ->addField('responsiveContainer', 'layout_legend', PaletteManipulator::POSITION_APPEND)
     ->applyToPalette('element_group', 'tl_content');

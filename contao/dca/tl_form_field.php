@@ -35,5 +35,6 @@ $GLOBALS['TL_DCA']['tl_form_field']['subpalettes']['responsiveContainer_0'] = 'r
 $GLOBALS['TL_DCA']['tl_form_field']['subpalettes']['responsiveContainer_responsiveContainerSizes'] = implode(',',array_keys($GLOBALS['TL_DCA']['container']['fields']));
 
 PaletteManipulator::create()
-    ->addField('responsiveContainer', 'customTpl', PaletteManipulator::POSITION_AFTER)
+    ->addLegend('layout_legend',['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
+    ->addField('responsiveContainer', 'layout_legend', PaletteManipulator::POSITION_APPEND)
     ->applyToPalette('fieldsetStart', 'tl_form_field');
