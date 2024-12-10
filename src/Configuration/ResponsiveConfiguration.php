@@ -8,6 +8,10 @@ use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
 
 abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterface
 {
+    public function __get(string $name)
+    {
+    }
+
     public function getBreakpoints(): array
     {
         return array_keys($this->arrBreakpoints);
