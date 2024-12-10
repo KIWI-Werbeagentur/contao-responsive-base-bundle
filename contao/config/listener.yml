@@ -1,7 +1,0 @@
-services:
-  Kiwi\Contao\ResponsiveBaseBundle\EventListener\DcGeneral\UpdateDataDefinition:
-    tags:
-      - name: kernel.event_listener
-        event: dc-general.factory.build-data-definition
-        method: addResponsiveFields
-        priority: -5000
