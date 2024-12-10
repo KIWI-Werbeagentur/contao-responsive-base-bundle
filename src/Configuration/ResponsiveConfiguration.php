@@ -8,6 +8,11 @@ use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
 
 abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterface
 {
+    public function getBreakpoints(): array
+    {
+        return array_keys($this->arrBreakpoints);
+    }
+
     #[AsCallback('tl_content', 'fields.responsiveCols.options')]
     public function getCols(): array
     {

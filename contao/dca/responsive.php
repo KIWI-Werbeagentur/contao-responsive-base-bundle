@@ -69,7 +69,7 @@ $GLOBALS['TL_DCA']['columnActivate']['fields']['addResponsive'] = array(
     'label'                   => &$GLOBALS['TL_LANG']['responsive']['addResponsive'],
     'default'                 => '1',
     'inputType'               => 'checkbox',
-    'eval'                    => array('tl_class'=>'m12 w50', 'submitOnChange'=>true),
+    'eval'                    => array('tl_class'=>'m12 w50 clr', 'submitOnChange'=>true),
     'sql'                     => "char(1) NOT NULL default '1'"
 );
 
