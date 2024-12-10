@@ -4,6 +4,15 @@ use Contao\System;
 
 System::loadLanguageFile('responsive');
 
+$GLOBALS['TL_DCA']['containerSize']['fields']['responsiveContainerSize'] = [
+    'label' => &$GLOBALS['TL_LANG']['responsive']['responsiveContainerSize'],
+    'reference' => &$GLOBALS['TL_LANG']['responsive']['flexContainer'],
+    'inputType' => 'select',
+    'options_callback' => [$GLOBALS['responsive']['config'], 'getContainerSizes'],
+    'eval' => ['tl_class' => 'w50'],
+    'sql' => "varchar(255) NOT NULL default ''"
+];
+
 //CONTAINER
 $GLOBALS['TL_DCA']['container']['fields']['responsiveFlexDirection'] = [
     'label' => &$GLOBALS['TL_LANG']['responsive']['responsiveFlexDirection'],
@@ -55,6 +64,14 @@ $GLOBALS['TL_DCA']['container']['fields']['responsiveFlexWrap'] = [
     'sql' => "blob NULL"
 ];
 
+
+$GLOBALS['TL_DCA']['columnActivate']['fields']['addResponsive'] = array(
+    'label'                   => &$GLOBALS['TL_LANG']['responsive']['addResponsive'],
+    'default'                 => '1',
+    'inputType'               => 'checkbox',
+    'eval'                    => array('tl_class'=>'m12 w50', 'submitOnChange'=>true),
+    'sql'                     => "char(1) NOT NULL default '1'"
+);
 
 //COLUMN
 $GLOBALS['TL_DCA']['column']['fields']['responsiveCols'] = [

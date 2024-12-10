@@ -3,18 +3,12 @@
 use Contao\Controller;
 use \Contao\CoreBundle\DataContainer\PaletteManipulator;
 
+Controller::loadDataContainer('responsive');
+
 $GLOBALS['TL_DCA']['tl_article']['config']['onload_callback'][] = [$GLOBALS['responsive']['config'], 'getDefaults'];
 
-$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveContainerSize'] = [
-    'label' => &$GLOBALS['TL_LANG']['responsive']['responsiveContainerSize'],
-    'inputType' => 'select',
-    'eval' => ['tl_class' => "clr", 'chosen'=>true],
-    'options_callback' => [$GLOBALS['responsive']['config'], 'getContainerSizes'],
-    'reference' => &$GLOBALS['TL_LANG']['responsive']['flexContainer'],
-    'sql' => "blob NULL"
-];
+$GLOBALS['TL_DCA']['tl_article']['fields']['responsiveContainerSize'] = $GLOBALS['TL_DCA']['containerSize']['fields']['responsiveContainerSize'];
 
-Controller::loadDataContainer('responsive');
 $GLOBALS['TL_DCA']['tl_article']['fields'] += $GLOBALS['TL_DCA']['container']['fields'];
 $GLOBALS['TL_DCA']['tl_article']['fields'] += $GLOBALS['TL_DCA']['space']['fields'];
 

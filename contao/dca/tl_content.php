@@ -1,9 +1,7 @@
 <?php
 
 use Contao\Controller;
-use Contao\CoreBundle\DataContainer\PaletteManipulator;
-use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
-use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\Wrappers;
+use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\WrapperListener;
 
 /*
     * COLUMNS
@@ -16,12 +14,7 @@ Controller::loadDataContainer('responsive');
 $GLOBALS['TL_DCA']['tl_content']['fields'] += $GLOBALS['TL_DCA']['column']['fields'];
 
 // Apply Container-Option to Elementgroup
-$GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = [Wrappers::class, 'addContainerSubpalette'];
-
-PaletteManipulatorExtended::create()
-    ->addLegend('layout_legend', ['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
-    ->addField('responsiveCols,responsiveOffsets,responsiveOrder,responsiveAlignSelf', 'layout_legend', PaletteManipulator::POSITION_APPEND)
-    ->applyToAllPalettes('tl_content', $GLOBALS['responsive']['tl_content']['excludePalettes']['column']);
+$GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = [WrapperListener::class, 'addContainerSubpalette'];
 
 
 /*
@@ -36,7 +29,7 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveContainer'] = [
         return ['default'] + (new $GLOBALS['responsive']['config'])->getContainerSizes();
     },
     'reference' => &$GLOBALS['TL_LANG']['responsive']['flexContainer'],
-    'sql' => "blob NULL"
+    'sql' => "varchar(255) NOT NULL default ''"
 ];
 
 //Add multiple reusable fields
@@ -50,8 +43,3 @@ $GLOBALS['TL_DCA']['tl_content']['subpalettes']['responsiveContainer_0'] = 'resp
 
 // Used for all container sizes (Kiwi\Contao\ResponsiveBaseBundle\DataContainer\Content->addContainerSubpalette())
 $GLOBALS['TL_DCA']['tl_content']['subpalettes']['responsiveContainer_responsiveContainerSizes'] = implode(',',array_keys($GLOBALS['TL_DCA']['container']['fields']));
-
-PaletteManipulator::create()
-    ->addLegend('layout_legend',['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
-    ->addField('responsiveContainer,responsiveOrder,responsiveAlignSelf', 'layout_legend', PaletteManipulator::POSITION_APPEND)
-    ->applyToPalette('element_group', 'tl_content');

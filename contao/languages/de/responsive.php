@@ -40,6 +40,9 @@ $GLOBALS['TL_LANG']['responsive']['spacings']['md'][0] = "Mittel";
 $GLOBALS['TL_LANG']['responsive']['spacings']['lg'][0] = "Groß";
 $GLOBALS['TL_LANG']['responsive']['spacings']['xl'][0] = "Extra Groß";
 
+$GLOBALS['TL_LANG']['responsive']['addResponsive'] = [
+    0 => "Responsive Breite festelegen",
+];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveFlexDirection'] = [
     0 => "Hauptachse",
