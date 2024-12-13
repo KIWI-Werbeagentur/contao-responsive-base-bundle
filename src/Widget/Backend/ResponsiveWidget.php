@@ -55,6 +55,7 @@ class ResponsiveWidget extends Widget
                 $this->strTable,
                 $this
             )));
+            $objWidget->strField = "{$this->strField}";
             $objWidget->strId = "{$this->strField}{$arrBreakpoint['modifier']}";
             $objWidget->storeValues = true;
             $objWidget->mandatory = $i == 0;

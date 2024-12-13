@@ -3,42 +3,32 @@
 $GLOBALS['TL_LANG']['responsive']['responsive'] = "Responsiv einstellen";
 $GLOBALS['TL_LANG']['responsive']['inherit'] = "- Erben -";
 
-$GLOBALS['TL_LANG']['responsive']['flexDirection']['row'] = "Horizontal";
-$GLOBALS['TL_LANG']['responsive']['flexDirection']['column'] = "Vertikal";
-$GLOBALS['TL_LANG']['responsive']['flexDirection']['row-reverse'] = "Horizontal Reverse";
-$GLOBALS['TL_LANG']['responsive']['flexDirection']['column-reverse'] = "Vertikal Reverse";
+$GLOBALS['TL_LANG']['responsive']['flexDirection']['row'] = "Horizontal [row]";
+$GLOBALS['TL_LANG']['responsive']['flexDirection']['column'] = "Vertikal [column]";
+$GLOBALS['TL_LANG']['responsive']['flexDirection']['row-reverse'] = "Horizontal Reverse [row-reverse]";
+$GLOBALS['TL_LANG']['responsive']['flexDirection']['column-reverse'] = "Vertikal Reverse [column-reverse]";
 
 $GLOBALS['TL_LANG']['responsive']['flexDirection']['default'] = "Default";
 
-$GLOBALS['TL_LANG']['responsive']['flexWrap']['wrap'] = "Umbrechen";
-$GLOBALS['TL_LANG']['responsive']['flexWrap']['nowrap'] = "Nicht umbrechen";
-$GLOBALS['TL_LANG']['responsive']['flexWrap']['wrap-reverse'] = "Vorne umbrechen";
+$GLOBALS['TL_LANG']['responsive']['flexWrap']['wrap'] = "Umbrechen [wrap]";
+$GLOBALS['TL_LANG']['responsive']['flexWrap']['nowrap'] = "Nicht umbrechen [nowrap]";
+$GLOBALS['TL_LANG']['responsive']['flexWrap']['wrap-reverse'] = "Vorne umbrechen [wrap-reverse]";
 
-$GLOBALS['TL_LANG']['responsive']['flexItems']['normal'] = "Standard";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['auto'] = "Standard";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['stretch'] = "Wachsend";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['baseline'] = "Grundlinie";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['flex-start'] = "Anfang";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['center'] = "Mitte";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['flex-end'] = "Ende";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['normal'] = "Standard [normal]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['auto'] = "Standard [auto]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['stretch'] = "Wachsend [stretch]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['baseline'] = "Grundlinie [baseline]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['start'] = "Anfang [start]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['center'] = "Mitte [center]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['end'] = "Ende [end]";
 
-$GLOBALS['TL_LANG']['responsive']['flexContent']['normal'] = "Standard";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['flex-start'] = "Anfang";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['flex-end'] = "Ende";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['center']="Mitte";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-between'] = "Verteilt";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-around'] = "Verteilt mit Platz nach außen";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-evenly'] = "Verteilt mit halben Platz nach außen";
-
-$GLOBALS['TL_LANG']['responsive']['spacings']['default'][0] = "Standard";
-$GLOBALS['TL_LANG']['responsive']['spacings']['none'][0] = "Kein Abstand";
-$GLOBALS['TL_LANG']['responsive']['spacings']['gap'][0] = "Halber Rasterabstand";
-$GLOBALS['TL_LANG']['responsive']['spacings']['gap-full'][0] = "Voller Rasterabstand";
-$GLOBALS['TL_LANG']['responsive']['spacings']['xs'][0] = "Extra klein";
-$GLOBALS['TL_LANG']['responsive']['spacings']['sm'][0] = "Klein";
-$GLOBALS['TL_LANG']['responsive']['spacings']['md'][0] = "Mittel";
-$GLOBALS['TL_LANG']['responsive']['spacings']['lg'][0] = "Groß";
-$GLOBALS['TL_LANG']['responsive']['spacings']['xl'][0] = "Extra Groß";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['normal'] = "Standard [normal]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['start'] = "Anfang [start]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['end'] = "Ende [end]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['center']="Mitte [center]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['space-between'] = "Verteilt [space-between]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['space-around'] = "Verteilt mit Platz nach außen [space-around]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['space-evenly'] = "Verteilt mit halben Platz nach außen [space-evenly]";
 
 $GLOBALS['TL_LANG']['responsive']['addResponsive'] = [
     0 => "Responsive Breite festelegen",
@@ -88,9 +78,9 @@ $GLOBALS['TL_LANG']['responsive']['responsiveCols'] = [
         3 => "3 Spalten",
         2 => "2 Spalten",
         1 => "1 Spalte",
-        "auto" => "Inhaltsabhängig",
-        "fill" => "Zeile füllen",
-        "hidden" => "Unsichtbar"
+        "auto" => "Inhaltsabhängig [auto]",
+        "fill" => "Zeile füllen []",
+        "hidden" => "Unsichtbar [none]"
     ]
 ];
 
@@ -110,8 +100,8 @@ $GLOBALS['TL_LANG']['responsive']['responsiveOffsets'] = [
         3 => "3 Spalten",
         2 => "2 Spalten",
         1 => "1 Spalte",
-        "auto" => "rechts",
-        "none" => "Kein Versatz"
+        "auto" => "rechts [auto]",
+        "none" => "Kein Versatz [none]"
     ]
 ];
 
