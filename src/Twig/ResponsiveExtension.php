@@ -13,9 +13,13 @@ class ResponsiveExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('getColClasses', fn($strData) => $this->responsiveFrontendService->getResponsiveClasses($strData, 'arrCols')),
+            new TwigFunction('getAllResponsiveClasses', [$this->responsiveFrontendService, 'getAllResponsiveClasses']),
+            new TwigFunction('getColClasses', [$this->responsiveFrontendService, 'getColClasses']),
             new TwigFunction('getOffsetClasses', fn($strData) => $this->responsiveFrontendService->getResponsiveClasses($strData, 'arrOffsets')),
-            new TwigFunction('getResponsiveClasses', [$this, 'getResponsiveClasses']),
+            new TwigFunction('getResponsiveClasses', [$this->responsiveFrontendService, 'getResponsiveClasses']),
+            new TwigFunction('getContainerClasses', [$this->responsiveFrontendService, 'getContainerClasses']),
+            new TwigFunction('getAllInnerContainerClasses', [$this->responsiveFrontendService, 'getAllInnerContainerClasses']),
+            new TwigFunction('getAllContainerClasses', [$this->responsiveFrontendService, 'getAllContainerClasses']),
         ];
     }
 }

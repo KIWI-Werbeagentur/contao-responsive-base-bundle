@@ -43,4 +43,24 @@ interface ResponsiveConfigurationInterface
         get;
         set;
     }
+
+    public array|string $varOrderClasses {
+        get;
+    }
+
+    public array|string $varAlignSelfClasses {
+        get;
+    }
+
+    public array|string $varAlignItemsClasses {
+        get;
+    }
+
+    public array|string $varAlignContentClasses {
+        get;
+    }
+
+    public array|string $varJustifyContentClasses {
+        get;
+    }
 }

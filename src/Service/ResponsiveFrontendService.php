@@ -6,18 +6,122 @@ use Contao\StringUtil;
 
 class ResponsiveFrontendService
 {
-    public function getResponsiveClasses(string $strData, string $strMapping): array
+    public function getResponsiveClasses(string $strData, string $strMapping, array $arrOptions = []): array
     {
         $arrClasses = [];
 
-        if($strData ?? false) {
+        if ($strData ?? false) {
             $arrValues = StringUtil::deserialize($strData, true);
             $objConfig = new $GLOBALS['responsive']['config']();
-            foreach ($arrValues as $strBreakpoint => $varValue){
-                $strClass = $objConfig->{$strMapping}[$varValue] ?? '';
-                $arrClasses[] = str_replace('{{modifier}}', $objConfig->arrBreakpoints[$strBreakpoint]['modifier'], $strClass);
+
+            foreach ($arrValues as $strBreakpoint => $varValue) {
+                $strClass = is_array($objConfig->{$strMapping}) ? ($objConfig->{$strMapping}[$varValue] ?? '') : $objConfig->{$strMapping};
+
+                $strClass = str_replace(
+                    ['{{modifier}}', '{{value}}'],
+                    [$objConfig->arrBreakpoints[$strBreakpoint]['modifier'], $varValue],
+                    $strClass);
+
+                $strClass = preg_replace_callback('/\{{(\w+)}}/', function ($match) use ($arrOptions) {
+                    $matched = $match[0];
+                    $name = $match[1];
+                    return isset($arrOptions[$name]) ? $arrOptions[$name] : $matched;
+                }, $strClass);
+
+                $arrClasses[] = $strClass;
             }
         }
         return $arrClasses;
+    }
+
+    public function getColClasses($strData): array
+    {
+        return $this->getResponsiveClasses($strData, 'varColClasses');
+    }
+
+    public function getOffsetClasses($strData): array
+    {
+        return $this->getResponsiveClasses($strData, 'varOffsetClasses');
+    }
+
+    public function getOrderClasses($strData): array
+    {
+        return $this->getResponsiveClasses($strData, 'varOrderClasses');
+    }
+
+    public function getAlignSelfClasses($strData): array
+    {
+        return $this->getResponsiveClasses($strData, 'varAlignSelfClasses');
+    }
+
+    public function getSpacingClasses($strData, $strDirection = ""): array
+    {
+        return $this->getResponsiveClasses($strData, 'varSpacingClasses', ['direction' => $strDirection]);
+    }
+
+    public function getAllResponsiveClasses(array $arrData, array $arrFields = []): array
+    {
+        return
+            array_merge(
+                $this->getColClasses($arrData[$arrFields['cols'] ?? 'responsiveCols'] ?? ""),
+                $this->getOffsetClasses($arrData[$arrFields['offsets'] ?? 'responsiveOffsets'] ?? ""),
+                $this->getOrderClasses($arrData[$arrFields['order'] ?? 'responsiveOrder'] ?? ""),
+                $this->getAlignSelfClasses($arrData[$arrFields['align-self'] ?? 'responsiveAlignSelf'] ?? "")
+            );
+    }
+
+    public function getContainerClasses($strData): array
+    {
+        if (!$strData) return [];
+
+        $objConfig = new $GLOBALS['responsive']['config']();
+        return is_array($objConfig->arrContainerSizes[$strData]) ? $objConfig->arrContainerSizes[$strData] : [$objConfig->arrContainerSizes[$strData]];
+    }
+
+    public function getAllContainerClasses(array $arrData, array $arrFields = []): array
+    {
+        return
+            array_merge(
+                $this->getContainerClasses($arrData[$arrFields['containerSize'] ?? 'responsiveContainerSize'] ?? ""),
+                $this->getSpacingClasses($arrData[$arrFields['spacingTop'] ?? 'responsiveSpacingTop'] ?? "", 't'),
+                $this->getSpacingClasses($arrData[$arrFields['spacingBottom'] ?? 'responsiveSpacingBottom'] ?? "", 'b'),
+            );
+    }
+
+    public function getFlexDirectionClasses($strData): array
+    {
+        return $this->getResponsiveClasses($strData, 'varFlexDirectionClasses');
+    }
+
+    public function getFlexWrapClasses($strData): array
+    {
+        return $this->getResponsiveClasses($strData, 'varFlexWrapClasses');
+    }
+
+    public function getAlignItemsClasses($strData): array
+    {
+        return $this->getResponsiveClasses($strData, 'varAlignItemsClasses');
+    }
+
+    public function getAlignContentClasses($strData): array
+    {
+        return $this->getResponsiveClasses($strData, 'varAlignContentClasses');
+    }
+
+    public function getJustifyContentClasses($strData): array
+    {
+        return $this->getResponsiveClasses($strData, 'varJustifyContentClasses');
+    }
+
+    public function getAllInnerContainerClasses(array $arrData, array $arrFields = []): array
+    {
+        return
+            array_merge(
+                $this->getFlexDirectionClasses($arrData[$arrFields['flexDirection'] ?? 'responsiveFlexDirection'] ?? ""),
+                $this->getFlexWrapClasses($arrData[$arrFields['flexWrap'] ?? 'responsiveFlexWrap'] ?? ""),
+                $this->getAlignItemsClasses($arrData[$arrFields['alignItems'] ?? 'responsiveAlignItems'] ?? ""),
+                $this->getAlignContentClasses($arrData[$arrFields['alignContent'] ?? 'responsiveAlignContent'] ?? ""),
+                $this->getJustifyContentClasses($arrData[$arrFields['justifyContent'] ?? 'responsiveJustifyContent'] ?? ""),
+            );
     }
 }
