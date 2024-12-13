@@ -1,0 +1,3 @@
+kiwi.contao.responsive.controllers:
+  resource: '@KiwiResponsiveBaseBundle/src/Controller'
+  type: annotation
