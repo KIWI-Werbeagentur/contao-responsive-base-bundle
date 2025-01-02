@@ -34,6 +34,9 @@ $GLOBALS['TL_DCA']['container']['fields']['responsiveJustifyContent'] = [
     'responsiveInputType' => 'iconedSelect',
     'eval' => ['tl_class' => "w50"],
     'options_callback' => [$GLOBALS['responsive']['config'], 'getJustifyContent'],
+    'icon_callback' => function () {
+        return (new $GLOBALS['responsive']['config']())->getIcons('justifyContent');
+    },
     'reference' => &$GLOBALS['TL_LANG']['responsive']['flexContent'],
     'sql' => "blob NULL"
 ];
@@ -44,6 +47,9 @@ $GLOBALS['TL_DCA']['container']['fields']['responsiveAlignItems'] = [
     'responsiveInputType' => 'iconedSelect',
     'eval' => ['tl_class' => "w50 clr"],
     'options_callback' => [$GLOBALS['responsive']['config'], 'getAlignItems'],
+    'icon_callback' => function () {
+        return (new $GLOBALS['responsive']['config']())->getIcons('flexItems');
+    },
     'reference' => &$GLOBALS['TL_LANG']['responsive']['flexItems'],
     'sql' => "blob NULL"
 ];
@@ -54,6 +60,9 @@ $GLOBALS['TL_DCA']['container']['fields']['responsiveAlignContent'] = [
     'responsiveInputType' => 'iconedSelect',
     'eval' => ['tl_class' => "w50"],
     'options_callback' => [$GLOBALS['responsive']['config'], 'getAlignContent'],
+    'icon_callback' => function () {
+        return (new $GLOBALS['responsive']['config']())->getIcons('alignContent');
+    },
     'reference' => &$GLOBALS['TL_LANG']['responsive']['flexContent'],
     'sql' => "blob NULL"
 ];
@@ -64,6 +73,9 @@ $GLOBALS['TL_DCA']['container']['fields']['responsiveFlexWrap'] = [
     'responsiveInputType' => 'iconedSelect',
     'eval' => ['tl_class' => "clr w50"],
     'options_callback' => [$GLOBALS['responsive']['config'], 'getFlexWrap'],
+    'icon_callback' => function () {
+        return (new $GLOBALS['responsive']['config']())->getIcons('flexWrap');
+    },
     'reference' => &$GLOBALS['TL_LANG']['responsive']['flexWrap'],
     'sql' => "blob NULL"
 ];
@@ -95,7 +107,7 @@ $GLOBALS['TL_DCA']['column']['fields']['responsiveOffsets'] = [
     'options_callback' => [$GLOBALS['responsive']['config'], 'getOffsets'],
     'reference' => &$GLOBALS['TL_LANG']['responsive']['responsiveOffsets']['options'],
     'eval' => ['tl_class' => 'clr'],
-    'sql' => "varchar(255) COLLATE ascii_bin NOT NULL default ''"
+    'sql' => "blob NULL"
 ];
 
 $GLOBALS['TL_DCA']['column']['fields']['responsiveOrder'] = [
@@ -111,6 +123,9 @@ $GLOBALS['TL_DCA']['column']['fields']['responsiveAlignSelf'] = [
     'inputType' => 'optionalResponsive',
     'responsiveInputType' => 'iconedSelect',
     'options_callback' => [$GLOBALS['responsive']['config'], 'getAlignSelf'],
+    'icon_callback' => function () {
+        return (new $GLOBALS['responsive']['config']())->getIcons('flexItems');
+    },
     'reference' => &$GLOBALS['TL_LANG']['responsive']['flexItems'],
     'eval' => ['tl_class' => "w50"],
     'sql' => "blob NULL"

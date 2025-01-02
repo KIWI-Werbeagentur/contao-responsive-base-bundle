@@ -79,10 +79,49 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
         $this->arrIcons = [
             'flexDirection' =>
                 [
-                    'row' => "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' height='24' width='24' id='Align-Stretch--Streamline-Material-Pro'%3E%3Cg id='Align-Stretch--Streamline-Material-Pro'%3E%3Cpath id='align-stretch_2' fill='%23000' d='M7 10V4H2V2H22V4H17V10H7ZM2 22V20H7V14H17V20H22V22H2Z' stroke-width='1'%3E%3C/path%3E%3C/g%3E%3C/svg%3E",
-                    'column' => "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' height='24' width='24' id='Align-Stretch--Streamline-Material-Pro'%3E%3Cg id='Align-Stretch--Streamline-Material-Pro'%3E%3Cpath id='align-stretch_2' fill='%23000' d='M7 10V4H2V2H22V4H17V10H7ZM2 22V20H7V14H17V20H22V22H2Z' stroke-width='1'%3E%3C/path%3E%3C/g%3E%3C/svg%3E",
-                    'row-reverse' => "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' height='24' width='24' id='Align-Stretch--Streamline-Material-Pro'%3E%3Cg id='Align-Stretch--Streamline-Material-Pro'%3E%3Cpath id='align-stretch_2' fill='%23000' d='M7 10V4H2V2H22V4H17V10H7ZM2 22V20H7V14H17V20H22V22H2Z' stroke-width='1'%3E%3C/path%3E%3C/g%3E%3C/svg%3E",
-                    'column-reverse' => "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' height='24' width='24' id='Align-Stretch--Streamline-Material-Pro'%3E%3Cg id='Align-Stretch--Streamline-Material-Pro'%3E%3Cpath id='align-stretch_2' fill='%23000' d='M7 10V4H2V2H22V4H17V10H7ZM2 22V20H7V14H17V20H22V22H2Z' stroke-width='1'%3E%3C/path%3E%3C/g%3E%3C/svg%3E"
+                    'row' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-row.svg",
+                    'column' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-column.svg",
+                    'row-reverse' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-row-reverse.svg",
+                    'column-reverse' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-column-reverse.svg"
+                ],
+
+            'flexItems' =>
+                [
+                    'auto' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-stretch.svg",
+                    'stretch' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-stretch.svg",
+                    'start' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-start.svg",
+                    'center' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-center.svg",
+                    'end' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-end.svg",
+                    'baseline' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-baseline.svg",
+                ],
+
+            'alignContent' =>
+                [
+                    'normal' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-start.svg",
+                    'start' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-start.svg",
+                    'center' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-center.svg",
+                    'end' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-end.svg",
+                    'space-around' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-around.svg",
+                    'space-evenly' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-evenly.svg",
+                    'space-between' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-between.svg",
+                ],
+
+            'justifyContent' =>
+                [
+                    'normal' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-start.svg",
+                    'start' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-start.svg",
+                    'center' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-center.svg",
+                    'end' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-end.svg",
+                    'space-around' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-around.svg",
+                    'space-evenly' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-evenly.svg",
+                    'space-between' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-between.svg",
+                ],
+
+            'flexWrap' =>
+                [
+                    'wrap' => "/bundles/kiwiresponsivebase/icons/flex-wrap/flex-wrap-wrap.svg",
+                    'nowrap' => "/bundles/kiwiresponsivebase/icons/flex-wrap/flex-wrap-nowrap.svg",
+                    'wrap-reverse' => "/bundles/kiwiresponsivebase/icons/flex-wrap/flex-wrap-wrap-reverse.svg",
                 ]
         ];
 

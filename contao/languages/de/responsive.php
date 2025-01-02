@@ -27,8 +27,8 @@ $GLOBALS['TL_LANG']['responsive']['flexContent']['start'] = "Anfang [start]";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['end'] = "Ende [end]";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['center']="Mitte [center]";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['space-between'] = "Verteilt [space-between]";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-around'] = "Verteilt mit Platz nach außen [space-around]";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-evenly'] = "Verteilt mit halben Platz nach außen [space-evenly]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['space-around'] = "Verteilt mit halben Platz nach außen [space-around]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['space-evenly'] = "Verteilt mit Platz nach außen [space-evenly]";
 
 $GLOBALS['TL_LANG']['responsive']['addResponsive'] = [
     0 => "Responsive Breite festelegen",
@@ -42,19 +42,16 @@ $GLOBALS['TL_LANG']['responsive']['responsiveFlexDirection'] = [
 $GLOBALS['TL_LANG']['responsive']['responsiveAlignItems'] = [
     0 => "Elementanordnung an Gegenachse (pro Reihe)",
     1 => "align-items",
-    'icon' => 'bundles/kiwiresponsivebase/align-items.svg'
 ];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveJustifyContent'] = [
     0 => "Ausrichtung an Hauptachse (alle Elemente)",
     1 => "justify-content",
-    'icon' => 'bundles/kiwiresponsivebase/justify-content.svg'
 ];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveAlignContent'] = [
     0 => "Ausrichtung an Gegenachse (alle Elemente)",
     1 => "align-content",
-    'icon' => 'bundles/kiwiresponsivebase/align-content.svg'
 ];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveFlexWrap'] = [
