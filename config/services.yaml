@@ -11,6 +11,7 @@ services:
       - '@twig'
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\LoadDataContainerListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\ParseTemplateListener: ~
+  Kiwi\Contao\ResponsiveBaseBundle\EventListener\GeneratePageListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\Twig\ResponsiveExtension:
     arguments:
       - '@kiwi.contao.responsive.frontend'
