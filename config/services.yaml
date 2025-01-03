@@ -3,6 +3,7 @@ services:
     autowire: true
     autoconfigure: true
   kiwi.contao.responsive.frontend:
+    public: true
     class: Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService
   Kiwi\Contao\ResponsiveBaseBundle\Controller\ResponsiveAssetsController:
     public: true
@@ -12,6 +13,7 @@ services:
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\LoadDataContainerListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\ParseTemplateListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\GeneratePageListener: ~
+  Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetFrontendModuleListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\Twig\ResponsiveExtension:
     arguments:
       - '@kiwi.contao.responsive.frontend'
