@@ -31,7 +31,11 @@ $GLOBALS['TL_LANG']['responsive']['flexContent']['space-around'] = "Verteilt mit
 $GLOBALS['TL_LANG']['responsive']['flexContent']['space-evenly'] = "Verteilt mit Platz nach außen [space-evenly]";
 
 $GLOBALS['TL_LANG']['responsive']['addResponsive'] = [
-    0 => "Responsive Breite festelegen",
+    0 => "Responsive Breite festlegen",
+];
+
+$GLOBALS['TL_LANG']['responsive']['addResponsiveChildren'] = [
+    0 => "Responsive Breite für Kindelemente festlegen",
 ];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveFlexDirection'] = [

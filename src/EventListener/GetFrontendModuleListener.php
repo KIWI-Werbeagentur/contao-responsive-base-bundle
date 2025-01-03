@@ -24,6 +24,8 @@ class GetFrontendModuleListener
 
             if ($strBootstrapClasses) {
                 if ($objModule->Template) {
+                    $objModule->Template->isResponsive = true;
+                    $objModule->Template->baseClass = $objModule->typePrefix . $objModule->type;
                     $objModule->Template->class = trim($objModule->Template->class . ' ' . $strBootstrapClasses);
                     $strBuffer = $objModule->Template->parse();
                 }

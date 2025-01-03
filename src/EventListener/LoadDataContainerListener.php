@@ -57,8 +57,8 @@ class LoadDataContainerListener
 
             PaletteManipulatorExtended::create()
                 ->addLegend('items_legend', ['protected_legend','expert_legend'], PaletteManipulator::POSITION_BEFORE)
-                ->addField(array_merge(['responsiveColsItems'], array_keys($GLOBALS['TL_DCA']['container']['fields'] ?? [])), 'items_legend', PaletteManipulator::POSITION_APPEND)
-                ->applyToPalettes($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? [], 'tl_module');
+                ->addField(['addResponsiveChildren'], 'items_legend', PaletteManipulator::POSITION_APPEND)
+                ->applyToPalettes(array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []), 'tl_module');
         }
     }
 }

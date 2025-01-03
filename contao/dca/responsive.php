@@ -89,6 +89,14 @@ $GLOBALS['TL_DCA']['columnActivate']['fields']['addResponsive'] = array(
     'sql'                     => "char(1) NOT NULL default '1'"
 );
 
+$GLOBALS['TL_DCA']['columnActivate']['fields']['addResponsiveChildren'] = array(
+    'label'                   => &$GLOBALS['TL_LANG']['responsive']['addResponsiveChildren'],
+    'default'                 => '1',
+    'inputType'               => 'checkbox',
+    'eval'                    => array('tl_class'=>'m12 w50 clr', 'submitOnChange'=>true),
+    'sql'                     => "char(1) NOT NULL default '1'"
+);
+
 //COLUMN
 $GLOBALS['TL_DCA']['column']['fields']['responsiveCols'] = [
     'label' => &$GLOBALS['TL_LANG']['responsive']['responsiveCols'],
