@@ -4,7 +4,7 @@ services:
     autoconfigure: true
   kiwi.contao.responsive.frontend:
     public: true
-    class: Kiwi\Contao\BootstrapBundle\Service\BootstrapFrontendService
+    class: Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService
   Kiwi\Contao\ResponsiveBaseBundle\Controller\ResponsiveAssetsController:
     public: true
     arguments:
