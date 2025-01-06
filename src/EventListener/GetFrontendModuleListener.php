@@ -13,23 +13,48 @@ class GetFrontendModuleListener
 {
     public function __invoke(ModuleModel $objModuleModel, string $strBuffer, object $objModule): string
     {
+        $shallReparse = false;
+
         $objFrontendModule = $objModule instanceof Hybrid ? $objModule->getParent() : $objModuleModel;
+        $objResponsiveFrontendService = System::getContainer()->get('kiwi.contao.responsive.frontend');
+        $objModule->Template->baseClass = $objModule->typePrefix . $objModule->type;
 
         $isField = PaletteManipulatorExtended::create()->hasField($objFrontendModule->type, 'tl_module', 'addResponsive');
 
         if ($objFrontendModule->addResponsive && $isField) {
-            $arrClasses = System::getContainer()->get('kiwi.contao.responsive.frontend')->getAllResponsiveClasses($objFrontendModule->row());
+            $shallReparse = true;
+            $arrClasses = $objResponsiveFrontendService->getAllResponsiveClasses($objFrontendModule->row());
 
-            $strBootstrapClasses = implode(' ', $arrClasses);
+            $strResponsiveClasses = implode(' ', $arrClasses);
 
-            if ($strBootstrapClasses) {
-                if ($objModule->Template) {
-                    $objModule->Template->isResponsive = true;
-                    $objModule->Template->baseClass = $objModule->typePrefix . $objModule->type;
-                    $objModule->Template->class = trim($objModule->Template->class . ' ' . $strBootstrapClasses);
-                    $strBuffer = $objModule->Template->parse();
+            if ($objModule->Template) {
+                $objModule->Template->isResponsive = true;
+                $objModule->Template->class = trim($objModule->Template->class . ' ' . $strResponsiveClasses);
+            }
+        }
+
+        $isField = PaletteManipulatorExtended::create()->hasField($objFrontendModule->type, 'tl_module', 'addResponsiveChildren');
+
+        if ($objFrontendModule->addResponsiveChildren && $isField) {
+            $shallReparse = true;
+            $arrInnerClasses = $objResponsiveFrontendService->getAllInnerContainerClasses($objFrontendModule->row());
+            $hasResponsiveChildren = in_array($objFrontendModule->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']));
+
+            if ($objModule->Template) {
+                $objModule->Template->hasResponsiveChildren = $hasResponsiveChildren;
+                $objModule->Template->innerClass = $arrInnerClasses;
+            }
+        }
+
+        if ($shallReparse) {
+            // HOOK: customize Template Data
+            if (isset($GLOBALS['TL_HOOKS']['alterTemplateData']) && \is_array($GLOBALS['TL_HOOKS']['alterTemplateData'])) {
+                foreach ($GLOBALS['TL_HOOKS']['alterTemplateData'] as $callback) {
+                    System::importStatic($callback[0])->{$callback[1]}($objModule->Template, $objFrontendModule, $objModule);
                 }
             }
+
+            $strBuffer = $objModule->Template->parse();
         }
 
         return $strBuffer;
