@@ -1,5 +1,6 @@
 <?php
 
+use Kiwi\Contao\ResponsiveBaseBundle\Controller\ContentElement\ContentModuleResponsive;
 use Kiwi\Contao\ResponsiveBaseBundle\Widget\Backend\OptionalResponsiveWidget;
 use Kiwi\Contao\ResponsiveBaseBundle\Widget\Backend\ResponsiveWidget;
 use Contao\System;
@@ -9,6 +10,8 @@ $GLOBALS['responsive']['tl_content']['excludePalettes']['column'] = ['default', 
 $GLOBALS['responsive']['tl_form_field']['excludePalettes']['column'] = ['default', 'html', 'fieldsetStart', 'fieldsetStop'];
 $GLOBALS['responsive']['tl_module']['excludePalettes']['column'] = ['default', 'html'];
 $GLOBALS['responsive']['tl_module']['includePalettes']['container'] = ['newslist'=>'articles', 'eventlist'=>'events', 'vacancieslist'=>'vacancies'];
+
+$GLOBALS['TL_CTE']['includes']['module'] = ContentModuleResponsive::class;
 
 $GLOBALS['BE_FFL']['responsive'] = ResponsiveWidget::class;
 $GLOBALS['BE_FFL']['optionalResponsive'] = OptionalResponsiveWidget::class;
