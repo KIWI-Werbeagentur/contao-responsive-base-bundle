@@ -63,10 +63,10 @@ class ResponsiveFrontendService
     {
         return
             array_merge(
-                $this->getColClasses($arrData[$arrFields['cols'] ?? 'responsiveCols'] ?? ""),
-                $this->getOffsetClasses($arrData[$arrFields['offsets'] ?? 'responsiveOffsets'] ?? ""),
-                $this->getOrderClasses($arrData[$arrFields['order'] ?? 'responsiveOrder'] ?? ""),
-                $this->getAlignSelfClasses($arrData[$arrFields['align-self'] ?? 'responsiveAlignSelf'] ?? "")
+                $this->getColClasses($arrData[$arrFields['cols'] ?? 'responsiveCols'] ?? "", $arrData),
+                $this->getOffsetClasses($arrData[$arrFields['offsets'] ?? 'responsiveOffsets'] ?? "", $arrData),
+                $this->getOrderClasses($arrData[$arrFields['order'] ?? 'responsiveOrder'] ?? "", $arrData),
+                $this->getAlignSelfClasses($arrData[$arrFields['align-self'] ?? 'responsiveAlignSelf'] ?? "", $arrData)
             );
     }
 
@@ -82,9 +82,9 @@ class ResponsiveFrontendService
     {
         return
             array_merge(
-                $this->getContainerClasses($arrData[$arrFields['containerSize'] ?? 'responsiveContainerSize'] ?? ""),
-                $this->getSpacingClasses($arrData[$arrFields['spacingTop'] ?? 'responsiveSpacingTop'] ?? "", 't'),
-                $this->getSpacingClasses($arrData[$arrFields['spacingBottom'] ?? 'responsiveSpacingBottom'] ?? "", 'b'),
+                $this->getContainerClasses($arrData[$arrFields['containerSize'] ?? 'responsiveContainerSize'] ?? "", $arrData),
+                $this->getSpacingClasses($arrData[$arrFields['spacingTop'] ?? 'responsiveSpacingTop'] ?? "", 't', $arrData),
+                $this->getSpacingClasses($arrData[$arrFields['spacingBottom'] ?? 'responsiveSpacingBottom'] ?? "", 'b', $arrData),
             );
     }
 
@@ -117,11 +117,11 @@ class ResponsiveFrontendService
     {
         return
             array_merge(
-                $this->getFlexDirectionClasses($arrData[$arrFields['flexDirection'] ?? 'responsiveFlexDirection'] ?? ""),
-                $this->getFlexWrapClasses($arrData[$arrFields['flexWrap'] ?? 'responsiveFlexWrap'] ?? ""),
-                $this->getAlignItemsClasses($arrData[$arrFields['alignItems'] ?? 'responsiveAlignItems'] ?? ""),
-                $this->getAlignContentClasses($arrData[$arrFields['alignContent'] ?? 'responsiveAlignContent'] ?? ""),
-                $this->getJustifyContentClasses($arrData[$arrFields['justifyContent'] ?? 'responsiveJustifyContent'] ?? ""),
+                $this->getFlexDirectionClasses($arrData[$arrFields['flexDirection'] ?? 'responsiveFlexDirection'] ?? "", $arrData),
+                $this->getFlexWrapClasses($arrData[$arrFields['flexWrap'] ?? 'responsiveFlexWrap'] ?? "", $arrData),
+                $this->getAlignItemsClasses($arrData[$arrFields['alignItems'] ?? 'responsiveAlignItems'] ?? "", $arrData),
+                $this->getAlignContentClasses($arrData[$arrFields['alignContent'] ?? 'responsiveAlignContent'] ?? "", $arrData),
+                $this->getJustifyContentClasses($arrData[$arrFields['justifyContent'] ?? 'responsiveJustifyContent'] ?? "", $arrData),
             );
     }
 }
