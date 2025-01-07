@@ -22,13 +22,13 @@ class GetFrontendModuleListener
             $shallReparse = false;
 
             // Ignore responsive classes from module when it is inserted via CTE
-            $objTargetWithClasses = $objModuleModel->cte ? $objModuleModel->cte->getModel() : $objModuleModel;
+            $objTargetWithClasses = ($objModuleModel->cte->getModel() ?? false) ? $objModuleModel->cte->getModel() : $objModuleModel;
             $objModule->Template->baseClass = $objModule->typePrefix . $objModule->type;
 
             //Responsive Module Settings
             $isField = PaletteManipulatorExtended::create()->hasField($objModuleModel->type, 'tl_module', 'addResponsive');
 
-            if ($objTargetWithClasses->addResponsive && $isField) {
+            if (!($objTargetWithClasses->addResponsive === 0) && $isField) {
                 $shallReparse = true;
                 $arrClasses = $this->responsiveFrontendService->getAllResponsiveClasses($objTargetWithClasses->row());
 
@@ -42,7 +42,7 @@ class GetFrontendModuleListener
             $isField = PaletteManipulatorExtended::create()->hasField($objModuleModel->type, 'tl_module', 'addResponsiveChildren');
             $objTargetWithClasses = $objTargetWithClasses->addResponsiveChildren ? $objTargetWithClasses : $objModuleModel;
 
-            if ($objTargetWithClasses->addResponsiveChildren && $isField) {
+            if (!($objTargetWithClasses->addResponsiveChildren === 0) && $isField) {
                 $shallReparse = true;
                 $arrInnerClasses = $this->responsiveFrontendService->getAllInnerContainerClasses($objTargetWithClasses->row());
                 $hasResponsiveChildren = in_array($objModuleModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']));
