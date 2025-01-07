@@ -34,7 +34,7 @@ class IncludesListener
 
             $objModel = $strTargetClass::findByPk($intTarget);
 
-            if (!$objModel->type || in_array($objModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']))) {
+            if (in_array($objModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']))) {
                 PaletteManipulatorExtended::create()
                     ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                     ->addField(['addResponsiveChildren'], 'items_legend', PaletteManipulator::POSITION_APPEND)
