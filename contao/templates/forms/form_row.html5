@@ -1,0 +1,7 @@
+<div class="<?= $this->prefix ?><?php if ($this->class): ?> <?= $this->class ?><?php endif; ?> <?= implode(" ",\Contao\System::getContainer()->get('kiwi.contao.responsive.frontend')->getAllResponsiveClasses($this->arrConfiguration)) ?>">
+    <?php $this->block('label'); ?>
+    <?php $this->endblock(); ?>
+
+    <?php $this->block('field'); ?>
+    <?php $this->endblock(); ?>
+</div>

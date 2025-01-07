@@ -1,0 +1,7 @@
+{% extends "@Contao/form_inline.html5" %}
+
+{% set fields %}
+    <div class="formbody__inside {{ innerClass|default(null) ? innerClass|join(" ") : getAllInnerContainerClasses(_context)|join(" ") }}">
+        {{ fields|raw }}
+    </div>
+{% endset %}

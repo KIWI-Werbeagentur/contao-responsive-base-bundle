@@ -1,13 +1,13 @@
 <?php
 
 use Contao\Controller;
-use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfig;
+use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfigListener;
 
 Controller::loadDataContainer('responsive');
 
 //Set default values dynamically
 $GLOBALS['TL_DCA']['tl_module']['config']['onload_callback'][] = [$GLOBALS['responsive']['config'], 'getDefaults'];
-$GLOBALS['TL_DCA']['tl_module']['config']['onbeforesubmit_callback'][] = [ResponsiveConfig::class, 'unsetResponsiveWhenNotInPalette'];
+$GLOBALS['TL_DCA']['tl_module']['config']['onbeforesubmit_callback'][] = [ResponsiveConfigListener::class, 'unsetResponsiveWhenNotInPalette'];
 
 $GLOBALS['TL_DCA']['tl_module']['fields']['addResponsive'] = $GLOBALS['TL_DCA']['columnActivate']['fields']['addResponsive'];
 $GLOBALS['TL_DCA']['tl_module']['fields'] += $GLOBALS['TL_DCA']['column']['fields'];

@@ -1,7 +1,7 @@
 <?php
 
 use Contao\System;
-use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfig;
+use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfigListener;
 
 System::loadLanguageFile('responsive');
 

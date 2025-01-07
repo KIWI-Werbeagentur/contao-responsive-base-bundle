@@ -10,12 +10,16 @@ services:
     arguments:
       - '@contao.framework'
       - '@twig'
-  Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfig: ~
+  Kiwi\Contao\ResponsiveBaseBundle\DataContainer\IncludesListener: ~
+  Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfigListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\LoadDataContainerListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\ParseTemplateListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetAllEventsListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\GeneratePageListener: ~
-  Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetFrontendModuleListener: ~
+  Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetFrontendModuleListener:
+    public: true
+    arguments:
+      - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Twig\ResponsiveExtension:
     arguments:
       - '@kiwi.contao.responsive.frontend'

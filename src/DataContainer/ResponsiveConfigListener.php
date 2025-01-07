@@ -6,7 +6,7 @@ use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 
-class ResponsiveConfig
+class ResponsiveConfigListener
 {
     #[AsCallback(table: 'tl_module', target: 'config.onbeforesubmit')]
     public function unsetResponsiveWhenNotInPalette($arrValues, DataContainer $objDca): array
