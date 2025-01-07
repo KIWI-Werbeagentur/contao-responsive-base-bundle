@@ -21,16 +21,16 @@ class GetFrontendModuleListener
         if ($objModule->Template) {
             $shallReparse = false;
 
-            $objFrontendModule = $objModule instanceof Hybrid ? $objModule->getParent() : $objModuleModel;
+            // Ignore Responsive Classes from Module when module is inserted via CTE
+            $objTargetWithClasses = $objModuleModel->cte ? $objModuleModel->cte->getModel() : $objModuleModel;
             $objModule->Template->baseClass = $objModule->typePrefix . $objModule->type;
 
-            //Responsive
-            $isField = PaletteManipulatorExtended::create()->hasField($objFrontendModule->type, 'tl_module', 'addResponsive');
-            $isResponsive = $this->checkFieldValue('addResponsive', $objFrontendModule, $objModule, $objModuleModel);
+            //Responsive Module Settings
+            $isField = PaletteManipulatorExtended::create()->hasField($objModuleModel->type, 'tl_module', 'addResponsive');
 
-            if ($isResponsive && $isField) {
+            if ($objTargetWithClasses->addResponsive && $isField) {
                 $shallReparse = true;
-                $arrClasses = $this->getClasses('getAllResponsiveClasses', $objFrontendModule, $objModule, $objModuleModel);
+                $arrClasses = $this->responsiveFrontendService->getAllResponsiveClasses($objTargetWithClasses->row());
 
                 $strResponsiveClasses = implode(' ', $arrClasses);
 
@@ -38,14 +38,13 @@ class GetFrontendModuleListener
                 $objModule->Template->class = trim($objModule->Template->class . ' ' . $strResponsiveClasses);
             }
 
-            //Responsive Children
-            $isField = PaletteManipulatorExtended::create()->hasField($objFrontendModule->type, 'tl_module', 'addResponsiveChildren');
-            $hasResponsiveChildren = $this->checkFieldValue('addResponsiveChildren', $objFrontendModule, $objModule, $objModuleModel);
+            //Responsive Children Settings
+            $isField = PaletteManipulatorExtended::create()->hasField($objModuleModel->type, 'tl_module', 'addResponsiveChildren');
 
-            if ($hasResponsiveChildren && $isField) {
+            if ($objTargetWithClasses->addResponsiveChildren && $isField) {
                 $shallReparse = true;
-                $arrInnerClasses = $this->getClasses('getAllInnerContainerClasses', $objFrontendModule, $objModule, $objModuleModel);
-                $hasResponsiveChildren = in_array($objFrontendModule->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']));
+                $arrInnerClasses = $this->responsiveFrontendService->getAllInnerContainerClasses($objTargetWithClasses->row());
+                $hasResponsiveChildren = in_array($objModuleModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']));
 
                 $objModule->Template->hasResponsiveChildren = $hasResponsiveChildren;
                 $objModule->Template->innerClass = $arrInnerClasses;
@@ -55,7 +54,7 @@ class GetFrontendModuleListener
                 // HOOK: customize Template Data
                 if (isset($GLOBALS['TL_HOOKS']['alterTemplateData']) && \is_array($GLOBALS['TL_HOOKS']['alterTemplateData'])) {
                     foreach ($GLOBALS['TL_HOOKS']['alterTemplateData'] as $callback) {
-                        System::importStatic($callback[0])->{$callback[1]}($objModule->Template, $objFrontendModule, $objModule);
+                        System::importStatic($callback[0])->{$callback[1]}($objModule->Template, $objModuleModel, $objModule);
                     }
                 }
 
@@ -64,27 +63,5 @@ class GetFrontendModuleListener
         }
 
         return $strBuffer;
-    }
-
-    public function checkFieldValue($strField, $objFrontendModule, $objModule, $objModuleModel)
-    {
-        if ($objModule instanceof Hybrid && $objModuleModel->cte) {
-            return $objModuleModel->cte->getModel()->{$strField};
-        } elseif ($objFrontendModule->cte) {
-            return $objFrontendModule->cte->getModel()->{$strField};
-        } else {
-            return $objFrontendModule->{$strField};
-        }
-    }
-
-    public function getClasses($strMethod, $objFrontendModule, $objModule, $objModuleModel)
-    {
-        if ($objModule instanceof Hybrid && $objModuleModel->cte) {
-            return $this->responsiveFrontendService->{$strMethod}($objModuleModel->cte->getModel()->row());
-        } elseif ($objFrontendModule->cte) {
-            return $this->responsiveFrontendService->{$strMethod}($objFrontendModule->cte->getModel()->row());
-        } else {
-            return $this->responsiveFrontendService->{$strMethod}($objFrontendModule->row());
-        }
     }
 }
