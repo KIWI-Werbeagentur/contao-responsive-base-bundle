@@ -50,7 +50,7 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
 
     protected $arrIcons;
 
-    public function __construct(){
+    public function __construct(private $objDca = null){
         $this->arrAlignmentContent = [
             'normal' => 'normal',
             'start' => 'start',

@@ -21,7 +21,6 @@ interface ResponsiveConfigurationInterface
 
     public array $arrColsDefaults {
         get;
-        set;
     }
 
     public array $arrOffsets {
