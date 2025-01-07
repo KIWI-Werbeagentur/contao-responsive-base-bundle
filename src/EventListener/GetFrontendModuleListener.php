@@ -21,7 +21,7 @@ class GetFrontendModuleListener
         if ($objModule->Template) {
             $shallReparse = false;
 
-            // Ignore Responsive Classes from Module when module is inserted via CTE
+            // Ignore responsive classes from module when it is inserted via CTE
             $objTargetWithClasses = $objModuleModel->cte ? $objModuleModel->cte->getModel() : $objModuleModel;
             $objModule->Template->baseClass = $objModule->typePrefix . $objModule->type;
 
@@ -40,6 +40,7 @@ class GetFrontendModuleListener
 
             //Responsive Children Settings
             $isField = PaletteManipulatorExtended::create()->hasField($objModuleModel->type, 'tl_module', 'addResponsiveChildren');
+            $objTargetWithClasses = $objTargetWithClasses->addResponsiveChildren ? $objTargetWithClasses : $objModuleModel;
 
             if ($objTargetWithClasses->addResponsiveChildren && $isField) {
                 $shallReparse = true;
@@ -50,13 +51,14 @@ class GetFrontendModuleListener
                 $objModule->Template->innerClass = $arrInnerClasses;
             }
 
-            if ($shallReparse) {
-                // HOOK: customize Template Data
-                if (isset($GLOBALS['TL_HOOKS']['alterTemplateData']) && \is_array($GLOBALS['TL_HOOKS']['alterTemplateData'])) {
-                    foreach ($GLOBALS['TL_HOOKS']['alterTemplateData'] as $callback) {
-                        System::importStatic($callback[0])->{$callback[1]}($objModule->Template, $objModuleModel, $objModule);
-                    }
+            // HOOK: customize Template Data
+            if (isset($GLOBALS['TL_HOOKS']['alterTemplateData']) && \is_array($GLOBALS['TL_HOOKS']['alterTemplateData'])) {
+                foreach ($GLOBALS['TL_HOOKS']['alterTemplateData'] as $callback) {
+                    System::importStatic($callback[0])->{$callback[1]}($objModule->Template, $objModuleModel, $objModule, $shallReparse);
                 }
+            }
+
+            if ($shallReparse) {
 
                 $strBuffer = $objModule->Template->parse();
             }

@@ -38,6 +38,11 @@ $GLOBALS['TL_LANG']['responsive']['addResponsiveChildren'] = [
     0 => "Responsive Breite für Kindelemente festlegen",
 ];
 
+$GLOBALS['TL_LANG']['responsive']['overwriteResponsiveChildren'] = [
+    0 => "Responsive Breite für Kindelemente überschreiben",
+    1 => "Überschreiben Sie die Moduleinstellungen <i>%s</i>"
+];
+
 $GLOBALS['TL_LANG']['responsive']['responsiveFlexDirection'] = [
     0 => "Hauptachse",
     1 => "flex-direction",
