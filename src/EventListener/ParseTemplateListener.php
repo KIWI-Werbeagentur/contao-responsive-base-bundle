@@ -26,12 +26,13 @@ class ParseTemplateListener
     {
         Controller::loadDataContainer('responsive');
 
-        if (!$objTemplate->addResponsiveChildren || !$objTemplate->responsiveColsItems) return;
+        $objTargetWithClasses = ($objTemplate->cte ?? false) && $objTemplate->cte->addResponsiveChildren ? $objTemplate->cte : $objTemplate;
+        if (!$objTargetWithClasses->addResponsiveChildren || !$objTargetWithClasses->responsiveColsItems) return;
 
         //Checks if DCA-Palette has Settings for children (usually used for lists)
         if (!in_array($objTemplate->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']))) return;
 
-        $strColumnClasses = implode(" ", System::getContainer()->get('kiwi.contao.responsive.frontend')->getColClasses($objTemplate->responsiveColsItems));
+        $strColumnClasses = implode(" ", System::getContainer()->get('kiwi.contao.responsive.frontend')->getColClasses($objTargetWithClasses->responsiveColsItems));
         $varChildren = ($objTemplate->{$GLOBALS['responsive']['tl_module']['includePalettes']['container'][$objTemplate->type]});
 
         if (is_array($varChildren) && $objTemplate->isResponsive) {
