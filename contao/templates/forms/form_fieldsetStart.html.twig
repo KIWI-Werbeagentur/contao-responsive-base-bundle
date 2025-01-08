@@ -1,0 +1,5 @@
+<fieldset class="fieldset formbody__area {{ class ?? '' }} {{ getAllResponsiveClasses(arrConfiguration)|join(" ") }}">
+        <div class="fieldset__inside {{ getAllInnerContainerClasses(arrConfiguration)|join(" ") }}">
+    {% if label ?? false %}
+        <legend>{{ label }}</legend>
+    {% endif %}
