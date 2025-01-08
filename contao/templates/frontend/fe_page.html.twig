@@ -1,0 +1,76 @@
+{% extends '@Contao/fe_page.html5' %}
+
+{% block header %}
+    {% if header %}
+        <header id="header" class="header">
+            <div class="header__container section-container {{ responsiveContainerSizeHeader }}">
+                <div class="header__inside inside">
+                    <div class="header__wrapper row">
+                        {{ header }}
+                    </div>
+                </div>
+            </div>
+        </header>
+    {% endif %}
+{% endblock %}
+
+{% block container %}
+    <div id="container" class="content">
+        <div class="content__container section-container {{ responsiveContainerSize }}">
+            <div class="content__inside inside">
+                <div class="content__wrapper row">
+
+                    {% block main %}
+                        <main id="main" class="main content__area {{ responsiveColsMain|join(' ') }}">
+                                <div class="main__inside inside">
+                                    <div class="main__wrapper row">
+                                        {{ main|raw }}
+                                    </div>
+                                </div>
+                            {{ contao_section('main') }}
+                        </main>
+                    {% endblock %}
+
+                    {% block left %}
+                        {% if left %}
+                            <aside id="left" class="left content__area {{ responsiveColsLeft|join(' ') }}">
+                                <div class="left__inside inside">
+                                    <div class="left__wrapper row">
+                                        {{ left|raw }}
+                                    </div>
+                                </div>
+                            </aside>
+                        {% endif %}
+                    {% endblock %}
+
+                    {% block right %}
+                        {% if right %}
+                            <aside id="right" class="right content__area {{ responsiveColsRight|join(' ') }}">
+                                <div class="right__inside inside">
+                                    <div class="right__wrapper row">
+                                        {{ right|raw }}
+                                    </div>
+                                </div>
+                            </aside>
+                        {% endif %}
+                    {% endblock %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock container %}
+
+{% block footer %}
+    {% if footer %}
+        <footer id="footer" class="footer">
+            <div class="footer__container section-container {{ responsiveContainerSizeFooter }}">
+                <div class="footer__inside inside">
+                    <div class="footer__wrapper row">
+                        {{ footer }}
+                    </div>
+                </div>
+            </div>
+        </footer>
+    {% endif %}
+{% endblock %}
