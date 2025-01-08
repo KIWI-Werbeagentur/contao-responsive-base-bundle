@@ -4,7 +4,6 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\EventListener;
 
 use Contao\Controller;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
-use Contao\FrontendTemplate;
 use Contao\StringUtil;
 use Contao\System;
 
@@ -18,12 +17,13 @@ class ParseTemplateListener
             self::wrapListItems($objTemplate);
         }
 
-        if(substr($objTemplate->getName(), 0, 7) == 'fe_page'){
+        if(str_starts_with($objTemplate->getName(), 'fe_page')){
             self::setLayoutSizes($objTemplate);
         }
     }
 
-    public static function wrapListItems(&$objTemplate){
+    public static function wrapListItems(&$objTemplate):void
+    {
         Controller::loadDataContainer('responsive');
 
         if (!$objTemplate->addResponsiveChildren || !$objTemplate->responsiveColsItems) return;
@@ -47,7 +47,8 @@ class ParseTemplateListener
         $objTemplate->{$GLOBALS['responsive']['tl_module']['includePalettes']['container'][$objTemplate->type]} = $varChildren;
     }
 
-    public static function mapSidebars(&$objTemplate){
+    public static function mapSidebars(&$objTemplate):array
+    {
         $sidebars = [];
         if ($objTemplate->layout->cols == '3cl') {
             $sidebars[] = "Left";
@@ -60,7 +61,8 @@ class ParseTemplateListener
         return $sidebars;
     }
 
-    public static function setLayoutSizes(&$objTemplate){
+    public static function setLayoutSizes(&$objTemplate):void
+    {
         $responsiveFrontendService = System::getContainer()->get('kiwi.contao.responsive.frontend');
 
         // Columns
