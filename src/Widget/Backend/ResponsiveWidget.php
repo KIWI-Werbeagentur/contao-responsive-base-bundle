@@ -33,8 +33,31 @@ class ResponsiveWidget extends Widget
         return parent::generateLabel();
     }
 
+    public function generateFormField($strClass, $strBreakpoint, $strModifier, $arrValues = [], $arrOptions = [])
+    {
+        $objWidget = (
+        new $strClass(self::getAttributesFromDca(
+            $this->arrDca,
+            "{$this->strField}{$strModifier}",
+            $arrValues[$strBreakpoint] ?? null,
+            "{$this->strField}{$strModifier}",
+            $this->strTable,
+            $this
+        )));
+        $objWidget->strField = "{$this->strField}";
+        $objWidget->strId = "{$this->strField}{$strModifier}";
+        $objWidget->storeValues = true;
+        $objWidget->mandatory = ($arrOptions['mandatory'] ?? 0) == 0;
+        $objWidget->options = (($arrOptions['mandatory'] ?? 0) == 0 ? ($this->arrConfiguration['options'] ?? []) : array_merge([['value' => '', 'label' => ($GLOBALS['TL_LANG']['responsive']['inherit'] ?? 'inherit')]], ($this->arrConfiguration['options'] ?? [])));
+        $objWidget->label = $GLOBALS['TL_LANG']['responsive']['breakpoint'][$strBreakpoint][0] ?? $strBreakpoint;
+        $objWidget->currentRecord = $this->currentRecord;
+
+        return $objWidget->parse();
+    }
+
     public function generate(): string
     {
+        dump($this);
         System::loadLanguageFile('default', 'de');
         $arrInputs = [];
         $arrConfigurations = [];
@@ -43,30 +66,22 @@ class ResponsiveWidget extends Widget
         $arrValues = StringUtil::deserialize($this->value);
 
         $i = 0;
+        $hasEmptyModifier = false;
 
         //Create field for every Breakpoint
         foreach ($this->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
-            $objWidget = (
-            new $strClass(self::getAttributesFromDca(
-                $this->arrDca,
-                "{$this->strField}{$arrBreakpoint['modifier']}",
-                $arrValues[$strBreakpoint] ?? null,
-                "{$this->strField}{$arrBreakpoint['modifier']}",
-                $this->strTable,
-                $this
-            )));
-            $objWidget->strField = "{$this->strField}";
-            $objWidget->strId = "{$this->strField}{$arrBreakpoint['modifier']}";
-            $objWidget->storeValues = true;
-            $objWidget->mandatory = $i == 0;
-            $objWidget->options = ($i == 0 ? ($this->arrConfiguration['options'] ?? []) : array_merge([['value' => '', 'label' => ($GLOBALS['TL_LANG']['responsive']['inherit'] ?? 'inherit')]], ($this->arrConfiguration['options'] ?? [])));
-            $objWidget->label = $GLOBALS['TL_LANG']['responsive']['breakpoint'][$strBreakpoint][0] ?? $strBreakpoint;
-            $objWidget->currentRecord = $this->currentRecord;
+            if (!$arrBreakpoint['modifier']) {
+                $hasEmptyModifier = true;
+            }
 
-            $strField = $objWidget->parse();
-
+            $strField = $this->generateFormField($strClass, $strBreakpoint, $arrBreakpoint['modifier'], $arrValues, ['mandatory' => $i]);
             $arrInputs[$strBreakpoint] = sprintf("<div class='%s__item'>%s</div>", $this->strCssClass, $strField);
             $i++;
+        }
+
+        if (!$hasEmptyModifier) {
+            $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['eval']['alwaysSave'] = true;
+            array_unshift($arrInputs, "<input type='hidden' name='$this->strField'/>");
         }
 
         if (isset($GLOBALS['TL_HOOKS']['alterResponsiveBackendWidgetOptions']) && is_array($GLOBALS['TL_HOOKS']['alterResponsiveBackendWidgetOptions'])) {

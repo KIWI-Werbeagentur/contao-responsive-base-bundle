@@ -19,7 +19,7 @@
     white-space: nowrap;
 }
 
-input:not(:checked) ~ .responsive-widget > *:not(:first-child) {
+input:not(:checked) ~ .responsive-widget > div:not(:first-of-type) {
     display: none;
 }
 

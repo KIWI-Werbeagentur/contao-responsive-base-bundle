@@ -1,7 +1,6 @@
 <?php
 
 use Contao\Controller;
-use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\IncludesListener;
 use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\WrapperListener;
 
 /*

@@ -20,11 +20,10 @@ class OptionalResponsiveWidget extends ResponsiveWidget
 
     protected function validator($varInput, $arrValues = [])
     {
-        
         if (Input::post("{$this->strName}-responsive")) {
             return parent::validator($varInput, $arrValues);
         }
-        parent::validator($varInput);
-        return serialize([array_key_first($this->arrBreakpoints) => Input::post($this->strName)]);
+        parent::validator($varInput, $arrValues);
+        return serialize([array_key_first($this->arrBreakpoints) => Input::post($this->strName.$this->arrBreakpoints[array_key_first($this->arrBreakpoints)]['modifier'])]);
     }
 }
