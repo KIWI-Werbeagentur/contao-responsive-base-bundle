@@ -16,6 +16,8 @@ class ResponsiveWidget extends Widget
     protected $arrBreakpoints;
     protected $strLabelIcon;
 
+    protected $arrWidgets = [];
+
     protected $arrDca;
 
     public function __construct($arrAttributes = null)
@@ -25,6 +27,15 @@ class ResponsiveWidget extends Widget
         $this->arrBreakpoints = (new $GLOBALS['responsive']['config'])->arrBreakpoints;
         $this->arrDca = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField];
         $this->strLabelIcon = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['label']['icon'] ?? null;
+
+        $i = 0;
+        $strInputType = $this->arrDca['responsiveInputType'] ?? '';
+        $strClass = $GLOBALS['BE_FFL'][$strInputType];
+        $arrValues = StringUtil::deserialize($this->value);
+        foreach ($this->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
+            $this->arrWidgets[$arrBreakpoint['modifier']] = $this->generateFormField($strClass, $strBreakpoint, $arrBreakpoint['modifier'], $arrValues, ['mandatory' => $i == 0]);
+            $i++;
+        }
     }
 
     public function generateLabel(): string
@@ -47,12 +58,12 @@ class ResponsiveWidget extends Widget
         $objWidget->strField = "{$this->strField}";
         $objWidget->strId = "{$this->strField}{$strModifier}";
         $objWidget->storeValues = true;
-        $objWidget->mandatory = ($arrOptions['mandatory'] ?? 0) == 0;
-        $objWidget->options = (($arrOptions['mandatory'] ?? 0) == 0 ? ($this->arrConfiguration['options'] ?? []) : array_merge([['value' => '', 'label' => ($GLOBALS['TL_LANG']['responsive']['inherit'] ?? 'inherit')]], ($this->arrConfiguration['options'] ?? [])));
+        $objWidget->mandatory = $arrOptions['mandatory'] ?? 0;
+        $objWidget->options = (($arrOptions['mandatory'] ?? 0) ? ($this->arrConfiguration['options'] ?? []) : array_merge([['value' => '', 'label' => ($GLOBALS['TL_LANG']['responsive']['inherit'] ?? 'inherit')]], ($this->arrConfiguration['options'] ?? [])));
         $objWidget->label = $GLOBALS['TL_LANG']['responsive']['breakpoint'][$strBreakpoint][0] ?? $strBreakpoint;
         $objWidget->currentRecord = $this->currentRecord;
 
-        return $objWidget->parse();
+        return $objWidget;
     }
 
     public function generate(): string
@@ -60,11 +71,7 @@ class ResponsiveWidget extends Widget
         System::loadLanguageFile('default', 'de');
         $arrInputs = [];
         $arrConfigurations = [];
-        $strInputType = $this->arrDca['responsiveInputType'] ?? '';
-        $strClass = $GLOBALS['BE_FFL'][$strInputType];
-        $arrValues = StringUtil::deserialize($this->value);
 
-        $i = 0;
         $hasEmptyModifier = false;
 
         //Create field for every Breakpoint
@@ -73,9 +80,7 @@ class ResponsiveWidget extends Widget
                 $hasEmptyModifier = true;
             }
 
-            $strField = $this->generateFormField($strClass, $strBreakpoint, $arrBreakpoint['modifier'], $arrValues, ['mandatory' => $i]);
-            $arrInputs[$strBreakpoint] = sprintf("<div class='%s__item'>%s</div>", $this->strCssClass, $strField);
-            $i++;
+            $arrInputs[$strBreakpoint] = sprintf("<div class='%s__item'>%s</div>", $this->strCssClass, $this->arrWidgets[$arrBreakpoint['modifier']]->parse());
         }
 
         if (!$hasEmptyModifier) {
@@ -95,10 +100,19 @@ class ResponsiveWidget extends Widget
     protected function validator($varInput, $arrValues = [])
     {
         foreach ($this->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
+            $this->arrWidgets[$arrBreakpoint['modifier']]->validate(Input::post("{$this->strName}{$arrBreakpoint['modifier']}"));
+            if($this->arrWidgets[$arrBreakpoint['modifier']]->arrErrors) {
+                $this->addError('');
+            }
+
             if (($strValue = Input::post("{$this->strName}{$arrBreakpoint['modifier']}")) !== "") {
                 $arrValues[$strBreakpoint] = $strValue;
             }
             parent::validator($varInput);
+        }
+
+        if($this->arrErrors){
+            return '';
         }
 
         return serialize($arrValues);
