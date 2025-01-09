@@ -3,6 +3,7 @@
 namespace Kiwi\Contao\ResponsiveBaseBundle\Service;
 
 use Contao\StringUtil;
+use Contao\System;
 
 class ResponsiveFrontendService
 {
@@ -13,6 +14,15 @@ class ResponsiveFrontendService
         if ($strData ?? false) {
             $arrValues = StringUtil::deserialize($strData, true);
             $objConfig = new $GLOBALS['responsive']['config']();
+
+            // HOOK: add custom logic
+            if (isset($GLOBALS['TL_HOOKS']['alterResponsiveValues']) && \is_array($GLOBALS['TL_HOOKS']['alterResponsiveValues']))
+            {
+                foreach ($GLOBALS['TL_HOOKS']['alterResponsiveValues'] as $callback)
+                {
+                    System::importStatic($callback[0])->{$callback[1]}($arrValues, $strMapping, $arrOptions);
+                }
+            }
 
             foreach ($arrValues as $strBreakpoint => $varValue) {
                 $strClass = is_array($objConfig->{$strMapping}) ? ($objConfig->{$strMapping}[$varValue] ?? '') : $objConfig->{$strMapping};
