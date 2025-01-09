@@ -20,7 +20,7 @@ class ResponsiveFrontendService
             {
                 foreach ($GLOBALS['TL_HOOKS']['alterResponsiveValues'] as $callback)
                 {
-                    System::importStatic($callback[0])->{$callback[1]}($arrValues, $strMapping, $arrOptions);
+                    System::importStatic($callback[0])->{$callback[1]}($arrValues, $strMapping, $objConfig, $arrOptions);
                 }
             }
 
