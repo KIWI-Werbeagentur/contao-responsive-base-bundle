@@ -1,7 +1,7 @@
 {% extends "@Contao/content_element/_base.html.twig" %}
 
 {% set baseClass = "content-#{type|replace({'_': '-'})}" %}
-{% set attributes = attrs().addClass(getAllResponsiveClasses(data)) %}
+{% set attributes = attrs().addClass(getAllResponsiveClasses(data)).mergeWith(attributes|default) %}
 
 {%- block inner %}
     {% if nested_fragments %}
