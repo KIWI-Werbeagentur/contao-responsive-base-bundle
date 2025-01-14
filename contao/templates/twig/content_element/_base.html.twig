@@ -10,3 +10,11 @@
         {{ parent() }}
     {% endif %}
 {% endblock -%}
+
+{% set content_attributes = content_attributes|default(attrs()).addClass("#{baseClass}__content") %}
+
+{% block content %}
+    <div {{ content_attributes }}>
+        {{ block('content')|raw }}
+    </div>
+{% endblock %}

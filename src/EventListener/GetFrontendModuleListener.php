@@ -22,7 +22,7 @@ class GetFrontendModuleListener
             $shallReparse = false;
 
             // Ignore responsive classes from module when it is inserted via CTE
-            $objTargetWithClasses = ($objModuleModel->cte->getModel() ?? false) ? $objModuleModel->cte->getModel() : $objModuleModel;
+            $objTargetWithClasses = ($objModuleModel->cte?->getModel() ?? false) ? $objModuleModel->cte->getModel() : $objModuleModel;
             $objModule->Template->baseClass = $objModule->typePrefix . $objModule->type;
 
             //Responsive Module Settings

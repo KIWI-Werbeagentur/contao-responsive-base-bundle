@@ -7,6 +7,17 @@ use Contao\System;
 
 class ResponsiveFrontendService
 {
+    public static function getProp($varTarget, $strProp)
+    {
+        if (is_array($varTarget)) {
+            return $varTarget[$strProp] ?? "";
+        }
+        if (is_object($varTarget)) {
+            return $varTarget->{$strProp} ?? "";
+        }
+        return "";
+    }
+
     public function getResponsiveClasses(string $strData, string $strMapping, array $arrOptions = []): array
     {
         $arrClasses = [];
@@ -16,10 +27,8 @@ class ResponsiveFrontendService
             $objConfig = new $GLOBALS['responsive']['config']();
 
             // HOOK: add custom logic
-            if (isset($GLOBALS['TL_HOOKS']['alterResponsiveValues']) && \is_array($GLOBALS['TL_HOOKS']['alterResponsiveValues']))
-            {
-                foreach ($GLOBALS['TL_HOOKS']['alterResponsiveValues'] as $callback)
-                {
+            if (isset($GLOBALS['TL_HOOKS']['alterResponsiveValues']) && \is_array($GLOBALS['TL_HOOKS']['alterResponsiveValues'])) {
+                foreach ($GLOBALS['TL_HOOKS']['alterResponsiveValues'] as $callback) {
                     System::importStatic($callback[0])->{$callback[1]}($arrValues, $strMapping, $objConfig, $arrOptions);
                 }
             }
@@ -69,14 +78,14 @@ class ResponsiveFrontendService
         return $this->getResponsiveClasses($strData, 'varSpacingClasses', ['direction' => $strDirection]);
     }
 
-    public function getAllResponsiveClasses(array $arrData, array $arrFields = []): array
+    public function getAllResponsiveClasses($varData, array $arrFields = []): array
     {
         return
             array_merge(
-                $this->getColClasses($arrData[$arrFields['cols'] ?? 'responsiveCols'] ?? "", $arrData),
-                $this->getOffsetClasses($arrData[$arrFields['offsets'] ?? 'responsiveOffsets'] ?? "", $arrData),
-                $this->getOrderClasses($arrData[$arrFields['order'] ?? 'responsiveOrder'] ?? "", $arrData),
-                $this->getAlignSelfClasses($arrData[$arrFields['align-self'] ?? 'responsiveAlignSelf'] ?? "", $arrData)
+                $this->getColClasses(self::getProp($varData, $arrFields['cols'] ?? 'responsiveCols'), $varData),
+                $this->getOffsetClasses(self::getProp($varData, $arrFields['offsets'] ?? 'responsiveOffsets'), $varData),
+                $this->getOrderClasses(self::getProp($varData, $arrFields['order'] ?? 'responsiveOrder'), $varData),
+                $this->getAlignSelfClasses(self::getProp($varData, $arrFields['align-self'] ?? 'responsiveAlignSelf'), $varData)
             );
     }
 
@@ -88,13 +97,13 @@ class ResponsiveFrontendService
         return is_array($objConfig->arrContainerSizes[$strData]) ? $objConfig->arrContainerSizes[$strData] : [$objConfig->arrContainerSizes[$strData]];
     }
 
-    public function getAllContainerClasses(array $arrData, array $arrFields = []): array
+    public function getAllContainerClasses($varData, array $arrFields = []): array
     {
         return
             array_merge(
-                $this->getContainerClasses($arrData[$arrFields['containerSize'] ?? 'responsiveContainerSize'] ?? "", $arrData),
-                $this->getSpacingClasses($arrData[$arrFields['spacingTop'] ?? 'responsiveSpacingTop'] ?? "", 't', $arrData),
-                $this->getSpacingClasses($arrData[$arrFields['spacingBottom'] ?? 'responsiveSpacingBottom'] ?? "", 'b', $arrData),
+                $this->getContainerClasses(self::getProp($varData, $arrFields['containerSize'] ?? 'responsiveContainerSize'), $varData),
+                $this->getSpacingClasses(self::getProp($varData, $arrFields['spacingTop'] ?? 'responsiveSpacingTop'), 't', $varData),
+                $this->getSpacingClasses(self::getProp($varData, $arrFields['spacingBottom'] ?? 'responsiveSpacingBottom'), 'b', $varData),
             );
     }
 
@@ -123,15 +132,15 @@ class ResponsiveFrontendService
         return $this->getResponsiveClasses($strData, 'varJustifyContentClasses');
     }
 
-    public function getAllInnerContainerClasses(array $arrData, array $arrFields = []): array
+    public function getAllInnerContainerClasses($varData, array $arrFields = []): array
     {
         return
             array_merge(
-                $this->getFlexDirectionClasses($arrData[$arrFields['flexDirection'] ?? 'responsiveFlexDirection'] ?? "", $arrData),
-                $this->getFlexWrapClasses($arrData[$arrFields['flexWrap'] ?? 'responsiveFlexWrap'] ?? "", $arrData),
-                $this->getAlignItemsClasses($arrData[$arrFields['alignItems'] ?? 'responsiveAlignItems'] ?? "", $arrData),
-                $this->getAlignContentClasses($arrData[$arrFields['alignContent'] ?? 'responsiveAlignContent'] ?? "", $arrData),
-                $this->getJustifyContentClasses($arrData[$arrFields['justifyContent'] ?? 'responsiveJustifyContent'] ?? "", $arrData),
+                $this->getFlexDirectionClasses(self::getProp($varData, $arrFields['flexDirection'] ?? 'responsiveFlexDirection'), $varData),
+                $this->getFlexWrapClasses(self::getProp($varData, $arrFields['flexWrap'] ?? 'responsiveFlexWrap'), $varData),
+                $this->getAlignItemsClasses(self::getProp($varData, $arrFields['alignItems'] ?? 'responsiveAlignItems'), $varData),
+                $this->getAlignContentClasses(self::getProp($varData, $arrFields['alignContent'] ?? 'responsiveAlignContent'), $varData),
+                $this->getJustifyContentClasses(self::getProp($varData, $arrFields['justifyContent'] ?? 'responsiveJustifyContent'), $varData),
             );
     }
 }
