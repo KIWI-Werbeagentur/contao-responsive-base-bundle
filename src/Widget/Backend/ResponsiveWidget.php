@@ -108,7 +108,6 @@ class ResponsiveWidget extends Widget
             if (($strValue = Input::post("{$this->strName}{$arrBreakpoint['modifier']}")) !== "") {
                 $arrValues[$strBreakpoint] = $strValue;
             }
-            parent::validator($varInput);
         }
 
         if($this->arrErrors){
