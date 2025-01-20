@@ -80,7 +80,7 @@ class ResponsiveWidget extends Widget
                 $hasEmptyModifier = true;
             }
 
-            $arrInputs[$strBreakpoint] = sprintf("<div class='%s__item'>%s</div>", $this->strCssClass, $this->arrWidgets[$arrBreakpoint['modifier']]->parse());
+            $arrInputs[$strBreakpoint] = sprintf("<div class='%s__item'>%s</div>", $this->strCssClass, $this->parseChildWidget($strBreakpoint, $arrBreakpoint));
         }
 
         if (!$hasEmptyModifier) {
@@ -115,5 +115,10 @@ class ResponsiveWidget extends Widget
         }
 
         return serialize($arrValues);
+    }
+
+    protected function parseChildWidget(string $strBreakpoint, array $arrBreakpoint)
+    {
+        return $this->arrWidgets[$arrBreakpoint['modifier']]->parse();
     }
 }
