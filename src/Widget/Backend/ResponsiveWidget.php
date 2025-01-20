@@ -24,6 +24,7 @@ class ResponsiveWidget extends Widget
     {
         parent::__construct($arrAttributes);
 
+//if ($this->objDca->id == 237) dump($this);
         $this->arrBreakpoints = (new $GLOBALS['responsive']['config'])->arrBreakpoints;
         $this->arrDca = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField];
         $this->strLabelIcon = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$this->strField]['label']['icon'] ?? null;
@@ -32,6 +33,7 @@ class ResponsiveWidget extends Widget
         $strInputType = $this->arrDca['responsiveInputType'] ?? '';
         $strClass = $GLOBALS['BE_FFL'][$strInputType];
         $arrValues = StringUtil::deserialize($this->value);
+if ($this->objDca->id == 237) dump($this->value);
         foreach ($this->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
             $this->arrWidgets[$arrBreakpoint['modifier']] = $this->generateFormField($strClass, $strBreakpoint, $arrBreakpoint['modifier'], $arrValues, ['mandatory' => $i == 0]);
             $i++;
@@ -99,6 +101,7 @@ class ResponsiveWidget extends Widget
 
     protected function validator($varInput, $arrValues = [])
     {
+if ($this->objDca->id == 237) dump($varInput, $arrValues);
         foreach ($this->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
             $this->arrWidgets[$arrBreakpoint['modifier']]->validate(Input::post("{$this->strName}{$arrBreakpoint['modifier']}"));
             if($this->arrWidgets[$arrBreakpoint['modifier']]->arrErrors) {

@@ -18,7 +18,7 @@ class LoadDataContainerListener
 
         $i = 0;
         foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
-            if (in_array(($arrField['inputType'] ?? false), ["responsive", "optionalResponsive"])) {
+            if (in_array(($arrField['inputType'] ?? false), ["responsive", "optionalResponsive", 'responsiveSubpalette', 'optionalResponsiveSubpalette'])) {
                 $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['alwaysSave'] = true;
                 foreach ((new $GLOBALS['responsive']['config'])->arrBreakpoints as $arrBreakpoint) {
                     if($arrBreakpoint['modifier']){
@@ -27,6 +27,33 @@ class LoadDataContainerListener
                         unset($GLOBALS['TL_DCA'][$strTable]['fields'][$strField . $arrBreakpoint['modifier']]['sql']);
                     }
                 }
+            }
+            if (in_array(($arrField['inputType'] ?? false), ['responsiveSubpalette', 'optionalResponsiveSubpalette'])) {
+//                $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['alwaysSave'] = true;
+                foreach ($arrField['subpalettes'] as $fields) {
+                    foreach ($fields as $fieldName => $value) {
+                        $safeFieldName = $strField . '-' . $fieldName;
+
+                        if (is_string($value)) {
+                            foreach ((new $GLOBALS['responsive']['config'])->arrBreakpoints as $arrBreakpoint) {
+//                                if ($arrBreakpoint['modifier']) {
+                                    $GLOBALS['TL_DCA'][$strTable]['fields'][$safeFieldName . $arrBreakpoint['modifier']] = $GLOBALS['TL_DCA'][$strTable]['fields'][$value];
+                                    unset($GLOBALS['TL_DCA'][$strTable]['fields'][$safeFieldName . $arrBreakpoint['modifier']]['sql']);
+//                                }
+                            }
+                        } elseif (is_array($value)) {
+                            $GLOBALS['TL_DCA'][$strTable]['fields'][$safeFieldName] = $value;
+                            unset($arrField['subpalettes'][$safeFieldName]['sql']);
+                            foreach ((new $GLOBALS['responsive']['config'])->arrBreakpoints as $arrBreakpoint) {
+//                                if ($arrBreakpoint['modifier']) {
+                                    $GLOBALS['TL_DCA'][$strTable]['fields'][$safeFieldName . $arrBreakpoint['modifier']] = $value;
+                                    unset($arrField['subpalettes'][$safeFieldName . $arrBreakpoint['modifier']]['sql']);
+//                                }
+                            }
+                        }
+                    }
+                }
+dump($GLOBALS['TL_DCA'][$strTable]['fields']);
             }
             $i++;
         }

@@ -1,6 +1,7 @@
 <?php
 
 use Kiwi\Contao\ResponsiveBaseBundle\Controller\ContentElement\ContentModuleResponsive;
+use Kiwi\Contao\ResponsiveBaseBundle\Widget\Backend\OptionalResponsiveSubpaletteWidget;
 use Kiwi\Contao\ResponsiveBaseBundle\Widget\Backend\OptionalResponsiveWidget;
 use Kiwi\Contao\ResponsiveBaseBundle\Widget\Backend\ResponsiveWidget;
 use Contao\System;
@@ -15,6 +16,7 @@ $GLOBALS['TL_CTE']['includes']['module'] = ContentModuleResponsive::class;
 
 $GLOBALS['BE_FFL']['responsive'] = ResponsiveWidget::class;
 $GLOBALS['BE_FFL']['optionalResponsive'] = OptionalResponsiveWidget::class;
+$GLOBALS['BE_FFL']['optionalResponsiveSubpalette'] = OptionalResponsiveSubpaletteWidget::class;
 
 if (System::getContainer()->get('contao.routing.scope_matcher')
     ->isBackendRequest(System::getContainer()->get('request_stack')->getCurrentRequest() ?? Request::create(''))
