@@ -5,10 +5,18 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\EventListener;
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
+use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
 
 #[AsHook('loadDataContainer')]
 class LoadDataContainerListener
 {
+    protected ResponsiveConfigurationInterface $responsiveConfiguration;
+
+    public function __construct()
+    {
+        $this->responsiveConfiguration = new $GLOBALS['responsive']['config'];
+    }
+
     public function __invoke(string $strTable): void
     {
         //Copy DCA-entry for responsive widgets to avoid exception in Ajax requests (e.g. fileTree)
@@ -20,7 +28,7 @@ class LoadDataContainerListener
         foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
             if (in_array(($arrField['inputType'] ?? false), ["responsive", "optionalResponsive", 'responsiveSubpalette', 'optionalResponsiveSubpalette'])) {
                 $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['alwaysSave'] = true;
-                foreach ((new $GLOBALS['responsive']['config'])->arrBreakpoints as $arrBreakpoint) {
+                foreach ($this->responsiveConfiguration->arrBreakpoints as $arrBreakpoint) {
                     if($arrBreakpoint['modifier']){
                         $GLOBALS['TL_DCA'][$strTable]['fields'][$strField . $arrBreakpoint['modifier']] = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
                         if($i == 0) $GLOBALS['TL_DCA'][$strTable]['fields'][$strField . $arrBreakpoint['modifier']]['eval']['mandatory'] = true;
