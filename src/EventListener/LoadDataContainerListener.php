@@ -37,31 +37,22 @@ class LoadDataContainerListener
                 }
             }
             if (in_array(($arrField['inputType'] ?? false), ['responsiveSubpalette', 'optionalResponsiveSubpalette'])) {
-//                $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['alwaysSave'] = true;
                 foreach ($arrField['subpalettes'] as $fields) {
-                    foreach ($fields as $fieldName => $value) {
-                        $safeFieldName = $strField . '-' . $fieldName;
-
-                        if (is_string($value)) {
-                            foreach ((new $GLOBALS['responsive']['config'])->arrBreakpoints as $arrBreakpoint) {
-//                                if ($arrBreakpoint['modifier']) {
-                                    $GLOBALS['TL_DCA'][$strTable]['fields'][$safeFieldName . $arrBreakpoint['modifier']] = $GLOBALS['TL_DCA'][$strTable]['fields'][$value];
-                                    unset($GLOBALS['TL_DCA'][$strTable]['fields'][$safeFieldName . $arrBreakpoint['modifier']]['sql']);
-//                                }
-                            }
-                        } elseif (is_array($value)) {
-                            $GLOBALS['TL_DCA'][$strTable]['fields'][$safeFieldName] = $value;
-                            unset($arrField['subpalettes'][$safeFieldName]['sql']);
-                            foreach ((new $GLOBALS['responsive']['config'])->arrBreakpoints as $arrBreakpoint) {
-//                                if ($arrBreakpoint['modifier']) {
-                                    $GLOBALS['TL_DCA'][$strTable]['fields'][$safeFieldName . $arrBreakpoint['modifier']] = $value;
-                                    unset($arrField['subpalettes'][$safeFieldName . $arrBreakpoint['modifier']]['sql']);
-//                                }
+                    foreach ($fields as $baseFieldName => $value) {
+                        foreach ($this->responsiveConfiguration->arrBreakpoints as $arrBreakpoint) {
+                            $fieldName = $strField . '-' . $baseFieldName . $arrBreakpoint['modifier'];
+                            if (is_string($value)) {
+                                $GLOBALS['TL_DCA'][$strTable]['fields'][$fieldName] = $GLOBALS['TL_DCA'][$strTable]['fields'][$value];
+                                unset($GLOBALS['TL_DCA'][$strTable]['fields'][$fieldName]['sql']);
+                            } elseif (is_array($value)) {
+                                $GLOBALS['TL_DCA'][$strTable]['fields'][$fieldName] = $value;
+                                unset($arrField['subpalettes'][$fieldName]['sql']);
+                            } else {
+                                throw new \Exception('DCA error: subpalette entries of "' . $arrField['inputType'] . '" need to contain a string (referencing an existing dca field) or an array (containing a dca field configuration).');
                             }
                         }
                     }
                 }
-dump($GLOBALS['TL_DCA'][$strTable]['fields']);
             }
             $i++;
         }
