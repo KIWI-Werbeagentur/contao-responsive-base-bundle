@@ -24,14 +24,12 @@ class LoadDataContainerListener
             return;
         }
 
-        $i = 0;
         foreach ($GLOBALS['TL_DCA'][$strTable]['fields'] as $strField => $arrField) {
             if (in_array(($arrField['inputType'] ?? false), ["responsive", "optionalResponsive", 'responsiveSubpalette', 'optionalResponsiveSubpalette'])) {
                 $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['alwaysSave'] = true;
                 foreach ($this->responsiveConfiguration->arrBreakpoints as $arrBreakpoint) {
                     if($arrBreakpoint['modifier']){
                         $GLOBALS['TL_DCA'][$strTable]['fields'][$strField . $arrBreakpoint['modifier']] = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
-                        if($i == 0) $GLOBALS['TL_DCA'][$strTable]['fields'][$strField . $arrBreakpoint['modifier']]['eval']['mandatory'] = true;
                         unset($GLOBALS['TL_DCA'][$strTable]['fields'][$strField . $arrBreakpoint['modifier']]['sql']);
                     }
                 }
@@ -54,7 +52,6 @@ class LoadDataContainerListener
                     }
                 }
             }
-            $i++;
         }
 
         //add Responsiveness to DCA
