@@ -25,3 +25,8 @@ if (System::getContainer()->get('contao.routing.scope_matcher')
 ) {
     $GLOBALS['TL_CSS'][] = 'bundles/kiwiresponsivebase/responsive.css';
 }
+
+$GLOBALS['design']['modifiers'] = [
+    'delimiter' => ' ',
+    'pattern' => 'data-responsive-{{modifier}}'
+];

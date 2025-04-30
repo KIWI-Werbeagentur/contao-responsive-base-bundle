@@ -5,6 +5,9 @@ services:
   kiwi.contao.responsive.frontend:
     public: true
     class: Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService
+  kiwi.contao.designer.frontend:
+    public: true
+    class: Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveDesignerFrontendService
   Kiwi\Contao\ResponsiveBaseBundle\Controller\ResponsiveAssetsController:
     public: true
     arguments:

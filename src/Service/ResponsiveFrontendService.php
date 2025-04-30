@@ -34,7 +34,12 @@ class ResponsiveFrontendService
             }
 
             foreach ($arrValues as $strBreakpoint => $varValue) {
-                $strClass = is_array($objConfig->{$strMapping}) ? ($objConfig->{$strMapping}[$varValue] ?? '') : $objConfig->{$strMapping};
+                if($objConfig->{$strMapping}) {
+                    $strClass = is_array($objConfig->{$strMapping}) ? ($objConfig->{$strMapping}[$varValue] ?? '') : $objConfig->{$strMapping};
+                }
+                else{
+                    $strClass = $strMapping;
+                }
 
                 $strClass = str_replace(
                     ['{{modifier}}', '{{value}}'],

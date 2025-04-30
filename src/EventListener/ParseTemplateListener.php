@@ -86,7 +86,7 @@ class ParseTemplateListener
 
         $arrMain = [];
         foreach((new $GLOBALS['responsive']['config']())->arrBreakpoints as $strBreakpoint => $arrBreakpoint){
-            $arrMain[$strBreakpoint] = 12 - ($arrBreakpoints[$strBreakpoint] % 12);
+            $arrMain[$strBreakpoint] = 12 - (($arrBreakpoints[$strBreakpoint] ?? 12) % 12);
         }
 
         $objTemplate->responsiveColsMain = $responsiveFrontendService->getColClasses(serialize($arrMain));
