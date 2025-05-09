@@ -15,13 +15,13 @@
 {% endblock %}
 
 {% block container %}
-    <div id="container" class="content">
-        <div class="content__container section-container {{ responsiveContainerSize }}">
-            <div class="content__inside inside">
-                <div class="content__wrapper row">
+    <div id="container" class="contents">
+        <div class="contents__container section-container {{ responsiveContainerSize }}">
+            <div class="contents__inside inside">
+                <div class="contents__wrapper row">
 
                     {% block main %}
-                        <main id="main" class="main content__area {{ responsiveColsMain|join(' ') }}">
+                        <main id="main" class="main contents__area {{ responsiveColsMain|join(' ') }}">
                                 <div class="main__inside inside">
                                     <div class="main__wrapper row">
                                         {{ main|raw }}
@@ -33,7 +33,7 @@
 
                     {% block left %}
                         {% if left %}
-                            <aside id="left" class="left content__area {{ responsiveColsLeft|join(' ') }}">
+                            <aside id="left" class="left contents__area {{ responsiveColsLeft|join(' ') }}">
                                 <div class="left__inside inside">
                                     <div class="left__wrapper row">
                                         {{ left|raw }}
@@ -45,7 +45,7 @@
 
                     {% block right %}
                         {% if right %}
-                            <aside id="right" class="right content__area {{ responsiveColsRight|join(' ') }}">
+                            <aside id="right" class="right contents__area {{ responsiveColsRight|join(' ') }}">
                                 <div class="right__inside inside">
                                     <div class="right__wrapper row">
                                         {{ right|raw }}

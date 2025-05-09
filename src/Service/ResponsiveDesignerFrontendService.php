@@ -27,7 +27,7 @@ class ResponsiveDesignerFrontendService extends DesignerFrontendService
                 break;
             default:
                 if ($GLOBALS['responsive'] ?? false) {
-                    if($replacement = (new $GLOBALS['responsive']['config']())->arrBreakpoints[$this->strBreakpoint][$strName] ?? false) $strValue = $replacement;
+                    if(isset((new $GLOBALS['responsive']['config']())->arrBreakpoints[$this->strBreakpoint][$strName]) ?? false) $strValue = (new $GLOBALS['responsive']['config']())->arrBreakpoints[$this->strBreakpoint][$strName];
                 }
                 break;
         }
@@ -36,6 +36,7 @@ class ResponsiveDesignerFrontendService extends DesignerFrontendService
     public function getGlobalStrings($arrData, $strMapping, $strField = "")
     {
         if (!$strField) $strField = $strMapping;
+        $this->arrData = $arrData;
 
         $arrStyles = StringUtil::deserialize($arrData[$strField], true);
         $arrReturn = [];
@@ -50,6 +51,6 @@ class ResponsiveDesignerFrontendService extends DesignerFrontendService
             }
         }
 
-        return implode("",$arrReturn);
+        return implode(" ",$arrReturn);
     }
 }

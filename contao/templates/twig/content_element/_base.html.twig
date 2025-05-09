@@ -1,17 +1,16 @@
 {% extends "@Contao/content_element/_base.html.twig" %}
 
-{% set baseClass = "content-#{type|replace({'_': '-'})}" %}
 {% set attributes = attrs().addClass(getAllResponsiveClasses(data)).mergeWith(attributes|default) %}
+
+{% set inner_classes = getAllInnerContainerClasses(data)|join(" ") %}
 
 {%- block inner %}
     {% if nested_fragments %}
-        <div class="{{ baseClass }}__inside inside {{ getAllInnerContainerClasses(data)|join(" ") }}">{{ parent() }}</div>
+        <div class="content__inside inside {{ inner_classes }}">{{ parent() }}</div>
     {% else %}
         {{ parent() }}
     {% endif %}
 {% endblock -%}
-
-{% set content_attributes = content_attributes|default(attrs()).addClass("#{baseClass}__content") %}
 
 {% block content %}
     <div {{ content_attributes }}>

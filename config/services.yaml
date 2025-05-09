@@ -17,6 +17,7 @@ services:
   Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfigListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\LoadDataContainerListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\ParseTemplateListener: ~
+  Kiwi\Contao\ResponsiveBaseBundle\EventListener\AlterSchemesScss: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\ParseWidgetListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetAllEventsListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\GeneratePageListener: ~

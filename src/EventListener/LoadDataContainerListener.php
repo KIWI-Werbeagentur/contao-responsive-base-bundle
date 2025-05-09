@@ -28,7 +28,7 @@ class LoadDataContainerListener
             if (in_array(($arrField['inputType'] ?? false), ["responsive", "optionalResponsive", 'responsiveSubpalette', 'optionalResponsiveSubpalette'])) {
                 $GLOBALS['TL_DCA'][$strTable]['fields'][$strField]['eval']['alwaysSave'] = true;
                 foreach ($this->responsiveConfiguration->arrBreakpoints as $arrBreakpoint) {
-                    if($arrBreakpoint['modifier']){
+                    if ($arrBreakpoint['modifier']) {
                         $GLOBALS['TL_DCA'][$strTable]['fields'][$strField . $arrBreakpoint['modifier']] = $GLOBALS['TL_DCA'][$strTable]['fields'][$strField];
                         unset($GLOBALS['TL_DCA'][$strTable]['fields'][$strField . $arrBreakpoint['modifier']]['sql']);
                     }
@@ -62,33 +62,33 @@ class LoadDataContainerListener
                 ->applyToAllPalettes('tl_content', $GLOBALS['responsive']['tl_content']['excludePalettes']['column'] ?? []);
 
             PaletteManipulatorExtended::create()
-                ->addLegend('layout_legend',['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
-                ->addField(['responsiveContainer','responsiveOrder','responsiveAlignSelf'], 'layout_legend', PaletteManipulator::POSITION_APPEND)
-                ->addLegend('items_legend',['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
-                ->addField(array_merge(['responsiveColsItems'],array_keys($GLOBALS['TL_DCA']['container']['fields'] ?? [])), 'items_legend', PaletteManipulator::POSITION_APPEND)
-                ->applyToPalette('element_group', 'tl_content');
+                ->addLegend('layout_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
+                ->addField(['responsiveContainer', 'responsiveOrder', 'responsiveAlignSelf'], 'layout_legend', PaletteManipulator::POSITION_APPEND)
+                ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
+                ->addField(array_merge(['responsiveColsItems'], array_keys($GLOBALS['TL_DCA']['container']['fields'] ?? [])), 'items_legend', PaletteManipulator::POSITION_APPEND)
+                ->applyToPalettes($GLOBALS['responsive']['tl_content']['includePalettes']['container'], 'tl_content');
         }
         if ($strTable == 'tl_form_field') {
             PaletteManipulatorExtended::create()
-                ->addLegend('layout_legend', ['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
+                ->addLegend('layout_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                 ->addField('responsiveCols,responsiveOffsets,responsiveOrder,responsiveAlignSelf', 'layout_legend', PaletteManipulator::POSITION_APPEND)
                 ->applyToAllPalettes('tl_form_field', $GLOBALS['responsive']['tl_form_field']['excludePalettes']['column'] ?? []);
 
             PaletteManipulatorExtended::create()
-                ->addLegend('layout_legend',['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
-                ->addField(['responsiveContainer','responsiveOrder','responsiveAlignSelf'], 'layout_legend', PaletteManipulator::POSITION_APPEND)
-                ->addLegend('items_legend',['protected_legend','expert_legend'],PaletteManipulator::POSITION_BEFORE)
+                ->addLegend('layout_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
+                ->addField(['responsiveContainer', 'responsiveOrder', 'responsiveAlignSelf'], 'layout_legend', PaletteManipulator::POSITION_APPEND)
+                ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                 ->addField(array_keys($GLOBALS['TL_DCA']['container']['fields'] ?? []), 'items_legend', PaletteManipulator::POSITION_APPEND)
                 ->applyToPalette('fieldsetStart', 'tl_form_field');
         }
-        if($strTable == 'tl_module'){
+        if ($strTable == 'tl_module') {
             PaletteManipulatorExtended::create()
-                ->addLegend('layout_legend', ['protected_legend','expert_legend'], PaletteManipulator::POSITION_BEFORE)
+                ->addLegend('layout_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                 ->addField(['addResponsive'], 'layout_legend', PaletteManipulator::POSITION_APPEND)
                 ->applyToAllPalettes('tl_module', $GLOBALS['responsive']['tl_module']['excludePalettes']['column'] ?? []);
 
             PaletteManipulatorExtended::create()
-                ->addLegend('items_legend', ['protected_legend','expert_legend'], PaletteManipulator::POSITION_BEFORE)
+                ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                 ->addField(['addResponsiveChildren'], 'items_legend', PaletteManipulator::POSITION_APPEND)
                 ->applyToPalettes(array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []), 'tl_module');
         }

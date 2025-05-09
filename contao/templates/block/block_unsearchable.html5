@@ -3,7 +3,7 @@
 <div class="<?= $this->class ?> block"<?= $this->cssID ?><?php if ($this->style): ?> style="<?= $this->style ?>"<?php endif; ?>>
 
   <?php $this->block('headline'); ?>
-    <?php if ($this->headline): ?>
+    <?php if ($this->headline && is_string($this->headline)): ?>
       <<?= $this->hl ?>><?= $this->headline ?></<?= $this->hl ?>>
     <?php endif; ?>
   <?php $this->endblock(); ?>

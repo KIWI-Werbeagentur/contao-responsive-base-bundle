@@ -7,6 +7,11 @@ use Contao\System;
 
 class ResponsiveFrontendService
 {
+    public static function propExists($varTarget, $strProp)
+    {
+        return (is_array($varTarget) && array_key_exists($strProp, $varTarget)) || (is_object($varTarget) && property_exists($varTarget, $strProp));
+    }
+
     public static function getProp($varTarget, $strProp)
     {
         if (is_array($varTarget)) {
@@ -34,10 +39,9 @@ class ResponsiveFrontendService
             }
 
             foreach ($arrValues as $strBreakpoint => $varValue) {
-                if($objConfig->{$strMapping}) {
+                if ($objConfig->{$strMapping}) {
                     $strClass = is_array($objConfig->{$strMapping}) ? ($objConfig->{$strMapping}[$varValue] ?? '') : $objConfig->{$strMapping};
-                }
-                else{
+                } else {
                     $strClass = $strMapping;
                 }
 

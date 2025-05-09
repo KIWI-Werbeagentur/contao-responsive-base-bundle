@@ -1,0 +1,10 @@
+
+@each $scheme in map-keys($schemes) {
+{% for identifier, breakpoint in breakpoints %}
+    @media(min-width:{{ breakpoint.breakpoint }}px) {
+      [data-scheme{{ breakpoint.modifier }}="#{$scheme}"] {
+        @include scheme($scheme);
+      }
+    }
+{% endfor %}
+}

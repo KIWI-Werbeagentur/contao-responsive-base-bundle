@@ -17,38 +17,43 @@ class ParseTemplateListener
             self::wrapListItems($objTemplate);
         }
 
-        if(str_starts_with($objTemplate->getName(), 'fe_page')){
+        if (str_starts_with($objTemplate->getName(), 'fe_page')) {
             self::setLayoutSizes($objTemplate);
         }
     }
 
-    public static function wrapListItems(&$objTemplate):void
+    public static function wrapListItems(&$objTemplate, $objModel = null): void
     {
         Controller::loadDataContainer('responsive');
 
-        $objTargetWithClasses = ($objTemplate->cte ?? false) && $objTemplate->cte->addResponsiveChildren ? $objTemplate->cte : $objTemplate;
+        if(!$objModel){
+            $objModel = $objTemplate;
+        }
+
+        $objTargetWithClasses = ($objModel->cte ?? false) && $objModel->cte->addResponsiveChildren ? $objModel->cte : $objModel;
+
         if (!$objTargetWithClasses->addResponsiveChildren || !$objTargetWithClasses->responsiveColsItems) return;
 
         //Checks if DCA-Palette has Settings for children (usually used for lists)
-        if (!in_array($objTemplate->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']))) return;
+        if (!in_array($objModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']))) return;
 
         $strColumnClasses = implode(" ", System::getContainer()->get('kiwi.contao.responsive.frontend')->getColClasses($objTargetWithClasses->responsiveColsItems));
-        $varChildren = ($objTemplate->{$GLOBALS['responsive']['tl_module']['includePalettes']['container'][$objTemplate->type]});
+        $varChildren = ($objTemplate->{$GLOBALS['responsive']['tl_module']['includePalettes']['container'][$objModel->type]});
 
-        if (is_array($varChildren) && $objTemplate->isResponsive) {
+        if (is_array($varChildren) && $objModel->isResponsive) {
             foreach ($varChildren as &$varChild) {
                 $varChild = System::getContainer()->get('twig')->render('@KiwiResponsiveBase/list_child.html.twig', [
-                    'baseClass' => $objTemplate->baseClass,
+                    'baseClass' => $objModel->baseClass,
                     'class' => $strColumnClasses,
                     'item' => $varChild
                 ]);
             }
         }
 
-        $objTemplate->{$GLOBALS['responsive']['tl_module']['includePalettes']['container'][$objTemplate->type]} = $varChildren;
+        $objTemplate->{$GLOBALS['responsive']['tl_module']['includePalettes']['container'][$objModel->type]} = $varChildren;
     }
 
-    public static function mapSidebars(&$objTemplate):array
+    public static function mapSidebars(&$objTemplate): array
     {
         $sidebars = [];
         if ($objTemplate->layout->cols == '3cl') {
@@ -62,7 +67,7 @@ class ParseTemplateListener
         return $sidebars;
     }
 
-    public static function setLayoutSizes(&$objTemplate):void
+    public static function setLayoutSizes(&$objTemplate): void
     {
         $responsiveFrontendService = System::getContainer()->get('kiwi.contao.responsive.frontend');
 
@@ -70,13 +75,16 @@ class ParseTemplateListener
         $arrBreakpoints = [];
         $objTemplate->responsiveColsLeft = [];
 
+        if (!self::mapSidebars($objTemplate)) {
+            $objTemplate->layout->responsiveContainerSize = "";
+        }
         foreach (self::mapSidebars($objTemplate) as $sidebar) {
             $arrBreakpointSetting = StringUtil::deserialize($objTemplate->layout->{'responsiveCols' . $sidebar});
             $objTemplate->{'responsiveCols' . $sidebar} = $responsiveFrontendService->getColClasses($objTemplate->layout->{'responsiveCols' . $sidebar});
 
             $prevVal = 0;
-            foreach((new $GLOBALS['responsive']['config']())->arrBreakpoints as $strBreakpoint => $arrBreakpoint){
-                if($arrBreakpointSetting[$strBreakpoint] ?? false) $prevVal = $arrBreakpointSetting[$strBreakpoint];
+            foreach ((new $GLOBALS['responsive']['config']())->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
+                if ($arrBreakpointSetting[$strBreakpoint] ?? false) $prevVal = $arrBreakpointSetting[$strBreakpoint];
                 $arrBreakpoints[$strBreakpoint] = ($arrBreakpoints[$strBreakpoint] ?? 0) + ($arrBreakpointSetting[$strBreakpoint] ?? $prevVal);
             }
         }
@@ -85,7 +93,7 @@ class ParseTemplateListener
 
 
         $arrMain = [];
-        foreach((new $GLOBALS['responsive']['config']())->arrBreakpoints as $strBreakpoint => $arrBreakpoint){
+        foreach ((new $GLOBALS['responsive']['config']())->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
             $arrMain[$strBreakpoint] = 12 - (($arrBreakpoints[$strBreakpoint] ?? 12) % 12);
         }
 
