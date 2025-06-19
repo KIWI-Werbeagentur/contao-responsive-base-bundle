@@ -1,6 +1,6 @@
 {% extends "@Contao/mod_article.html5" %}
 
-{% set class = class ~ " " ~ getAllContainerClasses(_context)|join(" ") %}
+{% set container_classes = getAllContainerClasses(_context)|join(" ") %}
 {% set inner_classes =
     [
         responsiveContainerSize ? "row",
@@ -9,7 +9,9 @@
 %}
 
 {% block content %}
-    <div class="mod_article__inside inside {{ inner_classes|join(" ") }}">
-        {{ parent() }}
+    <div class="mod_article__wrapper wrapper {{ container_classes }}">
+        <div class="mod_article__inside inside {{ inner_classes|join(" ") }}">
+            {{ parent() }}
+        </div>
     </div>
 {% endblock %}
