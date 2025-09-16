@@ -1,8 +1,9 @@
 {
     "name": "kiwi/contao-responsive-base",
     "type": "contao-bundle",
-    "description": "This contao-bundle enables you to place contents within a self configured responsive grid system.",
-    "license": "proprietary",
+    "keywords": ["contao", "grid", "responsive"],
+    "description": "This bundle enables you to place contents within a self configured responsive grid system within Contao CMS.",
+    "license": "LGPL-3.0-or-later",
     "authors": [
         {
             "name": "Katrin Zimmermann",
@@ -16,7 +17,7 @@
     "require": {
         "php": "^8.4",
         "contao/core-bundle": "~5.3.13",
-        "kiwi/contao-cmx": "^0.1"
+        "kiwi/contao-cmx": "^1.0"
     },
     "conflict": {
         "contao/manager-plugin": "<2.0 || >=3.0"
