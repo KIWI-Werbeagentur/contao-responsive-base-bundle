@@ -19,6 +19,9 @@
         "contao/core-bundle": "~5.3.13",
         "kiwi/contao-cmx": "^1.0"
     },
+    "require-dev": {
+        "contao/manager-plugin": "^2.0"
+    },
     "suggest": {
         "kiwi/contao-bootstrap": "Use this base bundle with Bootstrap as the responsive CSS framework",
         "kiwi/contao-blueprints": "Simplifies content creation with responsive settings for editors",
