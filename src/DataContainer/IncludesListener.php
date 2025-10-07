@@ -5,6 +5,7 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\DataContainer;
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
+use Contao\Input;
 use Contao\System;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 
@@ -13,6 +14,9 @@ class IncludesListener
     #[AsCallback(table: 'tl_content', target: 'config.onload')]
     public function addResponsiveChildrenSettings(DataContainer $objDca): void
     {
+        //Bug: Loads content with article-id when opening content-overview of article --> leads to permission errors
+        if(Input::get("do") == 'article' && Input::get("table") == 'tl_content' && !Input::get("act") == 'edit') return;
+
         $strType = $objDca->getCurrentRecord()['type'] ?? '';
         $strTargetClass = $GLOBALS['TL_MODELS']["tl_$strType"] ?? null;
         if (!$strTargetClass) return;
