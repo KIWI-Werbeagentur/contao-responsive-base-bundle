@@ -5,7 +5,7 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\Controller;
 use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\System;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Twig\Environment;
 
 class ResponsiveAssetsController
