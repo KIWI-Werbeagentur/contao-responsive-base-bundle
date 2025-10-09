@@ -8,6 +8,7 @@ services:
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveDesignerFrontendService:
     public: true
     decorates: kiwi.contao.designer.frontend
+    decoration_on_invalid: ignore
   Kiwi\Contao\ResponsiveBaseBundle\Controller\ResponsiveAssetsController:
     public: true
     arguments:
