@@ -28,7 +28,8 @@
         "kiwi/contao-designer": "Manage CSS framework design settings via klickibunti in the CMS"
     },
     "conflict": {
-        "contao/manager-plugin": "<2.0 || >=3.0"
+        "contao/manager-plugin": "<2.0 || >=3.0",
+        "kiwi/contao-bootstrap": "<1.0.6"
     },
     "autoload": {
         "psr-4" : {

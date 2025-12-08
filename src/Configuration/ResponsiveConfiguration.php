@@ -199,9 +199,13 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
     #[AsCallback(table: 'tl_form_field', target: 'config.onload')]
     public function getDefaults(DataContainer $objDca): void
     {
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefault ?? '';
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveHeaderContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefault ?? '';
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveFooterContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefault ?? '';
+        if ('tl_layout' === $objDca->table) {
+            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefaultLayout ?? '';
+        } else {
+            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefault ?? '';
+        }
+        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveHeaderContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefaultLayout ?? '';
+        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveFooterContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefaultLayout ?? '';
 
         $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveCols']['default'] = (new $GLOBALS['responsive']['config'])->arrColsDefaults;
         $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOffsets']['default'] = (new $GLOBALS['responsive']['config'])->arrOffsetsDefaults;
