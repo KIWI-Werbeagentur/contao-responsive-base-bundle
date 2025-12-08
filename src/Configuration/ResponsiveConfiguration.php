@@ -204,8 +204,8 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
         } else {
             $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefault ?? '';
         }
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveHeaderContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefaultLayout ?? '';
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveFooterContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefaultLayout ?? '';
+        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveContainerSizeHeader']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefaultLayout ?? '';
+        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveContainerSizeFooter']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefaultLayout ?? '';
 
         $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveCols']['default'] = (new $GLOBALS['responsive']['config'])->arrColsDefaults;
         $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOffsets']['default'] = (new $GLOBALS['responsive']['config'])->arrOffsetsDefaults;
@@ -214,8 +214,8 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
         $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOrder']['default'] = ((new $GLOBALS['responsive']['config'])->arrOrderDefaults) ?? null;
     }
 
-    #[AsCallback(table: 'tl_layout', target: 'fields.responsiveHeaderContainerSize.options')]
-    #[AsCallback(table: 'tl_layout', target: 'fields.responsiveFooterContainerSize.options')]
+    #[AsCallback(table: 'tl_layout', target: 'fields.responsiveContainerSizeHeader.options')]
+    #[AsCallback(table: 'tl_layout', target: 'fields.responsiveContainerSizeFooter.options')]
     #[AsCallback(table: 'tl_article', target: 'fields.responsiveContainerSize.options')]
     #[AsCallback(table: 'tl_content', target: 'fields.responsiveContainer.options')]
     public function getContainerSizes(): array
