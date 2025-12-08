@@ -38,14 +38,9 @@ unset($GLOBALS['TL_DCA']['tl_layout']['fields']['responsiveColsLeft']['label']);
 $GLOBALS['TL_DCA']['tl_layout']['fields']['responsiveColsRight'] = $GLOBALS['TL_DCA']['column']['fields']['responsiveCols'];
 unset($GLOBALS['TL_DCA']['tl_layout']['fields']['responsiveColsRight']['label']);
 
-$GLOBALS['TL_DCA']['tl_layout']['subpalettes']['cols_2cll'] = 'responsiveColsLeft';
-$GLOBALS['TL_DCA']['tl_layout']['subpalettes']['cols_2clr'] = 'responsiveColsRight';
-$GLOBALS['TL_DCA']['tl_layout']['subpalettes']['cols_3cl'] = $GLOBALS['TL_DCA']['tl_layout']['subpalettes']['cols_2cll'] . ',' . $GLOBALS['TL_DCA']['tl_layout']['subpalettes']['cols_2clr'];
-
-PaletteManipulator::create()
-    ->addField('responsiveContainerSize', null, PaletteManipulator::POSITION_PREPEND)
-    ->applyToSubpalette('cols_2cll', 'tl_layout')
-    ->applyToSubpalette('cols_2clr', 'tl_layout')
-    ->applyToSubpalette('cols_3cl', 'tl_layout');
+$GLOBALS['TL_DCA']['tl_layout']['subpalettes']['cols_1cl'] = 'responsiveContainerSize';
+$GLOBALS['TL_DCA']['tl_layout']['subpalettes']['cols_2cll'] = 'responsiveContainerSize,responsiveColsLeft';
+$GLOBALS['TL_DCA']['tl_layout']['subpalettes']['cols_2clr'] = 'responsiveContainerSize,responsiveColsRight';
+$GLOBALS['TL_DCA']['tl_layout']['subpalettes']['cols_3cl'] = 'responsiveContainerSize,responsiveColsLeft,responsiveColsRight';
 
 $GLOBALS['TL_DCA']['tl_layout']['fields']['cols']['default'] = '1cl';

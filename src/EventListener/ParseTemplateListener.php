@@ -75,9 +75,6 @@ class ParseTemplateListener
         $arrBreakpoints = [];
         $objTemplate->responsiveColsLeft = [];
 
-        if (!self::mapSidebars($objTemplate)) {
-            $objTemplate->layout->responsiveContainerSize = "";
-        }
         foreach (self::mapSidebars($objTemplate) as $sidebar) {
             $arrBreakpointSetting = StringUtil::deserialize($objTemplate->layout->{'responsiveCols' . $sidebar});
             $objTemplate->{'responsiveCols' . $sidebar} = $responsiveFrontendService->getColClasses($objTemplate->layout->{'responsiveCols' . $sidebar});
