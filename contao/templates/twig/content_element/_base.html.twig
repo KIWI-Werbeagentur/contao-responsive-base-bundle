@@ -1,7 +1,7 @@
 {% extends "@Contao/content_element/_base.html.twig" %}
 
 {% set attributes = attrs().addClass(getAllResponsiveClasses(data)).mergeWith(attributes|default) %}
-{% set attributes = attrs().addClass(getContainerClasses(data.responsiveContainer)).mergeWith(attributes|default) %}
+{% set attributes = data ? attrs().addClass(getContainerClasses(data.responsiveContainer)).mergeWith(attributes|default) %}
 
 {% set inner_classes = getAllInnerContainerClasses(data)|join(" ") %}
 

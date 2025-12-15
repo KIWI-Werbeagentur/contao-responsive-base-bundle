@@ -126,7 +126,7 @@ $GLOBALS['TL_LANG']['responsive']['responsiveSpacingTop'] = [
 ];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveSpacingBottom'] = [
-    0 => "Abstand nach untent",
+    0 => "Abstand nach unten",
 ];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveContainerSize'] = [
