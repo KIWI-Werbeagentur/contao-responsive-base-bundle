@@ -63,9 +63,9 @@ $GLOBALS['TL_LANG']['responsive']['flexContent']['normal'] = "Normal";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['flex-start'] = "Start";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['center']="Center";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['flex-end'] = "End";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-between'] = "Space Between";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-around'] = "Space Around";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-evenly'] = "Space Evenly";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['between'] = "Space Between";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['around'] = "Space Around";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['evenly'] = "Space Evenly";
 
 $GLOBALS['TL_LANG']['responsive']['spacings']['default'][0] = "Default";
 $GLOBALS['TL_LANG']['responsive']['spacings']['none'][0] = "None";

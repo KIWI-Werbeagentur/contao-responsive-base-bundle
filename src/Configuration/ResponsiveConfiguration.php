@@ -56,9 +56,9 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
             'start' => 'start',
             'center' => 'center',
             'end' => 'end',
-            'space-between' => 'space-between',
-            'space-around' => 'space-around',
-            'space-evenly' => 'space-evenly'
+            'between' => 'between',
+            'around' => 'around',
+            'evenly' => 'evenly'
         ];
 
         $this->arrAlignmentItems = [
@@ -101,9 +101,9 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
                     'start' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-start.svg",
                     'center' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-center.svg",
                     'end' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-end.svg",
-                    'space-around' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-around.svg",
-                    'space-evenly' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-evenly.svg",
-                    'space-between' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-between.svg",
+                    'around' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-around.svg",
+                    'evenly' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-evenly.svg",
+                    'between' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-between.svg",
                 ],
 
             'justifyContent' =>
@@ -112,9 +112,9 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
                     'start' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-start.svg",
                     'center' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-center.svg",
                     'end' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-end.svg",
-                    'space-around' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-around.svg",
-                    'space-evenly' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-evenly.svg",
-                    'space-between' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-between.svg",
+                    'around' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-around.svg",
+                    'evenly' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-evenly.svg",
+                    'between' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-between.svg",
                 ],
 
             'flexWrap' =>

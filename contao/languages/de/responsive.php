@@ -26,9 +26,9 @@ $GLOBALS['TL_LANG']['responsive']['flexContent']['normal'] = "Standard [normal]"
 $GLOBALS['TL_LANG']['responsive']['flexContent']['start'] = "Anfang [start]";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['end'] = "Ende [end]";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['center']="Mitte [center]";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-between'] = "Verteilt [space-between]";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-around'] = "Verteilt mit halben Platz nach außen [space-around]";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-evenly'] = "Verteilt mit Platz nach außen [space-evenly]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['between'] = "Verteilt [space-between]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['around'] = "Verteilt mit halben Platz nach außen [space-around]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['evenly'] = "Verteilt mit Platz nach außen [space-evenly]";
 
 $GLOBALS['TL_LANG']['responsive']['addResponsive'] = [
     0 => "Responsive Breite festlegen",
