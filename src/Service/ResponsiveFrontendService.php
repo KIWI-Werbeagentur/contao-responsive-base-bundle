@@ -87,6 +87,11 @@ class ResponsiveFrontendService
         return $this->getResponsiveClasses($strData, 'varSpacingClasses', ['direction' => $strDirection]);
     }
 
+    public function getRowClass(): string
+    {
+        return (new $GLOBALS['responsive']['config']())->strRow ?? '';
+    }
+
     public function getAllResponsiveClasses($varData, array $arrFields = []): array
     {
         return

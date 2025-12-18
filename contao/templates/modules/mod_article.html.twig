@@ -3,7 +3,7 @@
 {% set container_classes = getAllContainerClasses(_context)|join(" ") %}
 {% set inner_classes =
     [
-        responsiveContainerSize ? "row",
+        responsiveContainerSize ? getRowClass(),
         getAllInnerContainerClasses(_context)|join(" ")
     ]
 %}

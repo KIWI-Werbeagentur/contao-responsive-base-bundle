@@ -15,6 +15,7 @@ class ResponsiveExtension extends AbstractExtension
         return [
             new TwigFunction('getAllResponsiveClasses', [$this->responsiveFrontendService, 'getAllResponsiveClasses']),
             new TwigFunction('getColClasses', [$this->responsiveFrontendService, 'getColClasses']),
+            new TwigFunction('getRowClass', [$this->responsiveFrontendService, 'getRowClass']),
             new TwigFunction('getOffsetClasses', fn($strData) => $this->responsiveFrontendService->getResponsiveClasses($strData, 'arrOffsets')),
             new TwigFunction('getResponsiveClasses', [$this->responsiveFrontendService, 'getResponsiveClasses']),
             new TwigFunction('getContainerClasses', [$this->responsiveFrontendService, 'getContainerClasses']),

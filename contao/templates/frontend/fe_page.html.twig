@@ -5,7 +5,7 @@
         <header id="header" class="header">
             <div class="header__container section-container {{ responsiveContainerSizeHeader }}">
                 <div class="header__inside inside">
-                    <div class="header__wrapper row">
+                    <div class="header__wrapper {{ getRowClass() }}">
                         {{ header|raw }}
                     </div>
                 </div>
@@ -18,12 +18,12 @@
     <div id="container" class="contents">
         <div class="contents__container section-container {{ responsiveContainerSize }}">
             <div class="contents__inside inside">
-                <div class="contents__wrapper row">
+                <div class="contents__wrapper {{ getRowClass() }}">
 
                     {% block main %}
                         <main id="main" class="main contents__area {{ responsiveColsMain|join(' ') }}">
                                 <div class="main__inside inside">
-                                    <div class="main__wrapper row">
+                                    <div class="main__wrapper {{ getRowClass() }}">
                                         {{ main|raw }}
                                     </div>
                                 </div>
@@ -35,7 +35,7 @@
                         {% if left %}
                             <aside id="left" class="left contents__area {{ responsiveColsLeft|join(' ') }}">
                                 <div class="left__inside inside">
-                                    <div class="left__wrapper row">
+                                    <div class="left__wrapper {{ getRowClass() }}">
                                         {{ left|raw }}
                                     </div>
                                 </div>
@@ -47,7 +47,7 @@
                         {% if right %}
                             <aside id="right" class="right contents__area {{ responsiveColsRight|join(' ') }}">
                                 <div class="right__inside inside">
-                                    <div class="right__wrapper row">
+                                    <div class="right__wrapper {{ getRowClass() }}">
                                         {{ right|raw }}
                                     </div>
                                 </div>
@@ -66,7 +66,7 @@
         <footer id="footer" class="footer">
             <div class="footer__container section-container {{ responsiveContainerSizeFooter }}">
                 <div class="footer__inside inside">
-                    <div class="footer__wrapper row">
+                    <div class="footer__wrapper {{ getRowClass() }}">
                         {{ footer|raw }}
                     </div>
                 </div>
