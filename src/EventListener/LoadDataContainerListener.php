@@ -5,16 +5,16 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\EventListener;
 use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
-use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
+use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
 
 #[AsHook('loadDataContainer')]
 class LoadDataContainerListener
 {
-    protected ResponsiveConfigurationInterface $responsiveConfiguration;
+    protected ResponsiveConfiguration $responsiveConfiguration;
 
     public function __construct()
     {
-        $this->responsiveConfiguration = new $GLOBALS['responsive']['config'];
+        $this->responsiveConfiguration = new $GLOBALS['responsive']['config']();
     }
 
     public function __invoke(string $strTable): void
