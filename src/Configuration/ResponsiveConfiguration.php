@@ -6,35 +6,21 @@ use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
 use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
 
-abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterface
+abstract class ResponsiveConfiguration
 {
-    public array|string $varColClasses {
-        get => $this->arrCols;
-    }
+    protected array|string $varColClasses = [];
 
-    public array|string $varOffsetClasses {
-        get => $this->arrOffsets;
-    }
+    protected array|string $varOffsetClasses = [];
 
-    public array|string $varAlignItemsClasses {
-        get => $this->arrAlignmentItems;
-    }
+    protected array|string $varAlignItemsClasses = [];
 
-    public array|string $varAlignSelfClasses {
-        get => $this->arrAlignmentItems;
-    }
+    protected array|string $varAlignSelfClasses = [];
 
-    public array|string $varAlignContentClasses {
-        get => $this->arrAlignmentContent;
-    }
+    protected array|string $varAlignContentClasses = [];
 
-    public array|string $varJustifyContentClasses {
-        get => $this->arrAlignmentContent;
-    }
+    protected array|string $varJustifyContentClasses = [];
 
-    public array|string $varSpacingClasses {
-        get => $this->arrSpacings;
-    }
+    protected array|string $varSpacingClasses = [];
 
     protected $arrAlignmentItems;
 
@@ -130,6 +116,14 @@ abstract class ResponsiveConfiguration implements ResponsiveConfigurationInterfa
 
     public function __get(string $name)
     {
+        return match ($name) {
+            'varColClasses' => $this->arrCols,
+            'varOffsetClasses' => $this->arrOffsets,
+            'varAlignItemsClasses', 'varAlignSelfClasses' => $this->arrAlignmentItems,
+            'varAlignContentClasses', 'varJustifyContentClasses' => $this->arrAlignmentContent,
+            'varSpacingClasses' => $this->arrSpacings,
+            default => $this->{$name},
+        };
     }
 
     public function getBreakpoints(): array
