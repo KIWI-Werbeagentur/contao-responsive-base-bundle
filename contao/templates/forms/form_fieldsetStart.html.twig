@@ -5,6 +5,6 @@
 
 <fieldset class="fieldset formbody__area {{ cleanClasses }} {{ getAllResponsiveClasses(arrConfiguration)|join(' ') }}"{% if cffAttr %} data-cff-condition="{{ cffAttr }}"{% endif %}>
     <div class="fieldset__inside {{ getAllInnerContainerClasses(arrConfiguration)|join(' ') }}">
-        {% if label ?? false %}
-            <legend>{{ label }}</legend>
+        {% if this.label ?? false %}
+            <legend>{{ this.label|default(label|default('')) }}</legend>
         {% endif %}
