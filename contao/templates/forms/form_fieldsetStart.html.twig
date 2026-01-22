@@ -1,26 +1,10 @@
-{% set widgetClass = this.class|default('') %}
-{% set injectedAttrs = '' %}
+{% set raw = this.class|default(class|default('')) %}
+{% set parts = raw|split('data-cff-condition="', 2) %}
+{% set cffAttr = (parts|length > 1) ? parts[1]|split('"', 2)[0] : '' %}
+{% set cleanClasses = parts[0]|replace({'"': ''})|trim %}
 
-{% if widgetClass starts with '"' %}
-    {% set injected = widgetClass|slice(1) %}
-
-    {# we have to manipulate the class="-string since CFF appends the conditions to it #}
-    {# Split at '">': (left side: data-cff-condition="...") #}
-    {% set parts = injected|split('">', 2) %}
-    {% set injectedAttrs = parts[0] %}
-
-    {# attribute fragment has to ends with a closing quote #}
-    {% if injectedAttrs and not (injectedAttrs ends with '"') %}
-            {% set injectedAttrs = injectedAttrs ~ '"' %}
-    {% endif %}
-
-    {# kill injected part from class list #}
-    {% set widgetClass = '' %}
-{% endif %}
-
-<fieldset class="fieldset formbody__area {{ widgetClass }} {{ getAllResponsiveClasses(arrConfiguration)|join(' ') }}" {{ injectedAttrs|raw }}>
+<fieldset class="fieldset formbody__area {{ cleanClasses }} {{ getAllResponsiveClasses(arrConfiguration)|join(' ') }}"{% if cffAttr %} data-cff-condition="{{ cffAttr }}"{% endif %}>
     <div class="fieldset__inside {{ getAllInnerContainerClasses(arrConfiguration)|join(' ') }}">
-        {% set legend = this.label|default(label|default('')) %}
-        {% if legend %}
-                <legend>{{ legend }}</legend>
+        {% if label ?? false %}
+            <legend>{{ label }}</legend>
         {% endif %}
