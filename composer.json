@@ -16,7 +16,7 @@
     "require": {
         "php": "^8.4",
         "contao/core-bundle": "~5.3.13 || ~5.7.0",
-        "kiwi/contao-cmx": "^0.1"
+        "kiwi/contao-cmx": "^0.2"
     },
     "conflict": {
         "contao/manager-plugin": "<2.0 || >=3.0"
