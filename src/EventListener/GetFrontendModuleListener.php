@@ -41,11 +41,11 @@ class GetFrontendModuleListener
             //Responsive Children Settings
             $isField = PaletteManipulatorExtended::create()->hasField($objModuleModel->type, 'tl_module', 'addResponsiveChildren');
             $objTargetWithClasses = $objTargetWithClasses->addResponsiveChildren ? $objTargetWithClasses : $objModuleModel;
+            $hasResponsiveChildren = in_array($objModuleModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']));
 
-            if (!($objTargetWithClasses->addResponsiveChildren === 0) && $isField) {
+            if (!($objTargetWithClasses->addResponsiveChildren === 0) && ($isField || $hasResponsiveChildren)) {
                 $shallReparse = true;
                 $arrInnerClasses = $this->responsiveFrontendService->getAllInnerContainerClasses($objTargetWithClasses->row());
-                $hasResponsiveChildren = in_array($objModuleModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']));
 
                 $objModule->Template->hasResponsiveChildren = $hasResponsiveChildren;
                 $objModule->Template->innerClass = $arrInnerClasses;
