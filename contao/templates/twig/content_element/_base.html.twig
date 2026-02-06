@@ -1,9 +1,9 @@
 {% extends "@Contao/content_element/_base.html.twig" %}
 
-{% set attributes = attributes|default(attrs()).addClass(getAllResponsiveClasses(data)).mergeWith(attributes|default) %}
-{% set attributes = data ? attributes|default(attrs()).addClass(getContainerClasses(data.responsiveContainer)).mergeWith(attributes|default) %}
+{% set attributes = attributes|default(attrs()).addClass(getAllResponsiveClasses(data|default)).mergeWith(attributes|default) %}
+{% set attributes = data|default ? attributes|default(attrs()).addClass(getContainerClasses(data.responsiveContainer|default)).mergeWith(attributes|default) %}
 
-{% set inner_classes = getAllInnerContainerClasses(data)|join(" ") %}
+{% set inner_classes = getAllInnerContainerClasses(data|default)|join(" ") %}
 
 {%- block inner %}
     {% if nested_fragments %}

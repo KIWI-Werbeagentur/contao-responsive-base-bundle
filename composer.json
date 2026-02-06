@@ -38,5 +38,8 @@
     },
     "extra":{
         "contao-manager-plugin": "Kiwi\\Contao\\ResponsiveBaseBundle\\ContaoManager\\Plugin"
+    },
+    "branch-alias": {
+        "dev-fix-cff-fieldset": "1.0.x-dev"
     }
 }
