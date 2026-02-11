@@ -82,16 +82,27 @@ class ParseTemplateListener
             $prevVal = 0;
             foreach ((new $GLOBALS['responsive']['config']())->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
                 if ($arrBreakpointSetting[$strBreakpoint] ?? false) $prevVal = $arrBreakpointSetting[$strBreakpoint];
-                $arrBreakpoints[$strBreakpoint] = ($arrBreakpoints[$strBreakpoint] ?? 0) + ($arrBreakpointSetting[$strBreakpoint] ?? $prevVal);
+                if(!is_numeric($arrBreakpointSetting[$strBreakpoint] ?? 0) || !is_numeric($arrBreakpoints[$strBreakpoint] ?? $prevVal)){
+                    $arrBreakpoints[$strBreakpoint] = 'auto';
+                }
+                else{
+                    $arrBreakpoints[$strBreakpoint] = ($arrBreakpoints[$strBreakpoint] ?? 0) + ($arrBreakpointSetting[$strBreakpoint] ?? $prevVal);
+                }
             }
         }
 
-        $objTemplate->responsiveColsLeft[] = "order-first";
+        $responsiveColsLeft = $objTemplate->responsiveColsLeft;
+        $objTemplate->responsiveColsLeft = array_merge($responsiveColsLeft,["order-first"]);
 
 
         $arrMain = [];
         foreach ((new $GLOBALS['responsive']['config']())->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
-            $arrMain[$strBreakpoint] = 12 - (($arrBreakpoints[$strBreakpoint] ?? 12) % 12);
+            if(!is_numeric($arrBreakpoints[$strBreakpoint] ?? 0)){
+                $arrMain[$strBreakpoint] = 'fill';
+            }
+            else{
+                $arrMain[$strBreakpoint] = 12 - (($arrBreakpoints[$strBreakpoint] ?? 12) % 12);
+            }
         }
 
         $objTemplate->responsiveColsMain = $responsiveFrontendService->getColClasses(serialize($arrMain));
