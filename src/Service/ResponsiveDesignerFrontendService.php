@@ -45,7 +45,7 @@ class ResponsiveDesignerFrontendService extends DesignerFrontendService
         if (!$strField) $strField = $strMapping;
         $this->arrData = $arrData;
 
-        $arrStyles = StringUtil::deserialize($arrData[$strField], true);
+        $arrStyles = ($arrData[$strField] ?? false) ? StringUtil::deserialize($arrData[$strField], true) : [];
         $arrReturn = [];
 
         if (array_key_exists(0, $arrStyles)) {
