@@ -20,6 +20,7 @@ class ResponsiveExtension extends AbstractExtension
             new TwigFunction('getResponsiveClasses', [$this->responsiveFrontendService, 'getResponsiveClasses']),
             new TwigFunction('getContainerClasses', [$this->responsiveFrontendService, 'getContainerClasses']),
             new TwigFunction('getAllInnerContainerClasses', [$this->responsiveFrontendService, 'getAllInnerContainerClasses']),
+            new TwigFunction('getSpacingClasses', [$this->responsiveFrontendService, 'getSpacingClasses']),
             new TwigFunction('getAllContainerClasses', [$this->responsiveFrontendService, 'getAllContainerClasses']),
         ];
     }
