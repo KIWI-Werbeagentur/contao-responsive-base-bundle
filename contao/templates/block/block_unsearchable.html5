@@ -10,7 +10,7 @@
 
     <?php $this->block('inside'); ?>
         <?php if($this->hasResponsiveChildren):?>
-            <div class="<?= $this->baseClass ?>__inside inside <?= implode(" ",$this->innerClass) ?>>">
+            <div class="<?= $this->baseClass ?>__inside inside <?= implode(" ",$this->innerClass) ?>">
                 <?php $this->block('content'); ?>
                 <?php $this->endblock(); ?>
             </div>
