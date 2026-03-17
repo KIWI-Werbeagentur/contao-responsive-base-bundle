@@ -23,7 +23,7 @@ class IncludesListener
 
         //Label Children
         if (in_array($objDca->getCurrentRecord()['type'], array_keys($GLOBALS['TL_CTE']['includes']))) {
-            $objInclude = $strTargetClass::findByPk($objDca->getCurrentRecord()[$objDca->getCurrentRecord()['type']]) ?? null;
+            $objInclude = $strTargetClass::findByPk($objDca->getCurrentRecord()[$objDca->getCurrentRecord()['type']] ?? null);
 
             if($objInclude){
                 $arrClasses = System::getContainer()->get('kiwi.contao.responsive.frontend')->getAllInnerContainerClasses($objInclude->row());
@@ -34,7 +34,7 @@ class IncludesListener
 
         //Add Childrens Legend
         if ($strType && $GLOBALS['TL_CTE']['includes'][$strType] ?? false) {
-            $intTarget = $objDca->getCurrentRecord()[$strType];
+            $intTarget = $objDca->getCurrentRecord()[$strType] ?? null;
 
             $objModel = $strTargetClass::findByPk($intTarget);
 
