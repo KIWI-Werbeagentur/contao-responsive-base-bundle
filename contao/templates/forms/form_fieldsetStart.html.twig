@@ -1,10 +1,20 @@
-{% set raw = this.class|default(class|default('')) %}
+{% set raw = this.class|default %}
 {% set parts = raw|split('data-cff-condition="', 2) %}
-{% set cffAttr = (parts|length > 1) ? parts[1]|split('"', 2)[0] : '' %}
+{% set cffCondition = (parts|length > 1) ? parts[1]|split('"', 2)[0] : '' %}
 {% set cleanClasses = parts[0]|replace({'"': ''})|trim %}
 
-<fieldset class="fieldset formbody__area {{ cleanClasses }} {{ getAllResponsiveClasses(arrConfiguration)|join(' ') }}"{% if cffAttr %} data-cff-condition="{{ cffAttr }}"{% endif %}>
+{% set fieldsetAttrs = attrs()
+    .addClass('fieldset formbody__area')
+    .addClass(cleanClasses)
+    .addClass(getAllResponsiveClasses(arrConfiguration)|join(' '))
+%}
+
+{% if cffCondition %}
+    {% set fieldsetAttrs = fieldsetAttrs.set('data-cff-condition', cffCondition) %}
+{% endif %}
+
+<fieldset{{ fieldsetAttrs }}>
     <div class="fieldset__inside {{ getAllInnerContainerClasses(arrConfiguration)|join(' ') }}">
-        {% if this.label ?? false %}
-            <legend>{{ this.label|default(label|default('')) }}</legend>
+        {% if this.label is defined %}
+            <legend>{{ this.label }}</legend>
         {% endif %}
