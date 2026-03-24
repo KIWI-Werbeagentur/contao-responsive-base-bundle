@@ -7,7 +7,7 @@
         getAllInnerContainerClasses(_context)|join(" ")
     ]
 %}
-{% set articleWrapperAttributes = attrs() %}
+{% set articleWrapperAttributes = articleWrapperAttributes|default(attrs()) %}
 {# move the spacing to 'mod_article__main' when using a background element #}
 {% if background and hasBackground(background) and not backgroundOverwrite %}
     {% set articleMainAttributes = articleMainAttributes|default(attrs())
