@@ -7,11 +7,8 @@
     .addClass('fieldset formbody__area')
     .addClass(cleanClasses)
     .addClass(getAllResponsiveClasses(arrConfiguration)|join(' '))
+    .setIfExists('data-cff-condition', cffCondition)
 %}
-
-{% if cffCondition %}
-    {% set fieldsetAttrs = fieldsetAttrs.set('data-cff-condition', cffCondition) %}
-{% endif %}
 
 <fieldset{{ fieldsetAttrs }}>
     <div class="fieldset__inside {{ getAllInnerContainerClasses(arrConfiguration)|join(' ') }}">
