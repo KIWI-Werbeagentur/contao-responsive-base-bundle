@@ -17,7 +17,7 @@ class ResponsiveSubpaletteWidget extends ResponsiveWidget
 
     protected function generateSubpaletteWidgets(): void
     {
-        $arrValues = StringUtil::deserialize($this->value);
+        $arrValues = StringUtil::deserialize($this->value, true);
 
         foreach ($this->arrDca['subpalettes'] as $k => $v) {
             // do not add options twice that have already been added via options
@@ -53,7 +53,7 @@ class ResponsiveSubpaletteWidget extends ResponsiveWidget
 
     protected function validator($varInput, $arrValues = [])
     {
-        $arrValues = StringUtil::deserialize(parent::validator($varInput, $arrValues));
+        $arrValues = StringUtil::deserialize(parent::validator($varInput, $arrValues), true);
 
         foreach ($this->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
             $strSubpalette = $arrValues[$strBreakpoint] ?? $this->selectorWidget->arrOptions[0]['value'] ?? '';

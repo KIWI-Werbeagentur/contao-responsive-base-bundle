@@ -32,7 +32,7 @@ class ResponsiveWidget extends Widget
         $i = 0;
         $strInputType = $this->arrDca['responsiveInputType'] ?? '';
         $strClass = $GLOBALS['BE_FFL'][$strInputType];
-        $arrValues = StringUtil::deserialize($this->value);
+        $arrValues = StringUtil::deserialize($this->value, true);
         foreach ($this->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
             $this->arrWidgets[$arrBreakpoint['modifier']] = $this->generateFormField($strClass, $strBreakpoint, $arrBreakpoint['modifier'], $arrValues, ['mandatory' => $i == 0]);
             $i++;

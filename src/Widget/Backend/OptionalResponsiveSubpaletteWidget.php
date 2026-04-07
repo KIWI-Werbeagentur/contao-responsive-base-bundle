@@ -15,7 +15,7 @@ class OptionalResponsiveSubpaletteWidget extends OptionalResponsiveWidget
 
     protected function generateSubpaletteWidgets(): void
     {
-        $arrValues = StringUtil::deserialize($this->value);
+        $arrValues = StringUtil::deserialize($this->value, true);
 
         foreach ($this->arrDca['subpalettes'] as $k => $v) {
             // do not add options twice that have already been added via options
@@ -51,7 +51,7 @@ class OptionalResponsiveSubpaletteWidget extends OptionalResponsiveWidget
 
     protected function validator($varInput, $arrValues = [])
     {
-        $arrValues = StringUtil::deserialize(parent::validator($varInput, $arrValues));
+        $arrValues = StringUtil::deserialize(parent::validator($varInput, $arrValues), true);
 
         $arrSubmit = [];
 
