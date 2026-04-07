@@ -23,7 +23,7 @@ class ResponsiveFrontendService
         return "";
     }
 
-    public function getResponsiveClasses(string $strData, string $strMapping, array $arrOptions = []): array
+    public function getResponsiveClasses(string|null $strData, string $strMapping, array $arrOptions = []): array
     {
         $arrClasses = [];
 
