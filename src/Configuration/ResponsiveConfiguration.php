@@ -2,7 +2,6 @@
 
 namespace Kiwi\Contao\ResponsiveBaseBundle\Configuration;
 
-use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
 use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
 
@@ -131,20 +130,16 @@ abstract class ResponsiveConfiguration
         return array_keys($this->arrBreakpoints);
     }
 
-    #[AsCallback('tl_content', 'fields.responsiveCols.options')]
     public function getCols(): array
     {
         return array_keys($this->arrCols);
     }
 
-    #[AsCallback('tl_content', 'fields.responsiveOffsets.options')]
     public function getOffsets(): array
     {
         return array_keys($this->arrOffsets);
     }
 
-    #[AsCallback('tl_article', 'fields.responsiveSpacingTop.options')]
-    #[AsCallback('tl_article', 'fields.responsiveSpacingBottom.options')]
     public function getSpacings(): array
     {
         return array_keys($this->arrSpacings);
@@ -185,12 +180,6 @@ abstract class ResponsiveConfiguration
         return $this->arrIcons[$strField] ?? [];
     }
 
-    #[AsCallback(table: 'tl_module', target: 'config.onload')]
-    #[AsCallback(table: 'tl_layout', target: 'config.onload')]
-    #[AsCallback(table: 'tl_article', target: 'config.onload')]
-    #[AsCallback(table: 'tl_content', target: 'config.onload')]
-    #[AsCallback(table: 'tl_form', target: 'config.onload')]
-    #[AsCallback(table: 'tl_form_field', target: 'config.onload')]
     public function getDefaults(DataContainer $objDca): void
     {
         if ('tl_layout' === $objDca->table) {
@@ -208,10 +197,6 @@ abstract class ResponsiveConfiguration
         $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOrder']['default'] = ((new $GLOBALS['responsive']['config'])->arrOrderDefaults) ?? null;
     }
 
-    #[AsCallback(table: 'tl_layout', target: 'fields.responsiveContainerSizeHeader.options')]
-    #[AsCallback(table: 'tl_layout', target: 'fields.responsiveContainerSizeFooter.options')]
-    #[AsCallback(table: 'tl_article', target: 'fields.responsiveContainerSize.options')]
-    #[AsCallback(table: 'tl_content', target: 'fields.responsiveContainer.options')]
     public function getContainerSizes(): array
     {
         return $this->arrContainerSizes;
