@@ -8,11 +8,26 @@ use Kiwi\Contao\ResponsiveBaseBundle\Widget\Backend\ResponsiveWidget;
 use Contao\System;
 use Symfony\Component\HttpFoundation\Request;
 
-$GLOBALS['responsive']['tl_content']['excludePalettes']['column'] = ['default', 'html', 'unfiltered_html', 'accordionStop', 'sliderStop', 'code', 'alias', 'element_group'];
-$GLOBALS['responsive']['tl_form_field']['excludePalettes']['column'] = ['default', 'html', 'fieldsetStart', 'fieldsetStop'];
-$GLOBALS['responsive']['tl_module']['excludePalettes']['column'] = ['default', 'html'];
-$GLOBALS['responsive']['tl_module']['includePalettes']['container'] = ['newslist'=>'articles', 'eventlist'=>'events', 'vacancieslist'=>'vacancies'];
-$GLOBALS['responsive']['tl_content']['includePalettes']['container'] = ['element_group'];
+$GLOBALS['responsive']['tl_content']['excludePalettes']['column'] = array_merge(
+    ['default', 'html', 'unfiltered_html', 'accordionStop', 'sliderStop', 'code', 'alias', 'element_group'],
+    $GLOBALS['responsive']['tl_content']['excludePalettes']['column'] ?? [],
+);
+$GLOBALS['responsive']['tl_form_field']['excludePalettes']['column'] = array_merge(
+    ['default', 'html', 'fieldsetStart', 'fieldsetStop'],
+    $GLOBALS['responsive']['tl_form_field']['excludePalettes']['column'] ?? [],
+);
+$GLOBALS['responsive']['tl_module']['excludePalettes']['column'] = array_merge(
+    ['default', 'html'],
+    $GLOBALS['responsive']['tl_module']['excludePalettes']['column'] ?? [],
+);
+$GLOBALS['responsive']['tl_module']['includePalettes']['container'] = array_merge(
+    ['newslist' => 'articles', 'eventlist' => 'events', 'vacancieslist' => 'vacancies'],
+    $GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? [],
+);
+$GLOBALS['responsive']['tl_content']['includePalettes']['container'] = array_merge(
+    ['element_group'],
+    $GLOBALS['responsive']['tl_content']['includePalettes']['container'] ?? []
+);
 
 $GLOBALS['TL_CTE']['includes']['module'] = ContentModuleResponsive::class;
 
