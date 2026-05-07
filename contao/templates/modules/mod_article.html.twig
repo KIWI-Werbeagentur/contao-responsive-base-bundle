@@ -1,13 +1,17 @@
 {% extends "@Contao/mod_article.html5" %}
 
-{% set container_classes = getAllContainerClasses(_context)|join(" ") %}
+{% set articleWrapperAttributes = attrs()
+    .addClass('mod_article__wrapper')
+    .addClass('wrapper')
+    .addClass(getAllContainerClasses(_context))
+    .mergeWith(articleWrapperAttributes|default(null))
+%}
 {% set inner_classes =
     [
         responsiveContainerSize ? getRowClass(),
         getAllInnerContainerClasses(_context)|join(" ")
     ]
 %}
-{% set articleWrapperAttributes = articleWrapperAttributes|default(attrs()) %}
 {# move the spacing to 'mod_article__main' when using a background element #}
 {% if background and hasBackground(background) and not backgroundOverwrite %}
     {% set articleMainAttributes = articleMainAttributes|default(attrs())
@@ -22,7 +26,7 @@
 {% endif %}
 
 {% block content %}
-    <div class="mod_article__wrapper wrapper {{ container_classes }}" {{ articleWrapperAttributes }}>
+    <div{{ articleWrapperAttributes }}>
         <div class="mod_article__inside inside {{ inner_classes|join(" ") }}">
             {{ parent() }}
         </div>
