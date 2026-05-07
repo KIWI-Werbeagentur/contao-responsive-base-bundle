@@ -1,11 +1,62 @@
 {% extends '@Contao/fe_page.html5' %}
 
+{% set headerContainerAttributes = attrs()
+    .addClass('header__container')
+    .addClass('section-container')
+    .addClass(responsiveContainerSizeHeader|default(''))
+    .mergeWith(headerContainerAttributes|default(null))
+%}
+{% set headerWrapperAttributes = attrs()
+    .addClass('header__wrapper')
+    .addClass(getRowClass())
+    .mergeWith(headerWrapperAttributes|default(null))
+%}
+
+{% set contentsContainerAttributes = attrs()
+    .addClass('contents__container')
+    .addClass('section-container')
+    .addClass(responsiveContainerSize|default(''))
+    .mergeWith(contentsContainerAttributes|default(null))
+%}
+{% set contentsWrapperAttributes = attrs()
+    .addClass('contents__wrapper')
+    .addClass(getRowClass())
+    .mergeWith(contentsWrapperAttributes|default(null))
+%}
+{% set mainWrapperAttributes = attrs()
+    .addClass('main__wrapper')
+    .addClass(getRowClass())
+    .mergeWith(mainWrapperAttributes|default(null))
+%}
+{% set leftWrapperAttributes = attrs()
+    .addClass('left__wrapper')
+    .addClass(getRowClass())
+    .mergeWith(leftWrapperAttributes|default(null))
+%}
+{% set rightWrapperAttributes = attrs()
+    .addClass('right__wrapper')
+    .addClass(getRowClass())
+    .mergeWith(rightWrapperAttributes|default(null))
+%}
+
+{% set footerContainerAttributes = attrs()
+    .addClass('footer__container')
+    .addClass('section-container')
+    .addClass(responsiveContainerSizeFooter|default(''))
+    .mergeWith(footerContainerAttributes|default(null))
+%}
+{% set footerWrapperAttributes = attrs()
+    .addClass('footer__wrapper')
+    .addClass(getRowClass())
+    .mergeWith(footerWrapperAttributes|default(null))
+%}
+
 {% block header %}
     {% if header %}
         <header id="header" class="header">
-            <div class="header__container section-container {{ responsiveContainerSizeHeader }}">
+            <div{{ headerContainerAttributes }}>
                 <div class="header__inside inside">
-                    <div class="header__wrapper {{ getRowClass() }}">
+                    <div{{ headerWrapperAttributes }}>
                         {{ header|raw }}
                     </div>
                 </div>
@@ -16,14 +67,14 @@
 
 {% block container %}
     <div id="container" class="contents">
-        <div class="contents__container section-container {{ responsiveContainerSize }}">
+        <div{{ contentsContainerAttributes }}>
             <div class="contents__inside inside">
-                <div class="contents__wrapper {{ getRowClass() }}">
+                <div{{ contentsWrapperAttributes }}>
 
                     {% block main %}
                         <main id="main" class="main contents__area {{ responsiveColsMain|join(' ') }}">
                                 <div class="main__inside inside">
-                                    <div class="main__wrapper {{ getRowClass() }}">
+                                    <div{{ mainWrapperAttributes }}>
                                         {{ main|raw }}
                                     </div>
                                 </div>
@@ -35,7 +86,7 @@
                         {% if left %}
                             <aside id="left" class="left contents__area {{ responsiveColsLeft|join(' ') }}">
                                 <div class="left__inside inside">
-                                    <div class="left__wrapper {{ getRowClass() }}">
+                                    <div{{ leftWrapperAttributes }}>
                                         {{ left|raw }}
                                     </div>
                                 </div>
@@ -47,7 +98,7 @@
                         {% if right %}
                             <aside id="right" class="right contents__area {{ responsiveColsRight|join(' ') }}">
                                 <div class="right__inside inside">
-                                    <div class="right__wrapper {{ getRowClass() }}">
+                                    <div{{ rightWrapperAttributes }}>
                                         {{ right|raw }}
                                     </div>
                                 </div>
@@ -64,9 +115,9 @@
 {% block footer %}
     {% if footer %}
         <footer id="footer" class="footer">
-            <div class="footer__container section-container {{ responsiveContainerSizeFooter }}">
+            <div{{ footerContainerAttributes }}>
                 <div class="footer__inside inside">
-                    <div class="footer__wrapper {{ getRowClass() }}">
+                    <div{{ footerWrapperAttributes }}>
                         {{ footer|raw }}
                     </div>
                 </div>
