@@ -12,6 +12,6 @@
 
 <fieldset{{ fieldsetAttrs }}>
     <div class="fieldset__inside {{ getAllInnerContainerClasses(arrConfiguration)|join(' ') }}">
-        {% if this.label is defined %}
+        {% if this.label is not empty %}
             <legend>{{ this.label }}</legend>
         {% endif %}
