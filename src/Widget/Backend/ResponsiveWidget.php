@@ -9,6 +9,9 @@ use Contao\Widget;
 
 class ResponsiveWidget extends Widget
 {
+    /** POST value for the non-mandatory inherit option; omitted from serialized save. */
+    public const INHERIT_OPTION_VALUE = '__kiwi_responsive_inherit__';
+
     protected $strCssClass = "responsive-widget";
     protected $blnSubmitInput = true;
     protected $strTemplate = 'be_widget';
@@ -60,7 +63,10 @@ class ResponsiveWidget extends Widget
         $objWidget->strId = "{$this->strField}{$strModifier}";
         $objWidget->storeValues = true;
         $objWidget->mandatory = $arrOptions['mandatory'] ?? 0;
-        $objWidget->options = (($arrOptions['mandatory'] ?? 0) ? ($this->arrConfiguration['options'] ?? []) : array_merge([['value' => '', 'label' => ($GLOBALS['TL_LANG']['responsive']['inherit'] ?? 'inherit')]], ($this->arrConfiguration['options'] ?? [])));
+        $objWidget->options = (($arrOptions['mandatory'] ?? 0) ? ($this->arrConfiguration['options'] ?? []) : array_merge([['value' => self::INHERIT_OPTION_VALUE, 'label' => ($GLOBALS['TL_LANG']['responsive']['inherit'] ?? 'inherit')]], ($this->arrConfiguration['options'] ?? [])));
+        if (!($arrOptions['mandatory'] ?? 0) && \in_array($arrValues[$strBreakpoint] ?? null, [null, ''], true)) {
+            $objWidget->value = self::INHERIT_OPTION_VALUE;
+        }
         $objWidget->label = $GLOBALS['TL_LANG']['responsive']['breakpoint'][$strBreakpoint][0] ?? $strBreakpoint;
         $objWidget->currentRecord = $this->currentRecord;
 
@@ -106,7 +112,7 @@ class ResponsiveWidget extends Widget
                 $this->addError('');
             }
 
-            if (($strValue = Input::post("{$this->strName}{$arrBreakpoint['modifier']}")) !== "") {
+            if (($strValue = Input::post("{$this->strName}{$arrBreakpoint['modifier']}")) !== "" && $strValue !== self::INHERIT_OPTION_VALUE) {
                 $arrValues[$strBreakpoint] = $strValue;
             }
         }
