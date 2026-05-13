@@ -3,11 +3,11 @@
     gap: 5px 15px;
     flex-wrap: wrap;
 
-    background: #eaeaec5c;
-    padding: 10px 20px 15px;
+    background: #90809018;
+    padding: 0 15px 15px;
     margin-top: 5px;
     margin-bottom: 5px;
-    border-radius: 15px;
+    border-radius: var(--border-radius, 8px);
 }
 
 .responsive-widget > * {
