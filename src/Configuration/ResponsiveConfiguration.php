@@ -192,9 +192,15 @@ abstract class ResponsiveConfiguration
 
         $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveCols']['default'] = (new $GLOBALS['responsive']['config'])->arrColsDefaults;
         $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOffsets']['default'] = (new $GLOBALS['responsive']['config'])->arrOffsetsDefaults;
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingTop']['default'] = ((new $GLOBALS['responsive']['config'])->arrSpacingTopDefaults) ?? null;
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingBottom']['default'] = ((new $GLOBALS['responsive']['config'])->arrSpacingBottomDefaults) ?? null;
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOrder']['default'] = ((new $GLOBALS['responsive']['config'])->arrOrderDefaults) ?? null;
+        if (isset($GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingTop'])) {
+            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingTop']['default'] = (new $GLOBALS['responsive']['config'])->arrSpacingTopDefaults ?? null;
+        }
+        if (isset($GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingBottom'])) {
+            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingBottom']['default'] = (new $GLOBALS['responsive']['config'])->arrSpacingBottomDefaults ?? null;
+        }
+        if (isset($GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOrder'])) {
+            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOrder']['default'] = (new $GLOBALS['responsive']['config'])->arrOrderDefaults ?? null;
+        }
     }
 
     public function getContainerSizes(): array
