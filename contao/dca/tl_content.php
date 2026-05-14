@@ -31,6 +31,7 @@ $GLOBALS['TL_DCA']['tl_content']['fields']['responsiveContainer'] = [
 
 //Add multiple reusable fields
 $GLOBALS['TL_DCA']['tl_content']['fields'] += $GLOBALS['TL_DCA']['container']['fields'];
+$GLOBALS['TL_DCA']['tl_content']['fields'] += $GLOBALS['TL_DCA']['elementGroupSpace']['fields'];
 
 //Set palettes
 $GLOBALS['TL_DCA']['tl_content']['palettes']['__selector__'][] = 'responsiveContainer';

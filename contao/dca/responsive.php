@@ -160,3 +160,23 @@ $GLOBALS['TL_DCA']['space']['fields']['responsiveSpacingBottom'] = [
     'reference' => &$GLOBALS['TL_LANG']['responsive']['spacings'],
     'sql' => "blob NULL"
 ];
+
+$GLOBALS['TL_DCA']['elementGroupSpace']['fields']['responsiveGroupSpacingTop'] = [
+    'label' => &$GLOBALS['TL_LANG']['responsive']['responsiveSpacingTop'],
+    'inputType' => 'optionalResponsive',
+    'responsiveInputType' => 'iconedSelect',
+    'eval' => ['tl_class' => "w50 clr"],
+    'options_callback' => [$GLOBALS['responsive']['config'], 'getSpacings'],
+    'reference' => &$GLOBALS['TL_LANG']['responsive']['spacings'],
+    'sql' => "blob NULL",
+];
+
+$GLOBALS['TL_DCA']['elementGroupSpace']['fields']['responsiveGroupSpacingBottom'] = [
+    'label' => &$GLOBALS['TL_LANG']['responsive']['responsiveSpacingBottom'],
+    'inputType' => 'optionalResponsive',
+    'responsiveInputType' => 'iconedSelect',
+    'eval' => ['tl_class' => "w50"],
+    'options_callback' => [$GLOBALS['responsive']['config'], 'getSpacings'],
+    'reference' => &$GLOBALS['TL_LANG']['responsive']['spacings'],
+    'sql' => "blob NULL",
+];
