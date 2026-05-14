@@ -4,6 +4,7 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\Service;
 
 use Contao\StringUtil;
 use Contao\System;
+use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
 
 class ResponsiveFrontendService
 {
@@ -38,7 +39,13 @@ class ResponsiveFrontendService
                 }
             }
 
+            $excludeValues = $arrOptions['excludeValues'] ?? [];
+
             foreach ($arrValues as $strBreakpoint => $varValue) {
+                if (\in_array($varValue, $excludeValues, true)) {
+                    continue;
+                }
+
                 if ($objConfig->{$strMapping}) {
                     $strClass = is_array($objConfig->{$strMapping}) ? ($objConfig->{$strMapping}[$varValue] ?? '') : $objConfig->{$strMapping};
                 } else {
@@ -84,7 +91,10 @@ class ResponsiveFrontendService
 
     public function getSpacingClasses($strData, $strDirection = ""): array
     {
-        return $this->getResponsiveClasses($strData, 'varSpacingClasses', ['direction' => $strDirection]);
+        return $this->getResponsiveClasses($strData, 'varSpacingClasses', [
+            'direction'     => $strDirection,
+            'excludeValues' => [ResponsiveConfiguration::SPACING_NO_OP],
+        ]);
     }
 
     public function getRowClass(): string

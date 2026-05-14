@@ -1,8 +1,12 @@
 <?php
 
+use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
+
 $GLOBALS['TL_LANG']['responsive']['responsiveContainerSize'] = [
     0 => "Container Size"
 ];
+
+$GLOBALS['TL_LANG']['responsive']['spacings'][ResponsiveConfiguration::SPACING_NO_OP][0] = "No spacing settings [noop]";
 
 $GLOBALS['TL_LANG']['responsive']['responsiveFlexDirection'] = [
     0 => "Main Axis",

@@ -7,18 +7,25 @@
         getAllInnerContainerClasses(_context)|join(" ")
     ]
 %}
+{% set spacingTopClasses = getSpacingClasses(responsiveSpacingTop|default(''), 't') %}
+{% set spacingBottomClasses = getSpacingClasses(responsiveSpacingBottom|default(''), 'b') %}
 {% set articleWrapperAttributes = articleWrapperAttributes|default(attrs()) %}
 {# move the spacing to 'mod_article__main' when using a background element #}
 {% if background and hasBackground(background) and not backgroundOverwrite %}
-    {% set articleMainAttributes = articleMainAttributes|default(attrs())
-        .set("data-spacing-top")
-        .set("data-spacing-bottom")
-    %}
+    {% set articleMainAttributes = articleMainAttributes|default(attrs()) %}
+    {% if spacingTopClasses %}
+        {% set articleMainAttributes = articleMainAttributes.set("data-spacing-top") %}
+    {% endif %}
+    {% if spacingBottomClasses %}
+        {% set articleMainAttributes = articleMainAttributes.set("data-spacing-bottom") %}
+    {% endif %}
 {% else %}
-    {% set articleWrapperAttributes = articleWrapperAttributes
-        .set("data-spacing-top")
-        .set("data-spacing-bottom")
-    %}
+    {% if spacingTopClasses %}
+        {% set articleWrapperAttributes = articleWrapperAttributes.set("data-spacing-top") %}
+    {% endif %}
+    {% if spacingBottomClasses %}
+        {% set articleWrapperAttributes = articleWrapperAttributes.set("data-spacing-bottom") %}
+    {% endif %}
 {% endif %}
 
 {% block content %}
