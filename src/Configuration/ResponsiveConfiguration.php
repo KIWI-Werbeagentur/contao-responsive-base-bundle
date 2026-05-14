@@ -6,6 +6,8 @@ use Contao\DataContainer;
 
 abstract class ResponsiveConfiguration
 {
+    public const SPACING_NO_OP = 'noop';
+
     protected array|string $varColClasses = [];
 
     protected array|string $varOffsetClasses = [];
@@ -142,6 +144,21 @@ abstract class ResponsiveConfiguration
     public function getSpacings(): array
     {
         return array_keys($this->arrSpacings);
+    }
+
+    /**
+     * Returns the spacing option keys with {@see self::SPACING_NO_OP} removed.
+     * Useful for consumers that need to enumerate the visible/effective tokens
+     * (e.g. SCSS regeneration), without knowing the concrete noop literal.
+     *
+     * @return list<string>
+     */
+    public function getSpacingsExcludingNoOp(): array
+    {
+        return array_values(array_filter(
+            $this->getSpacings(),
+            static fn ($key): bool => (string) $key !== self::SPACING_NO_OP
+        ));
     }
 
     public function getFlexDirections(): array
