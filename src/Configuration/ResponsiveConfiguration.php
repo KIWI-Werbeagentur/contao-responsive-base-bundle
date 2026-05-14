@@ -23,6 +23,12 @@ abstract class ResponsiveConfiguration
 
     protected array|string $varSpacingClasses = [];
 
+    /** @var array<string, int|string> */
+    protected array $arrElementGroupSpacingTopDefaults = [];
+
+    /** @var array<string, int|string> */
+    protected array $arrElementGroupSpacingBottomDefaults = [];
+
     protected $arrAlignmentItems;
 
     protected $arrAlignmentContent;
@@ -214,6 +220,12 @@ abstract class ResponsiveConfiguration
         }
         if (isset($GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingBottom'])) {
             $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingBottom']['default'] = (new $GLOBALS['responsive']['config'])->arrSpacingBottomDefaults ?? null;
+        }
+        if (isset($GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveGroupSpacingTop'])) {
+            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveGroupSpacingTop']['default'] = (new $GLOBALS['responsive']['config'])->arrElementGroupSpacingTopDefaults ?? null;
+        }
+        if (isset($GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveGroupSpacingBottom'])) {
+            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveGroupSpacingBottom']['default'] = (new $GLOBALS['responsive']['config'])->arrElementGroupSpacingBottomDefaults ?? null;
         }
         if (isset($GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOrder'])) {
             $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOrder']['default'] = (new $GLOBALS['responsive']['config'])->arrOrderDefaults ?? null;
