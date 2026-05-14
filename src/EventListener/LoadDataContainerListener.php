@@ -77,6 +77,10 @@ class LoadDataContainerListener
                 ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                 ->addField(array_merge(['responsiveColsItems'], array_keys($GLOBALS['TL_DCA']['container']['fields'] ?? [])), 'items_legend', PaletteManipulator::POSITION_APPEND)
                 ->applyToPalettes($GLOBALS['responsive']['tl_content']['includePalettes']['container'], 'tl_content');
+
+            PaletteManipulatorExtended::create()
+                ->addField('responsiveGroupSpacingTop,responsiveGroupSpacingBottom', 'layout_legend', PaletteManipulator::POSITION_APPEND)
+                ->applyToPalettes(['element_group'], 'tl_content');
         }
         if ($strTable == 'tl_form_field') {
             PaletteManipulatorExtended::create()
