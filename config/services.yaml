@@ -15,7 +15,6 @@ services:
       - '@contao.framework'
       - '@twig'
   Kiwi\Contao\ResponsiveBaseBundle\DataContainer\IncludesListener: ~
-  Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfigListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\DataContainer\WrapperListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\LoadDataContainerListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\ParseTemplateListener: ~
