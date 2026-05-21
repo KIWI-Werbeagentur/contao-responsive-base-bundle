@@ -2,12 +2,16 @@
 
 namespace Kiwi\Contao\ResponsiveBaseBundle\Service;
 
+use Contao\Controller;
 use Contao\StringUtil;
 use Contao\System;
+use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
 
 class ResponsiveFrontendService
 {
+    public function __construct(private readonly PaletteManipulatorExtended $paletteManipulator) {}
+
     public static function propExists($varTarget, $strProp)
     {
         return (is_array($varTarget) && array_key_exists($strProp, $varTarget)) || (is_object($varTarget) && property_exists($varTarget, $strProp));
@@ -102,20 +106,61 @@ class ResponsiveFrontendService
         return (new $GLOBALS['responsive']['config']())->strRow ?? '';
     }
 
-    public function getAllResponsiveClasses($varData, array $arrFields = []): array
+    public function getAllResponsiveClasses($varData, array $arrFields = [], string $table = 'tl_content'): array
     {
-        return
-            array_merge(
-                $this->getColClasses(self::getProp($varData, $arrFields['cols'] ?? 'responsiveCols'), $varData),
-                $this->getOffsetClasses(self::getProp($varData, $arrFields['offsets'] ?? 'responsiveOffsets'), $varData),
-                $this->getOrderClasses(self::getProp($varData, $arrFields['order'] ?? 'responsiveOrder'), $varData),
-                $this->getAlignSelfClasses(self::getProp($varData, $arrFields['align-self'] ?? 'responsiveAlignSelf'), $varData)
-            );
+        $arrSpecs = [
+            ['cols',       'responsiveCols',       'getColClasses'],
+            ['offsets',    'responsiveOffsets',    'getOffsetClasses'],
+            ['order',      'responsiveOrder',      'getOrderClasses'],
+            ['align-self', 'responsiveAlignSelf',  'getAlignSelfClasses'],
+        ];
+
+        $type = self::getProp($varData, 'type') ?: null;
+
+        $arrClasses = [];
+        foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
+            $strField = $arrFields[$strKey] ?? $strDefaultField;
+            if (!$this->isFieldInPalette($strField, $type, $table)) {
+                continue;
+            }
+            $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField), $varData));
+        }
+        return $arrClasses;
     }
 
-    public function getContainerClasses($strData): array
+    /**
+     * Resolve a container-size key to its CSS classes, optionally gated by palette membership.
+     *
+     * The same value lives under two differently named DCA fields, encoding different
+     * propositions:
+     *   - `responsiveContainer`     (tl_content, tl_form_field): a *mode selector* answering
+     *                               "is this element a container, and if so, what size?" -
+     *                               has a `default` option (= treat as column) and drives
+     *                               column- vs container-mode subpalettes.
+     *   - `responsiveContainerSize` (tl_article, tl_layout):     a *pure size attribute* -
+     *                               those records are always containers; only the size varies.
+     *
+     * Both resolve through the same `arrContainerSizes` map, so the conversion is uniform.
+     * Palette membership however is per-field-name: direct callers pass the field name they
+     * sourced the value from so the gate consults the right DCA entry for the resolved palette.
+     *
+     * Note on the internal {@see self::getAllContainerClasses()} call path: it already gates
+     * each spec entry against the correct field name in its own outer loop, then calls this
+     * method with no `$type` so the inner gate short-circuits to a no-op. The `$field`
+     * parameter here therefore matters for *direct* external callers (templates / hooks /
+     * tests) that source the value from a field other than `responsiveContainer`.
+     *
+     * @param string|null $strData  Container-size key looked up in $arrContainerSizes.
+     * @param string|null $type     Optional record type for palette gating. Null disables gating.
+     * @param string      $table    DCA table whose palette is consulted when $type is set.
+     * @param string      $field    Name of the DCA field $strData was sourced from.
+     */
+    public function getContainerClasses($strData, ?string $type = null, string $table = 'tl_content', string $field = 'responsiveContainer'): array
     {
         if (!$strData) return [];
+        if (!$this->isFieldInPalette($field, $type, $table)) {
+            return [];
+        }
 
         $objConfig = new $GLOBALS['responsive']['config']();
         return is_array($objConfig->arrContainerSizes[$strData]) ? $objConfig->arrContainerSizes[$strData] : [$objConfig->arrContainerSizes[$strData]];
@@ -125,7 +170,7 @@ class ResponsiveFrontendService
     {
         return
             array_merge(
-                $this->getContainerClasses(self::getProp($varData, $arrFields['containerSize'] ?? 'responsiveContainerSize'), $varData),
+                $this->getContainerClasses(self::getProp($varData, $arrFields['containerSize'] ?? 'responsiveContainerSize')),
                 $this->getSpacingClasses(self::getProp($varData, $arrFields['spacingTop'] ?? 'responsiveSpacingTop'), 't', $varData),
                 $this->getSpacingClasses(self::getProp($varData, $arrFields['spacingBottom'] ?? 'responsiveSpacingBottom'), 'b', $varData),
             );
@@ -156,15 +201,49 @@ class ResponsiveFrontendService
         return $this->getResponsiveClasses($strData, 'varJustifyContentClasses');
     }
 
-    public function getAllInnerContainerClasses($varData, array $arrFields = []): array
+    public function getAllInnerContainerClasses($varData, array $arrFields = [], string $table = 'tl_content'): array
     {
-        return
-            array_merge(
-                $this->getFlexDirectionClasses(self::getProp($varData, $arrFields['flexDirection'] ?? 'responsiveFlexDirection'), $varData),
-                $this->getFlexWrapClasses(self::getProp($varData, $arrFields['flexWrap'] ?? 'responsiveFlexWrap'), $varData),
-                $this->getAlignItemsClasses(self::getProp($varData, $arrFields['alignItems'] ?? 'responsiveAlignItems'), $varData),
-                $this->getAlignContentClasses(self::getProp($varData, $arrFields['alignContent'] ?? 'responsiveAlignContent'), $varData),
-                $this->getJustifyContentClasses(self::getProp($varData, $arrFields['justifyContent'] ?? 'responsiveJustifyContent'), $varData),
-            );
+        $arrSpecs = [
+            ['flexDirection',  'responsiveFlexDirection',  'getFlexDirectionClasses'],
+            ['flexWrap',       'responsiveFlexWrap',       'getFlexWrapClasses'],
+            ['alignItems',     'responsiveAlignItems',     'getAlignItemsClasses'],
+            ['alignContent',   'responsiveAlignContent',   'getAlignContentClasses'],
+            ['justifyContent', 'responsiveJustifyContent', 'getJustifyContentClasses'],
+        ];
+
+        $type = self::getProp($varData, 'type') ?: null;
+
+        $arrClasses = [];
+        foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
+            $strField = $arrFields[$strKey] ?? $strDefaultField;
+            if (!$this->isFieldInPalette($strField, $type, $table)) {
+                continue;
+            }
+            $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField), $varData));
+        }
+        return $arrClasses;
+    }
+
+    /**
+     * Returns whether the field is part of the resolved palette.
+     *
+     * Always returns true if no palette gating applies - either because the caller did not provide
+     * a type (`$type === null`), or because the type does not correspond to any palette in
+     * the given table (soft gating: legacy callers that pass varData whose `type` was not
+     * meant to identify a palette in $table keep their previous "all fields render" behavior).
+     */
+    protected function isFieldInPalette(string $strField, ?string $type, string $table = 'tl_content'): bool
+    {
+        if ($type === null || $type === '') {
+            return true;
+        }
+
+        Controller::loadDataContainer($table);
+
+        if (!isset($GLOBALS['TL_DCA'][$table]['palettes'][$type])) {
+            return true;
+        }
+
+        return $this->paletteManipulator->hasField($type, $table, $strField);
     }
 }
