@@ -6,12 +6,12 @@
 {% set fieldsetAttrs = attrs()
     .addClass('fieldset formbody__area')
     .addClass(cleanClasses)
-    .addClass(getAllResponsiveClasses(arrConfiguration)|join(' '))
+    .addClass(getAllResponsiveClasses(arrConfiguration, table='tl_form_field')|join(' '))
     .setIfExists('data-cff-condition', cffCondition)
 %}
 
 <fieldset{{ fieldsetAttrs }}>
-    <div class="fieldset__inside {{ getAllInnerContainerClasses(arrConfiguration)|join(' ') }}">
+    <div class="fieldset__inside {{ getAllInnerContainerClasses(arrConfiguration, table='tl_form_field')|join(' ') }}">
         {% if this.label is not empty %}
             <legend>{{ this.label }}</legend>
         {% endif %}
