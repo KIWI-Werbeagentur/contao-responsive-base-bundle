@@ -2,7 +2,7 @@
 
 {% if data|default %}
     {% set attributes = attrs()
-        .addClass(getContainerClasses(data.responsiveContainer|default))
+        .addClass(getContainerClasses(data.responsiveContainer|default, data.type|default))
         .addClass(getAllResponsiveClasses(data))
         .mergeWith(attributes|default)
     %}
