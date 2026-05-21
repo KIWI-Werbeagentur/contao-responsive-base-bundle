@@ -101,6 +101,24 @@ class ResponsiveFrontendService
         ]);
     }
 
+    /**
+     * Convenience wrapper around {@see self::getSpacingClasses()} for the top direction.
+     * Allows {@see self::getAllContainerClasses()} to use the same single-arg spec shape as
+     * the other aggregator methods.
+     */
+    public function getSpacingTopClasses($strData): array
+    {
+        return $this->getSpacingClasses($strData, 't');
+    }
+
+    /**
+     * Convenience wrapper around {@see self::getSpacingClasses()} for the bottom direction.
+     */
+    public function getSpacingBottomClasses($strData): array
+    {
+        return $this->getSpacingClasses($strData, 'b');
+    }
+
     public function getRowClass(): string
     {
         return (new $GLOBALS['responsive']['config']())->strRow ?? '';
@@ -166,14 +184,35 @@ class ResponsiveFrontendService
         return is_array($objConfig->arrContainerSizes[$strData]) ? $objConfig->arrContainerSizes[$strData] : [$objConfig->arrContainerSizes[$strData]];
     }
 
-    public function getAllContainerClasses($varData, array $arrFields = []): array
+    /**
+     * Resolve article-/layout-level container classes (size + top/bottom spacing).
+     *
+     * Unlike the sibling aggregators, this method operates on the article/layout level: the
+     * fields it reads (`responsiveContainerSize`, `responsiveSpacingTop`, `responsiveSpacingBottom`)
+     * live on `tl_article` and `tl_layout` via the `containerSize` / `space` DCA buckets, not
+     * on `tl_content`. The `$table` default therefore differs from the sibling aggregators -
+     * `tl_article` is the dominant caller (mod_article.html.twig); layout-level callers
+     * override with `tl_layout`.
+     */
+    public function getAllContainerClasses($varData, array $arrFields = [], string $table = 'tl_article'): array
     {
-        return
-            array_merge(
-                $this->getContainerClasses(self::getProp($varData, $arrFields['containerSize'] ?? 'responsiveContainerSize')),
-                $this->getSpacingClasses(self::getProp($varData, $arrFields['spacingTop'] ?? 'responsiveSpacingTop'), 't', $varData),
-                $this->getSpacingClasses(self::getProp($varData, $arrFields['spacingBottom'] ?? 'responsiveSpacingBottom'), 'b', $varData),
-            );
+        $arrSpecs = [
+            ['containerSize', 'responsiveContainerSize', 'getContainerClasses'],
+            ['spacingTop',    'responsiveSpacingTop',    'getSpacingTopClasses'],
+            ['spacingBottom', 'responsiveSpacingBottom', 'getSpacingBottomClasses'],
+        ];
+
+        $type = self::getProp($varData, 'type') ?: null;
+
+        $arrClasses = [];
+        foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
+            $strField = $arrFields[$strKey] ?? $strDefaultField;
+            if (!$this->isFieldInPalette($strField, $type, $table)) {
+                continue;
+            }
+            $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField)));
+        }
+        return $arrClasses;
     }
 
     public function getFlexDirectionClasses($strData): array
