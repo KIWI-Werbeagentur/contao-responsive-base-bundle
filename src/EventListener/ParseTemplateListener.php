@@ -34,11 +34,17 @@ class ParseTemplateListener
 
         if (!$objTargetWithClasses->addResponsiveChildren || !$objTargetWithClasses->responsiveColsItems) return;
 
-        //Checks if DCA-Palette has Settings for children (usually used for lists)
-        if (!in_array($objModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']))) return;
+        // Require an entry in the config-level allow-list: its value is the template property
+        // name that holds the list items (e.g. 'newslist' => 'articles', 'eventlist' => 'events'),
+        // and the code below indexes that map unconditionally - no fallback is possible. A
+        // hasField()-only path (as in GetFrontendModuleListener) is not enough here for that
+        // reason; a third-party module that declares addResponsiveChildren without registering
+        // in includePalettes.container has nothing for this listener to wrap.
+        $arrIncludePalettes = $GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? [];
+        if (!array_key_exists($objModel->type, $arrIncludePalettes)) return;
 
         $strColumnClasses = implode(" ", System::getContainer()->get('kiwi.contao.responsive.frontend')->getColClasses($objTargetWithClasses->responsiveColsItems));
-        $varChildren = ($objTemplate->{$GLOBALS['responsive']['tl_module']['includePalettes']['container'][$objModel->type]});
+        $varChildren = ($objTemplate->{$arrIncludePalettes[$objModel->type]});
 
         if (is_array($varChildren) && $objModel->isResponsive) {
             foreach ($varChildren as &$varChild) {
@@ -50,7 +56,7 @@ class ParseTemplateListener
             }
         }
 
-        $objTemplate->{$GLOBALS['responsive']['tl_module']['includePalettes']['container'][$objModel->type]} = $varChildren;
+        $objTemplate->{$arrIncludePalettes[$objModel->type]} = $varChildren;
     }
 
     public static function mapSidebars(&$objTemplate): array
