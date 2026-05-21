@@ -1,10 +1,10 @@
 {% extends "@Contao/mod_article.html5" %}
 
-{% set container_classes = getAllContainerClasses(_context)|join(" ") %}
+{% set container_classes = getAllContainerClasses(_context, table='tl_article')|join(" ") %}
 {% set inner_classes =
     [
         responsiveContainerSize ? getRowClass(),
-        getAllInnerContainerClasses(_context)|join(" ")
+        getAllInnerContainerClasses(_context, table='tl_article')|join(" ")
     ]
 %}
 {% set spacingTopClasses = getSpacingClasses(responsiveSpacingTop|default(''), 't') %}
