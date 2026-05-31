@@ -10,8 +10,6 @@ class WrapperListener{
     #[AsCallback(table: 'tl_form_field', target: 'config.onload')]
     public function addContainerSubpalette(DataContainer $objDca):void
     {
-        if(!$objDca->activeRecord) return;
-
         $arrContainerSizes = (new $GLOBALS['responsive']['config'])->getContainerSizes();
         if(!$arrContainerSizes) return;
 
