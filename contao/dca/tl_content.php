@@ -13,9 +13,6 @@ $GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = [$GLOBALS['res
 Controller::loadDataContainer('responsive');
 $GLOBALS['TL_DCA']['tl_content']['fields'] += $GLOBALS['TL_DCA']['column']['fields'];
 
-// Apply Container-Option to Elementgroup
-$GLOBALS['TL_DCA']['tl_content']['config']['onload_callback'][] = [WrapperListener::class, 'addContainerSubpalette'];
-
 
 /*
     * CONTAINER
@@ -38,11 +35,11 @@ $GLOBALS['TL_DCA']['tl_content']['fields'] += $GLOBALS['TL_DCA']['container']['f
 //Set palettes
 $GLOBALS['TL_DCA']['tl_content']['palettes']['__selector__'][] = 'responsiveContainer';
 // BUG: only working with both 'values':
-$GLOBALS['TL_DCA']['tl_content']['subpalettes']['responsiveContainer_'] = 'responsiveCols,responsiveOffsets';
+$GLOBALS['TL_DCA']['tl_content']['subpalettes']['responsiveContainer_'] = 'responsiveCols,responsiveOffsets'; // kept for BC
 $GLOBALS['TL_DCA']['tl_content']['subpalettes']['responsiveContainer_0'] = 'responsiveCols,responsiveOffsets';
 
-// Used for all container sizes (Kiwi\Contao\ResponsiveBaseBundle\DataContainer\Content->addContainerSubpalette())
-$GLOBALS['TL_DCA']['tl_content']['subpalettes']['responsiveContainer_responsiveContainerSizes'] = implode(',',array_keys($GLOBALS['TL_DCA']['container']['fields']));
+// Used for all container sizes, see Kiwi\Contao\ResponsiveBaseBundle\DataContainer\WrapperListener
+$GLOBALS['TL_DCA']['tl_content']['subpalettes']['responsiveContainer_responsiveContainerSizes'] = '';
 
 
 /*
