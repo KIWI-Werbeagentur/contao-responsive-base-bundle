@@ -6,12 +6,16 @@
 {% set fieldsetAttrs = attrs()
     .addClass('fieldset formbody__area')
     .addClass(cleanClasses)
-    .addClass(getAllResponsiveClasses(arrConfiguration, table='tl_form_field')|join(' '))
+    .addClass(getContainerClasses(arrConfiguration.responsiveContainer, table='tl_form_field'))
+    .addClass(getAllResponsiveClasses(arrConfiguration, table='tl_form_field'), not arrConfiguration.responsiveContainer)
+    .addClass(getOrderClasses(arrConfiguration.responsiveOrder), arrConfiguration.responsiveContainer)
+    .addClass(getAlignSelfClasses(arrConfiguration.responsiveAlignSelf), arrConfiguration.responsiveContainer)
     .setIfExists('data-cff-condition', cffCondition)
+    .mergeWith(fieldsetAttrs|default)
 %}
 
 <fieldset{{ fieldsetAttrs }}>
     <div class="fieldset__inside {{ getAllInnerContainerClasses(arrConfiguration, table='tl_form_field')|join(' ') }}">
-        {% if this.label is not empty %}
-            <legend>{{ this.label }}</legend>
+        {% if this.label %}
+            <legend>{{ this.label|insert_tag_raw }}</legend>
         {% endif %}
