@@ -141,6 +141,15 @@ class ResponsiveFrontendService
             if (!$this->isFieldInPalette($strField, $type, $table)) {
                 continue;
             }
+            if ('tl_content' == $table) {
+                if (in_array($type, $GLOBALS['responsive']['tl_content']['includePalettes']['container'] ?? [])) {
+                    if (self::getProp($varData, 'responsiveContainer')) {
+                        if (in_array($strKey, ['cols', 'offsets'])) {
+                            continue;
+                        }
+                    }
+                }
+            }
             $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField), $varData));
         }
         return $arrClasses;
