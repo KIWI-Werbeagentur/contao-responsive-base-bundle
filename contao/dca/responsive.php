@@ -1,7 +1,6 @@
 <?php
 
 use Contao\System;
-use Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfigListener;
 
 System::loadLanguageFile('responsive');
 
@@ -21,7 +20,7 @@ $GLOBALS['TL_DCA']['container']['fields']['responsiveFlexDirection'] = [
     'responsiveInputType' => 'iconedSelect',
     'eval' => ['tl_class' => "clr w50"],
 
-    'options_callback' => [$GLOBALS['responsive']['config'], 'getFlexDirections'],
+    'options_callback' => [$GLOBALS['responsive']['config'], 'getFlexDirection'],
     'icon_callback' => function () {
         return (new $GLOBALS['responsive']['config']())->getIcons('flexDirection');
     },

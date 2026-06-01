@@ -3,122 +3,143 @@
 namespace Kiwi\Contao\ResponsiveBaseBundle\Configuration;
 
 use Contao\DataContainer;
-use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
 
 abstract class ResponsiveConfiguration
 {
-    public const SPACING_NO_OP = 'noop';
+    public const string SPACING_NO_OP = 'noop';
 
-    protected array|string $varColClasses = [];
+    protected array|string $varColClasses;
+    protected array|string $varOffsetClasses;
+    protected array|string $varAlignItemsClasses;
+    protected array|string $varAlignSelfClasses;
+    protected array|string $varAlignContentClasses;
+    protected array|string $varJustifyContentClasses;
+    protected array|string $varSpacingClasses;
 
-    protected array|string $varOffsetClasses = [];
+    protected array $arrBreakpoints;
 
-    protected array|string $varAlignItemsClasses = [];
+    protected array $arrContainerSizes;
 
-    protected array|string $varAlignSelfClasses = [];
+    protected string $strContainerDefault;
+    protected string $strContainerDefaultLayout;
 
-    protected array|string $varAlignContentClasses = [];
+    protected array $arrCols;
+    protected array $arrColsDefaults;
 
-    protected array|string $varJustifyContentClasses = [];
+    protected array $arrOffsets;
+    protected array $arrOffsetsDefaults;
 
-    protected array|string $varSpacingClasses = [];
+    protected array $arrSpacings;
+    protected array $arrSpacingTopDefaults;
+    protected array $arrSpacingBottomDefaults;
 
     /** @var array<string, int|string> */
-    protected array $arrElementGroupSpacingTopDefaults = [];
-
+    protected array $arrElementGroupSpacingTopDefaults;
     /** @var array<string, int|string> */
-    protected array $arrElementGroupSpacingBottomDefaults = [];
+    protected array $arrElementGroupSpacingBottomDefaults;
 
-    protected $arrAlignmentItems;
+    protected array $arrAlignmentContent = [
+        'default' => 'default',
+        'start' => 'start',
+        'center' => 'center',
+        'end' => 'end',
+        'space-between' => 'space-between',
+        'space-around' => 'space-around',
+        'space-evenly' => 'space-evenly',
+    ];
 
-    protected $arrAlignmentContent;
+    protected array $arrJustifyContent = [
+        'default' => 'default',
+        'start' => 'start',
+        'center' => 'center',
+        'end' => 'end',
+        'space-between' => 'space-between',
+        'space-around' => 'space-around',
+        'space-evenly' => 'space-evenly',
+    ];
 
-    protected $arrJustifyContent;
+    protected array $arrAlignmentItems = [
+        'default' => 'default',
+        'stretch' => 'stretch',
+        'baseline' => 'baseline',
+        'start' => 'start',
+        'center' => 'center',
+        'end' => 'end',
+    ];
 
-    protected $arrFlexWrap;
+    protected array $arrAlignmentSelf = [
+        'default' => 'default',
+        'stretch' => 'stretch',
+        'baseline' => 'baseline',
+        'start' => 'start',
+        'center' => 'center',
+        'end' => 'end',
+    ];
 
-    protected $arrFlexDirections;
+    protected array $arrFlexDirection = [
+        'default' => 'default',
+        'row' => 'row',
+        'column' => 'column',
+        'row-reverse' => 'row-reverse',
+        'column-reverse' => 'column-reverse',
+    ];
 
-    protected $arrOrderDefaults;
+    protected array $arrFlexWrap = [
+        'default' => 'default',
+        'wrap' => 'wrap',
+        'nowrap' => 'nowrap',
+        'wrap-reverse' => 'wrap-reverse',
+    ];
 
-    protected $arrIcons;
+    protected array $arrOrder;
 
-    public function __construct(private $objDca = null){
-        $this->arrAlignmentContent = [
-            'normal' => 'normal',
-            'start' => 'start',
-            'center' => 'center',
-            'end' => 'end',
-            'space-between' => 'space-between',
-            'space-around' => 'space-around',
-            'space-evenly' => 'space-evenly'
-        ];
+    protected array $arrOrderDefaults = [
+        'xs' => 'default',
+    ];
 
-        $this->arrAlignmentItems = [
-            'auto' => 'auto',
-            'stretch' => 'stretch',
-            'baseline' => 'baseline',
-            'start' => 'start',
-            'center' => 'center',
-            'end' => 'end'
-        ];
+    protected array $arrIcons = [
+        'flexDirection' => [
+                'default' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-row.svg",
+                'row' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-row.svg",
+                'column' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-column.svg",
+                'row-reverse' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-row-reverse.svg",
+                'column-reverse' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-column-reverse.svg",
+        ],
+        'flexItems' => [
+                'default' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-stretch.svg",
+                'stretch' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-stretch.svg",
+                'start' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-start.svg",
+                'center' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-center.svg",
+                'end' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-end.svg",
+                'baseline' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-baseline.svg",
+        ],
+        'alignContent' => [
+                'default' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-start.svg",
+                'start' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-start.svg",
+                'center' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-center.svg",
+                'end' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-end.svg",
+                'space-around' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-around.svg",
+                'space-between' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-between.svg",
+        ],
+        'justifyContent' => [
+                'default' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-start.svg",
+                'start' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-start.svg",
+                'center' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-center.svg",
+                'end' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-end.svg",
+                'space-around' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-around.svg",
+                'space-evenly' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-evenly.svg",
+                'space-between' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-between.svg",
+        ],
+        'flexWrap' => [
+                'default' => "/bundles/kiwiresponsivebase/icons/flex-wrap/flex-wrap-wrap.svg",
+                'wrap' => "/bundles/kiwiresponsivebase/icons/flex-wrap/flex-wrap-wrap.svg",
+                'nowrap' => "/bundles/kiwiresponsivebase/icons/flex-wrap/flex-wrap-nowrap.svg",
+                'wrap-reverse' => "/bundles/kiwiresponsivebase/icons/flex-wrap/flex-wrap-wrap-reverse.svg",
+        ],
+    ];
 
-        $this->arrFlexDirections = ['row' => 'row', 'column' => 'column', 'row-reverse' => 'row-reverse', 'column-reverse' => 'column-reverse'];
-
-        $this->arrFlexWrap = ['wrap' => 'wrap', 'nowrap' => 'nowrap', 'wrap-reverse' => 'wrap-reverse'];
-
-        $this->arrOrderDefaults = ['xs' => 0];
-
-        $this->arrIcons = [
-            'flexDirection' =>
-                [
-                    'row' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-row.svg",
-                    'column' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-column.svg",
-                    'row-reverse' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-row-reverse.svg",
-                    'column-reverse' => "/bundles/kiwiresponsivebase/icons/flex-direction/flex-direction-column-reverse.svg"
-                ],
-
-            'flexItems' =>
-                [
-                    'auto' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-stretch.svg",
-                    'stretch' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-stretch.svg",
-                    'start' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-start.svg",
-                    'center' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-center.svg",
-                    'end' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-end.svg",
-                    'baseline' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-baseline.svg",
-                ],
-
-            'alignContent' =>
-                [
-                    'normal' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-start.svg",
-                    'start' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-start.svg",
-                    'center' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-center.svg",
-                    'end' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-end.svg",
-                    'space-around' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-around.svg",
-                    'space-evenly' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-evenly.svg",
-                    'space-between' => "/bundles/kiwiresponsivebase/icons/align-content/flex-content-space-between.svg",
-                ],
-
-            'justifyContent' =>
-                [
-                    'normal' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-start.svg",
-                    'start' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-start.svg",
-                    'center' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-center.svg",
-                    'end' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-end.svg",
-                    'space-around' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-around.svg",
-                    'space-evenly' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-evenly.svg",
-                    'space-between' => "/bundles/kiwiresponsivebase/icons/justify-content/flex-content-space-between.svg",
-                ],
-
-            'flexWrap' =>
-                [
-                    'wrap' => "/bundles/kiwiresponsivebase/icons/flex-wrap/flex-wrap-wrap.svg",
-                    'nowrap' => "/bundles/kiwiresponsivebase/icons/flex-wrap/flex-wrap-nowrap.svg",
-                    'wrap-reverse' => "/bundles/kiwiresponsivebase/icons/flex-wrap/flex-wrap-wrap-reverse.svg",
-                ]
-        ];
-
-        return $this;
+    public function __construct(private $objDca = null)
+    {
     }
 
     public function __get(string $name)
@@ -126,8 +147,10 @@ abstract class ResponsiveConfiguration
         return match ($name) {
             'varColClasses' => $this->arrCols,
             'varOffsetClasses' => $this->arrOffsets,
-            'varAlignItemsClasses', 'varAlignSelfClasses' => $this->arrAlignmentItems,
-            'varAlignContentClasses', 'varJustifyContentClasses' => $this->arrAlignmentContent,
+            'varAlignItemsClasses' => $this->arrAlignmentItems,
+            'varAlignSelfClasses' => $this->arrAlignmentSelf,
+            'varAlignContentClasses' => $this->arrAlignmentContent,
+            'varJustifyContentClasses' => $this->arrJustifyContent,
             'varSpacingClasses' => $this->arrSpacings,
             default => $this->{$name},
         };
@@ -168,14 +191,14 @@ abstract class ResponsiveConfiguration
         ));
     }
 
-    public function getFlexDirections(): array
+    public function getFlexDirection(): array
     {
-        return array_keys($this->arrFlexDirections);
+        return array_keys($this->arrFlexDirection);
     }
 
     public function getJustifyContent(): array
     {
-        return array_keys($this->arrAlignmentContent);
+        return array_keys($this->arrJustifyContent);
     }
 
     public function getAlignContent(): array
@@ -190,7 +213,7 @@ abstract class ResponsiveConfiguration
 
     public function getAlignSelf(): array
     {
-        return array_keys($this->arrAlignmentItems);
+        return array_keys($this->arrAlignmentSelf);
     }
 
     public function getFlexWrap(): array

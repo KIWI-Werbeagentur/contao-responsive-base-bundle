@@ -56,10 +56,8 @@ class ResponsiveFrontendService
                     $strClass = $strMapping;
                 }
 
-                $strClass = str_replace(
-                    ['{{modifier}}', '{{value}}'],
-                    [$objConfig->arrBreakpoints[$strBreakpoint]['modifier'], $varValue],
-                    $strClass);
+                $arrOptions['modifier'] = $objConfig->arrBreakpoints[$strBreakpoint]['modifier'];
+                $arrOptions['value'] = $varValue;
 
                 $strClass = preg_replace_callback('/\{{(\w+)}}/', function ($match) use ($arrOptions) {
                     $matched = $match[0];
@@ -67,7 +65,9 @@ class ResponsiveFrontendService
                     return isset($arrOptions[$name]) ? $arrOptions[$name] : $matched;
                 }, $strClass);
 
-                $arrClasses[] = $strClass;
+                if ($strClass) {
+                    $arrClasses[] = $strClass;
+                }
             }
         }
         return $arrClasses;
