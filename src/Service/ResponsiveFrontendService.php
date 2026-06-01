@@ -123,6 +123,7 @@ class ResponsiveFrontendService implements ResetInterface
             }
 
             $excludeValues = $arrOptions['excludeValues'] ?? [];
+            unset($arrOptions['excludeValues']);
 
             foreach ($arrValues as $strBreakpoint => $varValue) {
                 if (\in_array($varValue, $excludeValues, true)) {
@@ -142,15 +143,13 @@ class ResponsiveFrontendService implements ResetInterface
                     $strClass = $strMapping;
                 }
 
-                $strClass = str_replace(
-                    ['{{modifier}}', '{{value}}'],
-                    [$objConfig->arrBreakpoints[$strBreakpoint]['modifier'], $varValue],
-                    $strClass);
+                $arrOptions['modifier'] = $objConfig->arrBreakpoints[$strBreakpoint]['modifier'];
+                $arrOptions['value'] = $varValue;
 
                 $strClass = preg_replace_callback('/\{{(\w+)}}/', function ($match) use ($arrOptions) {
                     $matched = $match[0];
                     $name = $match[1];
-                    return isset($arrOptions[$name]) ? $arrOptions[$name] : $matched;
+                    return $arrOptions[$name] ?? $matched;
                 }, $strClass);
 
                 $arrClasses[] = $strClass;
@@ -179,12 +178,19 @@ class ResponsiveFrontendService implements ResetInterface
         return $this->getResponsiveClasses($strData, 'varAlignSelfClasses');
     }
 
-    public function getSpacingClasses(string|null $strData, string $strDirection = ""): array
+    public function getSpacingClasses(?string $strData, string $strDirection = "", array $arrOptions = []): array
     {
-        return $this->getResponsiveClasses($strData, 'varSpacingClasses', [
-            'direction'     => $strDirection,
-            'excludeValues' => [ResponsiveConfiguration::SPACING_NO_OP],
-        ]);
+        // Make default 'excludeValues' overwritable, but prefer explicit '$strDirection' parameter (effectively ignoring passed 'direction' option)
+        $arrOptions = array_merge(
+            [
+                'excludeValues' => [ResponsiveConfiguration::SPACING_NO_OP],
+            ],
+            $arrOptions,
+            [
+                'direction' => $strDirection,
+            ],
+        );
+        return $this->getResponsiveClasses($strData, 'varSpacingClasses', $arrOptions);
     }
 
     /**
@@ -192,9 +198,9 @@ class ResponsiveFrontendService implements ResetInterface
      * system, so this is identical to {@see self::getSpacingClasses()}; a layering
      * bundle (e.g. contao-bootstrap) overrides it to resolve the group partials.
      */
-    public function getGroupSpacingClasses(string|null $strData, string $strDirection = ""): array
+    public function getGroupSpacingClasses(?string $strData, string $strDirection = "", array $arrOptions = []): array
     {
-        return $this->getSpacingClasses($strData, $strDirection);
+        return $this->getSpacingClasses($strData, $strDirection, $arrOptions);
     }
 
     /**
@@ -202,17 +208,17 @@ class ResponsiveFrontendService implements ResetInterface
      * Allows {@see self::getAllContainerClasses()} to use the same single-arg spec shape as
      * the other aggregator methods.
      */
-    public function getSpacingTopClasses(string|null $strData): array
+    public function getSpacingTopClasses(?string $strData, array $arrOptions = []): array
     {
-        return $this->getSpacingClasses($strData, 't');
+        return $this->getSpacingClasses($strData, 't', $arrOptions);
     }
 
     /**
      * Convenience wrapper around {@see self::getSpacingClasses()} for the bottom direction.
      */
-    public function getSpacingBottomClasses(string|null $strData): array
+    public function getSpacingBottomClasses(?string $strData, array $arrOptions = []): array
     {
-        return $this->getSpacingClasses($strData, 'b');
+        return $this->getSpacingClasses($strData, 'b', $arrOptions);
     }
 
     public function getRowClass(): string
@@ -362,7 +368,7 @@ class ResponsiveFrontendService implements ResetInterface
      * @param string      $field            Name of the DCA field $strData was sourced from.
      * @param bool         $skipPaletteCheck Bypass the palette gate (typeless / already-gated callers).
      */
-    public function getContainerClasses($strData, ?string $type = null, ?string $table = null, string $field = 'responsiveContainer', bool $skipPaletteCheck = false): array
+    public function getContainerClasses(?string $strData, ?string $type = null, ?string $table = null, string $field = 'responsiveContainer', bool $skipPaletteCheck = false, array $arrOptions = []): array
     {
         if (!$strData) return [];
         [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_content', __FUNCTION__);
@@ -414,29 +420,29 @@ class ResponsiveFrontendService implements ResetInterface
         return $arrClasses;
     }
 
-    public function getFlexDirectionClasses($strData): array
+    public function getFlexDirectionClasses(?string $strData, $arrOptions = []): array
     {
-        return $this->getResponsiveClasses($strData, 'varFlexDirectionClasses');
+        return $this->getResponsiveClasses($strData, 'varFlexDirectionClasses', $arrOptions);
     }
 
-    public function getFlexWrapClasses($strData): array
+    public function getFlexWrapClasses(?string $strData, array $arrOptions = []): array
     {
-        return $this->getResponsiveClasses($strData, 'varFlexWrapClasses');
+        return $this->getResponsiveClasses($strData, 'varFlexWrapClasses', $arrOptions);
     }
 
-    public function getAlignItemsClasses($strData): array
+    public function getAlignItemsClasses(?string $strData, array $arrOptions = []): array
     {
-        return $this->getResponsiveClasses($strData, 'varAlignItemsClasses');
+        return $this->getResponsiveClasses($strData, 'varAlignItemsClasses', $arrOptions);
     }
 
-    public function getAlignContentClasses($strData): array
+    public function getAlignContentClasses(?string $strData, array $arrOptions = []): array
     {
-        return $this->getResponsiveClasses($strData, 'varAlignContentClasses');
+        return $this->getResponsiveClasses($strData, 'varAlignContentClasses', $arrOptions);
     }
 
-    public function getJustifyContentClasses($strData): array
+    public function getJustifyContentClasses(?string $strData, array $arrOptions = []): array
     {
-        return $this->getResponsiveClasses($strData, 'varJustifyContentClasses');
+        return $this->getResponsiveClasses($strData, 'varJustifyContentClasses', $arrOptions);
     }
 
     /**
