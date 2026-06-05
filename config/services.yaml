@@ -5,6 +5,9 @@ services:
   kiwi.contao.responsive.frontend:
     public: true
     class: Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService
+  Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver:
+    arguments:
+      - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveDesignerFrontendService:
     public: true
     decorates: kiwi.contao.designer.frontend
@@ -26,6 +29,7 @@ services:
     public: true
     arguments:
       - '@kiwi.contao.responsive.frontend'
+      - '@Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver'
   Kiwi\Contao\ResponsiveBaseBundle\Twig\ResponsiveExtension:
     arguments:
       - '@kiwi.contao.responsive.frontend'

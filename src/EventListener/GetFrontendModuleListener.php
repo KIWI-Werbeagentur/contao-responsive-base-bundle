@@ -8,29 +8,49 @@ use Contao\ModuleModel;
 use Contao\System;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 use Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService;
+use Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver;
 
 #[AsHook('getFrontendModule')]
 class GetFrontendModuleListener
 {
-    public function __construct(protected ResponsiveFrontendService $responsiveFrontendService)
-    {
+    public function __construct(
+        protected ResponsiveFrontendService $responsiveFrontendService,
+        protected ResponsiveModuleClassResolver $classResolver,
+    ) {
     }
 
     public function __invoke(ModuleModel $objModuleModel, string $strBuffer, object $objModule): string
     {
+        // Reconstruct the wrapper chain by walking the "includedVia" backref upward (set by the
+        // module wrappers, see RootPageDependentModulesControllerDecorator / IncludesModuleTrait)
+        $arrWrappers = $this->classResolver->collectWrappers($objModuleModel->includedVia ?? null);
+
+        // Consume our own backref so a shared registry model rendered again does not inherit it
+        if (isset($objModuleModel->includedVia)) {
+            $objModuleModel->includedVia = null;
+        }
+
         if ($objModule->Template) {
             $shallReparse = false;
 
-            // Ignore responsive classes from module when it is inserted via CTE
-            $objTargetWithClasses = ($objModuleModel->cte?->getModel() ?? false) ? $objModuleModel->cte->getModel() : $objModuleModel;
+            // When inserted via the "module" content element (CTE), source the responsive
+            // settings from the content element record instead of the module's own.
+            $objCteModel = $objModuleModel->cte?->getModel() ?: null;
+            $objTargetWithClasses = $objCteModel ?? $objModuleModel;
             $objModule->Template->baseClass = $objModule->typePrefix . $objModule->type;
 
-            //Responsive Module Settings
-            $isField = PaletteManipulatorExtended::create()->hasField($objModuleModel->type, 'tl_module', 'addResponsive');
+            //Responsive Module Settings: the outermost wrapper offering and enabling them wins, otherwise the CTE/module logic applies unchanged
+            // Check field availability against the source's own table (tl_content for a CTE, tl_module otherwise)
+            $isField = PaletteManipulatorExtended::create()->hasField($objTargetWithClasses->type, $objCteModel ? 'tl_content' : 'tl_module', 'addResponsive');
+            $objSource = $this->classResolver->getWrapperSource($arrWrappers, 'addResponsive');
 
-            if ($objTargetWithClasses->addResponsive && $isField) {
+            if (!$objSource && $objTargetWithClasses->addResponsive && $isField) {
+                $objSource = $objTargetWithClasses;
+            }
+
+            if ($objSource) {
                 $shallReparse = true;
-                $arrClasses = $this->responsiveFrontendService->getAllResponsiveClasses($objTargetWithClasses->row());
+                $arrClasses = $this->responsiveFrontendService->getAllResponsiveClasses($objSource->row());
 
                 $strResponsiveClasses = implode(' ', $arrClasses);
 
@@ -43,9 +63,19 @@ class GetFrontendModuleListener
             $objTargetWithClasses = $objTargetWithClasses->addResponsiveChildren ? $objTargetWithClasses : $objModuleModel;
             $hasResponsiveChildren = in_array($objModuleModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']));
 
-            if ($objTargetWithClasses->addResponsiveChildren && ($isField || $hasResponsiveChildren)) {
+            // Flag-only wrapper check: the wrapper gets addResponsiveChildren per record in the
+            // backend only (see IncludesListener::addWrapperResponsiveChildrenSettings), so the
+            // palette cannot be inspected here - the child gate below ensures applicability
+            $objSource = $this->classResolver->getWrapperSource($arrWrappers, 'addResponsiveChildren', false);
+
+            if (!$objSource && $objTargetWithClasses->addResponsiveChildren) {
+                $objSource = $objTargetWithClasses;
+            }
+
+            // The child still needs to support an inner container structurally, no matter whose values apply
+            if ($objSource && ($isField || $hasResponsiveChildren)) {
                 $shallReparse = true;
-                $arrInnerClasses = $this->responsiveFrontendService->getAllInnerContainerClasses($objTargetWithClasses->row());
+                $arrInnerClasses = $this->responsiveFrontendService->getAllInnerContainerClasses($objSource->row());
 
                 $objModule->Template->hasResponsiveChildren = $hasResponsiveChildren;
                 $objModule->Template->innerClass = $arrInnerClasses;
