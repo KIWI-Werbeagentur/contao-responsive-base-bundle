@@ -4,21 +4,54 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\EventListener;
 
 use Contao\Controller;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
+use Contao\Module;
+use Contao\ModuleProxy;
 use Contao\StringUtil;
 use Contao\System;
+use Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver;
 
 
 #[AsHook('parseTemplate')]
 class ParseTemplateListener
 {
+    public function __construct(protected ResponsiveModuleClassResolver $classResolver)
+    {
+    }
+
     public function __invoke($objTemplate)
     {
         if ($objTemplate->typePrefix == 'mod_') {
             self::wrapListItems($objTemplate);
         }
 
+        // Fragment modules render through ModuleProxy, so the getFrontendModule hook cannot reach
+        // their template. When such a module uses a legacy template it is rendered here via a real
+        // FrontendTemplate - inject the resolved responsive column classes into its class attribute.
+        // Modern Twig fragment templates are handled by the frontend_module/_base.html.twig override
+        // (they never reach this hook); legacy Modules are handled by the getFrontendModule hook and
+        // are excluded by the ModuleProxy check below, so classes are never applied twice.
+        if (str_starts_with((string) $objTemplate->getName(), 'mod_')) {
+            $this->addFragmentModuleClasses($objTemplate);
+        }
+
         if (str_starts_with($objTemplate->getName(), 'fe_page')) {
             self::setLayoutSizes($objTemplate);
+        }
+    }
+
+    protected function addFragmentModuleClasses($objTemplate): void
+    {
+        $arrRow = $objTemplate->getData();
+        $strType = $arrRow['type'] ?? null;
+
+        if (!$strType || Module::findClass($strType) !== ModuleProxy::class) {
+            return;
+        }
+
+        $arrClasses = $this->classResolver->resolveColumnClasses($arrRow);
+
+        if ($arrClasses) {
+            $objTemplate->class = trim(($objTemplate->class ?? '') . ' ' . implode(' ', $arrClasses));
         }
     }
 
