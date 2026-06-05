@@ -28,7 +28,7 @@ class IncludesListener
             $objInclude = $strTargetClass::findByPk($objDca->getCurrentRecord()[$objDca->getCurrentRecord()['type']] ?? null);
 
             if($objInclude){
-                $arrClasses = System::getContainer()->get('kiwi.contao.responsive.frontend')->getAllInnerContainerClasses($objInclude->row());
+                $arrClasses = System::getContainer()->get('kiwi.contao.responsive.frontend')->getAllInnerContainerClasses($objInclude->row(), [], 'tl_module');
                 $GLOBALS['TL_DCA']['tl_content']['fields']['addResponsiveChildren']['label'] = &$GLOBALS['TL_LANG']['responsive']['overwriteResponsiveChildren'];
                 $GLOBALS['TL_DCA']['tl_content']['fields']['addResponsiveChildren']['label'][1] = sprintf($GLOBALS['TL_LANG']['responsive']['overwriteResponsiveChildren'][1] ?? "", "(".implode(" ", $arrClasses).")");
             }

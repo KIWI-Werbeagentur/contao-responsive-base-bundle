@@ -33,11 +33,13 @@ class ResponsiveModuleClassResolver
             return [];
         }
 
-        if (!$arrSourceRow = $this->resolveColumnSourceRow($arrRow)) {
+        [$arrSourceRow, $strTable, $blnSkipPaletteCheck] = $this->resolveColumnSourceRow($arrRow);
+
+        if (!$arrSourceRow) {
             return [];
         }
 
-        return $this->responsiveFrontendService->getAllResponsiveClasses($arrSourceRow, [], 'tl_module');
+        return $this->responsiveFrontendService->getAllResponsiveClasses($arrSourceRow, [], $strTable, $blnSkipPaletteCheck);
     }
 
     /**
@@ -93,32 +95,36 @@ class ResponsiveModuleClassResolver
     }
 
     /**
-     * Resolves which row supplies the responsive column classes: the outermost enabled wrapper,
-     * otherwise the CTE-bound model, otherwise the module itself - mirroring the legacy
+     * Resolves which row supplies the responsive column classes and the DCA table it belongs to:
+     * the outermost enabled wrapper (tl_module), otherwise the CTE-bound content element
+     * (tl_content), otherwise the module itself (tl_module) - mirroring the legacy
      * getFrontendModule logic so all paths stay consistent. The availability check uses the
-     * rendered module's own type, like the hook does.
+     * source's own table so the palette gate is meaningful.
+     *
+     * @return array{0: ?array, 1: string, 2: bool} [source row or null, source table, skip palette check]
      */
-    protected function resolveColumnSourceRow(array $arrRow): ?array
+    protected function resolveColumnSourceRow(array $arrRow): array
     {
         $arrWrappers = $this->collectWrappers($arrRow['includedVia'] ?? null);
 
         if ($objWrapper = $this->getWrapperSource($arrWrappers, 'addResponsive')) {
-            return $objWrapper->row();
+            return [$objWrapper->row(), 'tl_module', false];
         }
 
-        // When inserted via the "module" content element (CTE), source the responsive settings
-        // from the content element record instead of the module's own. Field availability is
-        // checked against the source's own table (tl_content for the CTE, tl_module otherwise).
+        // When inserted via the "module" content element (CTE), the columns come from the content
+        // element record. tl_content has no "addResponsive" flag (bootstrap's "responsiveOverwriteRowCols"
+        // etc. gate is enforced inside the frontend service), and its responsive fields live behind a
+        // selector/subpalette absent from the frontend palette - so source it unconditionally and skip
+        // the palette gate, letting the service decide what renders.
         if ($objCte = ($arrRow['cte'] ?? null)?->getModel()) {
-            return $objCte->addResponsive
-                && PaletteManipulatorExtended::create()->hasField($objCte->type, 'tl_content', 'addResponsive')
-                    ? $objCte->row()
-                    : null;
+            return [$objCte->row(), 'tl_content', true];
         }
 
-        return ($arrRow['addResponsive'] ?? false)
+        $arrSource = ($arrRow['addResponsive'] ?? false)
             && PaletteManipulatorExtended::create()->hasField($arrRow['type'] ?? '', 'tl_module', 'addResponsive')
                 ? $arrRow
                 : null;
+
+        return [$arrSource, 'tl_module', false];
     }
 }
