@@ -37,6 +37,10 @@ services:
     arguments:
       - '@kiwi.contao.responsive.frontend'
       - '@Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver'
+  Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetContentElementListener:
+    public: true
+    arguments:
+      - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Twig\ResponsiveExtension:
     arguments:
       - '@kiwi.contao.responsive.frontend'
