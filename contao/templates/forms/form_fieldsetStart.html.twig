@@ -6,16 +6,16 @@
 {% set fieldsetAttrs = attrs()
     .addClass('fieldset formbody__area')
     .addClass(cleanClasses)
-    .addClass(getContainerClasses(arrConfiguration.responsiveContainer, table='tl_form_field'))
-    .addClass(getAllResponsiveClasses(arrConfiguration, table='tl_form_field'), not arrConfiguration.responsiveContainer)
-    .addClass(getOrderClasses(arrConfiguration.responsiveOrder), arrConfiguration.responsiveContainer)
-    .addClass(getAlignSelfClasses(arrConfiguration.responsiveAlignSelf), arrConfiguration.responsiveContainer)
+    .addClass(getContainerClasses(this.responsiveContainer, type=this.type, table='tl_form_field'))
+    .addClass(getAllResponsiveClasses(this, table='tl_form_field'), not this.responsiveContainer)
+    .addClass(getOrderClasses(this.responsiveOrder), this.responsiveContainer)
+    .addClass(getAlignSelfClasses(this.responsiveAlignSelf), this.responsiveContainer)
     .setIfExists('data-cff-condition', cffCondition)
     .mergeWith(fieldsetAttrs|default)
 %}
 
 <fieldset{{ fieldsetAttrs }}>
-    <div class="fieldset__inside {{ getAllInnerContainerClasses(arrConfiguration, table='tl_form_field')|join(' ') }}">
+    <div class="fieldset__inside {{ getAllInnerContainerClasses(this, table='tl_form_field')|join(' ') }}">
         {% if this.label %}
             <legend>{{ this.label|insert_tag_raw }}</legend>
         {% endif %}

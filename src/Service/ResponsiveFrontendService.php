@@ -124,7 +124,7 @@ class ResponsiveFrontendService
         return (new $GLOBALS['responsive']['config']())->strRow ?? '';
     }
 
-    public function getAllResponsiveClasses($varData, array $arrFields = [], string $table = 'tl_content'): array
+    public function getAllResponsiveClasses($varData, array $arrFields = [], string $table = 'tl_content', bool $skipPaletteCheck = false): array
     {
         $arrSpecs = [
             ['cols',       'responsiveCols',       'getColClasses'],
@@ -138,7 +138,7 @@ class ResponsiveFrontendService
         $arrClasses = [];
         foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
             $strField = $arrFields[$strKey] ?? $strDefaultField;
-            if (!$this->isFieldInPalette($strField, $type, $table)) {
+            if (!$this->isFieldInPalette($strField, $type, $table, $skipPaletteCheck)) {
                 continue;
             }
             if ('tl_content' == $table) {
@@ -173,19 +173,21 @@ class ResponsiveFrontendService
      *
      * Note on the internal {@see self::getAllContainerClasses()} call path: it already gates
      * each spec entry against the correct field name in its own outer loop, then calls this
-     * method with no `$type` so the inner gate short-circuits to a no-op. The `$field`
-     * parameter here therefore matters for *direct* external callers (templates / hooks /
-     * tests) that source the value from a field other than `responsiveContainer`.
+     * method with $skipPaletteCheck = true so the inner gate is not re-applied (it would
+     * otherwise check the wrong field name, `responsiveContainer`, against the row's palette).
+     * The `$field` parameter here therefore matters for *direct* external callers (templates /
+     * hooks / tests) that source the value from a field other than `responsiveContainer`.
      *
-     * @param string|null $strData  Container-size key looked up in $arrContainerSizes.
-     * @param string|null $type     Optional record type for palette gating. Null disables gating.
-     * @param string      $table    DCA table whose palette is consulted when $type is set.
-     * @param string      $field    Name of the DCA field $strData was sourced from.
+     * @param string|null $strData          Container-size key looked up in $arrContainerSizes.
+     * @param string|null $type             Record type for palette gating. Null fails the gate (closed).
+     * @param string      $table            DCA table whose palette is consulted.
+     * @param string      $field            Name of the DCA field $strData was sourced from.
+     * @param bool         $skipPaletteCheck Bypass the palette gate (typeless / already-gated callers).
      */
-    public function getContainerClasses($strData, ?string $type = null, string $table = 'tl_content', string $field = 'responsiveContainer'): array
+    public function getContainerClasses($strData, ?string $type = null, string $table = 'tl_content', string $field = 'responsiveContainer', bool $skipPaletteCheck = false): array
     {
         if (!$strData) return [];
-        if (!$this->isFieldInPalette($field, $type, $table)) {
+        if (!$this->isFieldInPalette($field, $type, $table, $skipPaletteCheck)) {
             return [];
         }
 
@@ -203,7 +205,7 @@ class ResponsiveFrontendService
      * `tl_article` is the dominant caller (mod_article.html.twig); layout-level callers
      * override with `tl_layout`.
      */
-    public function getAllContainerClasses($varData, array $arrFields = [], string $table = 'tl_article'): array
+    public function getAllContainerClasses($varData, array $arrFields = [], string $table = 'tl_article', bool $skipPaletteCheck = false): array
     {
         $arrSpecs = [
             ['containerSize', 'responsiveContainerSize', 'getContainerClasses'],
@@ -216,10 +218,18 @@ class ResponsiveFrontendService
         $arrClasses = [];
         foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
             $strField = $arrFields[$strKey] ?? $strDefaultField;
-            if (!$this->isFieldInPalette($strField, $type, $table)) {
+            if (!$this->isFieldInPalette($strField, $type, $table, $skipPaletteCheck)) {
                 continue;
             }
-            $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField)));
+            $varValue = self::getProp($varData, $strField);
+            // getContainerClasses re-gates on its own field name; this spec was already gated
+            // above (on responsiveContainerSize), so skip its inner palette check.
+            $arrClasses = array_merge(
+                $arrClasses,
+                'getContainerClasses' === $strMethod
+                    ? $this->getContainerClasses($varValue, $type, $table, $strField, true)
+                    : $this->$strMethod($varValue)
+            );
         }
         return $arrClasses;
     }
@@ -249,7 +259,7 @@ class ResponsiveFrontendService
         return $this->getResponsiveClasses($strData, 'varJustifyContentClasses');
     }
 
-    public function getAllInnerContainerClasses($varData, array $arrFields = [], string $table = 'tl_content'): array
+    public function getAllInnerContainerClasses($varData, array $arrFields = [], string $table = 'tl_content', bool $skipPaletteCheck = false): array
     {
         $arrSpecs = [
             ['flexDirection',  'responsiveFlexDirection',  'getFlexDirectionClasses'],
@@ -264,7 +274,7 @@ class ResponsiveFrontendService
         $arrClasses = [];
         foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
             $strField = $arrFields[$strKey] ?? $strDefaultField;
-            if (!$this->isFieldInPalette($strField, $type, $table)) {
+            if (!$this->isFieldInPalette($strField, $type, $table, $skipPaletteCheck)) {
                 continue;
             }
             $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField), $varData));
@@ -275,21 +285,28 @@ class ResponsiveFrontendService
     /**
      * Returns whether the field is part of the resolved palette.
      *
-     * Always returns true if no palette gating applies - either because the caller did not provide
-     * a type (`$type === null`), or because the type does not correspond to any palette in
-     * the given table (soft gating: legacy callers that pass varData whose `type` was not
-     * meant to identify a palette in $table keep their previous "all fields render" behavior).
+     * Fails closed: a field only renders when it is positively confirmed in the type's palette
+     * for the given table. A missing type, or a type that is not a palette in $table (the usual
+     * symptom of a wrong table / wrong source being passed), returns false - so such mismatches
+     * surface immediately as missing classes instead of silently rendering and lingering.
+     *
+     * Callers that legitimately operate on typeless data (an article or form body that has no
+     * per-record type and renders from its table's "default" palette) opt out via $skipPaletteCheck.
      */
-    protected function isFieldInPalette(string $strField, ?string $type, string $table = 'tl_content'): bool
+    protected function isFieldInPalette(string $strField, ?string $type, string $table = 'tl_content', bool $skipPaletteCheck = false): bool
     {
-        if ($type === null || $type === '') {
+        if ($skipPaletteCheck) {
             return true;
+        }
+
+        if ($type === null || $type === '') {
+            return false;
         }
 
         Controller::loadDataContainer($table);
 
         if (!isset($GLOBALS['TL_DCA'][$table]['palettes'][$type])) {
-            return true;
+            return false;
         }
 
         return $this->paletteManipulator->hasField($type, $table, $strField);
