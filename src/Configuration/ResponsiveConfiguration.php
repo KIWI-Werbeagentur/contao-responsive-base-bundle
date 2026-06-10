@@ -7,6 +7,8 @@ use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
 
 abstract class ResponsiveConfiguration
 {
+    public const SPACING_NO_OP = 'noop';
+
     protected array|string $varColClasses = [];
 
     protected array|string $varOffsetClasses = [];
@@ -20,6 +22,12 @@ abstract class ResponsiveConfiguration
     protected array|string $varJustifyContentClasses = [];
 
     protected array|string $varSpacingClasses = [];
+
+    /** @var array<string, int|string> */
+    protected array $arrElementGroupSpacingTopDefaults = [];
+
+    /** @var array<string, int|string> */
+    protected array $arrElementGroupSpacingBottomDefaults = [];
 
     protected $arrAlignmentItems;
 
@@ -145,6 +153,21 @@ abstract class ResponsiveConfiguration
         return array_keys($this->arrSpacings);
     }
 
+    /**
+     * Returns the spacing option keys with {@see self::SPACING_NO_OP} removed.
+     * Useful for consumers that need to enumerate the visible/effective tokens
+     * (e.g. SCSS regeneration), without knowing the concrete noop literal.
+     *
+     * @return list<string>
+     */
+    public function getSpacingsExcludingNoOp(): array
+    {
+        return array_values(array_filter(
+            $this->getSpacings(),
+            static fn ($key): bool => (string) $key !== self::SPACING_NO_OP
+        ));
+    }
+
     public function getFlexDirections(): array
     {
         return array_keys($this->arrFlexDirections);
@@ -180,26 +203,76 @@ abstract class ResponsiveConfiguration
         return $this->arrIcons[$strField] ?? [];
     }
 
+    /**
+     * DCA `onload_callback` entry point. Writes initial default values into
+     * every responsive field this bundle knows about for the table currently
+     * being loaded. Each family of fields is handled by a dedicated
+     * {@see self::apply*Defaults()} helper so subclasses can override individual
+     * groups surgically.
+     */
     public function getDefaults(DataContainer $objDca): void
     {
-        if ('tl_layout' === $objDca->table) {
-            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefaultLayout ?? '';
-        } else {
-            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveContainerSize']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefault ?? '';
-        }
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveContainerSizeHeader']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefaultLayout ?? '';
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveContainerSizeFooter']['default'] = (new $GLOBALS['responsive']['config'])->strContainerDefaultLayout ?? '';
+        $this->applyContainerSizeDefaults($objDca);
+        $this->applyColumnDefaults($objDca);
+        $this->applySpacingDefaults($objDca);
+        $this->applyElementGroupSpacingDefaults($objDca);
+        $this->applyOrderDefaults($objDca);
+    }
 
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveCols']['default'] = (new $GLOBALS['responsive']['config'])->arrColsDefaults;
-        $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOffsets']['default'] = (new $GLOBALS['responsive']['config'])->arrOffsetsDefaults;
-        if (isset($GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingTop'])) {
-            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingTop']['default'] = (new $GLOBALS['responsive']['config'])->arrSpacingTopDefaults ?? null;
+    protected function applyContainerSizeDefaults(DataContainer $dc): void
+    {
+        $fields = &$GLOBALS['TL_DCA'][$dc->table]['fields'];
+        if (isset($fields['responsiveContainerSize'])) {
+            $fields['responsiveContainerSize']['default'] = $dc->table === 'tl_layout'
+                ? ($this->strContainerDefaultLayout ?? '')
+                : ($this->strContainerDefault ?? '');
         }
-        if (isset($GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingBottom'])) {
-            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveSpacingBottom']['default'] = (new $GLOBALS['responsive']['config'])->arrSpacingBottomDefaults ?? null;
+        if (isset($fields['responsiveContainerSizeHeader'])) {
+            $fields['responsiveContainerSizeHeader']['default'] = $this->strContainerDefaultLayout ?? '';
         }
-        if (isset($GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOrder'])) {
-            $GLOBALS['TL_DCA'][$objDca->table]['fields']['responsiveOrder']['default'] = (new $GLOBALS['responsive']['config'])->arrOrderDefaults ?? null;
+        if (isset($fields['responsiveContainerSizeFooter'])) {
+            $fields['responsiveContainerSizeFooter']['default'] = $this->strContainerDefaultLayout ?? '';
+        }
+    }
+
+    protected function applyColumnDefaults(DataContainer $dc): void
+    {
+        $fields = &$GLOBALS['TL_DCA'][$dc->table]['fields'];
+        if (isset($fields['responsiveCols'])) {
+            $fields['responsiveCols']['default'] = $this->arrColsDefaults;
+        }
+        if (isset($fields['responsiveOffsets'])) {
+            $fields['responsiveOffsets']['default'] = $this->arrOffsetsDefaults;
+        }
+    }
+
+    protected function applySpacingDefaults(DataContainer $dc): void
+    {
+        $fields = &$GLOBALS['TL_DCA'][$dc->table]['fields'];
+        if (isset($fields['responsiveSpacingTop'])) {
+            $fields['responsiveSpacingTop']['default'] = $this->arrSpacingTopDefaults ?? null;
+        }
+        if (isset($fields['responsiveSpacingBottom'])) {
+            $fields['responsiveSpacingBottom']['default'] = $this->arrSpacingBottomDefaults ?? null;
+        }
+    }
+
+    protected function applyElementGroupSpacingDefaults(DataContainer $dc): void
+    {
+        $fields = &$GLOBALS['TL_DCA'][$dc->table]['fields'];
+        if (isset($fields['responsiveGroupSpacingTop'])) {
+            $fields['responsiveGroupSpacingTop']['default'] = $this->arrElementGroupSpacingTopDefaults ?? null;
+        }
+        if (isset($fields['responsiveGroupSpacingBottom'])) {
+            $fields['responsiveGroupSpacingBottom']['default'] = $this->arrElementGroupSpacingBottomDefaults ?? null;
+        }
+    }
+
+    protected function applyOrderDefaults(DataContainer $dc): void
+    {
+        $fields = &$GLOBALS['TL_DCA'][$dc->table]['fields'];
+        if (isset($fields['responsiveOrder'])) {
+            $fields['responsiveOrder']['default'] = $this->arrOrderDefaults ?? null;
         }
     }
 

@@ -5,6 +5,9 @@ services:
   kiwi.contao.responsive.frontend:
     public: true
     class: Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService
+  Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver:
+    arguments:
+      - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveDesignerFrontendService:
     public: true
     decorates: kiwi.contao.designer.frontend
@@ -14,8 +17,14 @@ services:
     arguments:
       - '@contao.framework'
       - '@twig'
+  Kiwi\Contao\ResponsiveBaseBundle\Controller\FrontendModule\RootPageDependentModulesControllerDecorator:
+    public: true
+    decorates: Contao\CoreBundle\Controller\FrontendModule\RootPageDependentModulesController
+    arguments:
+      - '@.inner'
+      - '@contao.framework'
+      - '@contao.routing.page_finder'
   Kiwi\Contao\ResponsiveBaseBundle\DataContainer\IncludesListener: ~
-  Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfigListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\DataContainer\WrapperListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\LoadDataContainerListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\ParseTemplateListener: ~
@@ -27,8 +36,14 @@ services:
     public: true
     arguments:
       - '@kiwi.contao.responsive.frontend'
+      - '@Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver'
+  Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetContentElementListener:
+    public: true
+    arguments:
+      - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Twig\ResponsiveExtension:
     arguments:
       - '@kiwi.contao.responsive.frontend'
+      - '@Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver'
     tags:
       - 'twig.extension'

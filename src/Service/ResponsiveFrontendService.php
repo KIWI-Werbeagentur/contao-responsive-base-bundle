@@ -2,11 +2,16 @@
 
 namespace Kiwi\Contao\ResponsiveBaseBundle\Service;
 
+use Contao\Controller;
 use Contao\StringUtil;
 use Contao\System;
+use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
+use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
 
 class ResponsiveFrontendService
 {
+    public function __construct(private readonly PaletteManipulatorExtended $paletteManipulator) {}
+
     public static function propExists($varTarget, $strProp)
     {
         return (is_array($varTarget) && array_key_exists($strProp, $varTarget)) || (is_object($varTarget) && property_exists($varTarget, $strProp));
@@ -38,7 +43,13 @@ class ResponsiveFrontendService
                 }
             }
 
+            $excludeValues = $arrOptions['excludeValues'] ?? [];
+
             foreach ($arrValues as $strBreakpoint => $varValue) {
+                if (\in_array($varValue, $excludeValues, true)) {
+                    continue;
+                }
+
                 if ($objConfig->{$strMapping}) {
                     $strClass = is_array($objConfig->{$strMapping}) ? ($objConfig->{$strMapping}[$varValue] ?? '') : $objConfig->{$strMapping};
                 } else {
@@ -84,7 +95,28 @@ class ResponsiveFrontendService
 
     public function getSpacingClasses($strData, $strDirection = ""): array
     {
-        return $this->getResponsiveClasses($strData, 'varSpacingClasses', ['direction' => $strDirection]);
+        return $this->getResponsiveClasses($strData, 'varSpacingClasses', [
+            'direction'     => $strDirection,
+            'excludeValues' => [ResponsiveConfiguration::SPACING_NO_OP],
+        ]);
+    }
+
+    /**
+     * Convenience wrapper around {@see self::getSpacingClasses()} for the top direction.
+     * Allows {@see self::getAllContainerClasses()} to use the same single-arg spec shape as
+     * the other aggregator methods.
+     */
+    public function getSpacingTopClasses($strData): array
+    {
+        return $this->getSpacingClasses($strData, 't');
+    }
+
+    /**
+     * Convenience wrapper around {@see self::getSpacingClasses()} for the bottom direction.
+     */
+    public function getSpacingBottomClasses($strData): array
+    {
+        return $this->getSpacingClasses($strData, 'b');
     }
 
     public function getRowClass(): string
@@ -92,33 +124,114 @@ class ResponsiveFrontendService
         return (new $GLOBALS['responsive']['config']())->strRow ?? '';
     }
 
-    public function getAllResponsiveClasses($varData, array $arrFields = []): array
+    public function getAllResponsiveClasses($varData, array $arrFields = [], string $table = 'tl_content', bool $skipPaletteCheck = false): array
     {
-        return
-            array_merge(
-                $this->getColClasses(self::getProp($varData, $arrFields['cols'] ?? 'responsiveCols'), $varData),
-                $this->getOffsetClasses(self::getProp($varData, $arrFields['offsets'] ?? 'responsiveOffsets'), $varData),
-                $this->getOrderClasses(self::getProp($varData, $arrFields['order'] ?? 'responsiveOrder'), $varData),
-                $this->getAlignSelfClasses(self::getProp($varData, $arrFields['align-self'] ?? 'responsiveAlignSelf'), $varData)
-            );
+        $arrSpecs = [
+            ['cols',       'responsiveCols',       'getColClasses'],
+            ['offsets',    'responsiveOffsets',    'getOffsetClasses'],
+            ['order',      'responsiveOrder',      'getOrderClasses'],
+            ['align-self', 'responsiveAlignSelf',  'getAlignSelfClasses'],
+        ];
+
+        $type = self::getProp($varData, 'type') ?: null;
+
+        $arrClasses = [];
+        foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
+            $strField = $arrFields[$strKey] ?? $strDefaultField;
+            if (!$this->isFieldInPalette($strField, $type, $table, $skipPaletteCheck)) {
+                continue;
+            }
+            if ('tl_content' == $table) {
+                if (in_array($type, $GLOBALS['responsive']['tl_content']['includePalettes']['container'] ?? [])) {
+                    if (self::getProp($varData, 'responsiveContainer')) {
+                        if (in_array($strKey, ['cols', 'offsets'])) {
+                            continue;
+                        }
+                    }
+                }
+            }
+            $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField), $varData));
+        }
+        return $arrClasses;
     }
 
-    public function getContainerClasses($strData): array
+    /**
+     * Resolve a container-size key to its CSS classes, optionally gated by palette membership.
+     *
+     * The same value lives under two differently named DCA fields, encoding different
+     * propositions:
+     *   - `responsiveContainer`     (tl_content, tl_form_field): a *mode selector* answering
+     *                               "is this element a container, and if so, what size?" -
+     *                               has a `default` option (= treat as column) and drives
+     *                               column- vs container-mode subpalettes.
+     *   - `responsiveContainerSize` (tl_article, tl_layout):     a *pure size attribute* -
+     *                               those records are always containers; only the size varies.
+     *
+     * Both resolve through the same `arrContainerSizes` map, so the conversion is uniform.
+     * Palette membership however is per-field-name: direct callers pass the field name they
+     * sourced the value from so the gate consults the right DCA entry for the resolved palette.
+     *
+     * Note on the internal {@see self::getAllContainerClasses()} call path: it already gates
+     * each spec entry against the correct field name in its own outer loop, then calls this
+     * method with $skipPaletteCheck = true so the inner gate is not re-applied (it would
+     * otherwise check the wrong field name, `responsiveContainer`, against the row's palette).
+     * The `$field` parameter here therefore matters for *direct* external callers (templates /
+     * hooks / tests) that source the value from a field other than `responsiveContainer`.
+     *
+     * @param string|null $strData          Container-size key looked up in $arrContainerSizes.
+     * @param string|null $type             Record type for palette gating. Null fails the gate (closed).
+     * @param string      $table            DCA table whose palette is consulted.
+     * @param string      $field            Name of the DCA field $strData was sourced from.
+     * @param bool         $skipPaletteCheck Bypass the palette gate (typeless / already-gated callers).
+     */
+    public function getContainerClasses($strData, ?string $type = null, string $table = 'tl_content', string $field = 'responsiveContainer', bool $skipPaletteCheck = false): array
     {
         if (!$strData) return [];
+        if (!$this->isFieldInPalette($field, $type, $table, $skipPaletteCheck)) {
+            return [];
+        }
 
         $objConfig = new $GLOBALS['responsive']['config']();
         return is_array($objConfig->arrContainerSizes[$strData]) ? $objConfig->arrContainerSizes[$strData] : [$objConfig->arrContainerSizes[$strData]];
     }
 
-    public function getAllContainerClasses($varData, array $arrFields = []): array
+    /**
+     * Resolve article-/layout-level container classes (size + top/bottom spacing).
+     *
+     * Unlike the sibling aggregators, this method operates on the article/layout level: the
+     * fields it reads (`responsiveContainerSize`, `responsiveSpacingTop`, `responsiveSpacingBottom`)
+     * live on `tl_article` and `tl_layout` via the `containerSize` / `space` DCA buckets, not
+     * on `tl_content`. The `$table` default therefore differs from the sibling aggregators -
+     * `tl_article` is the dominant caller (mod_article.html.twig); layout-level callers
+     * override with `tl_layout`.
+     */
+    public function getAllContainerClasses($varData, array $arrFields = [], string $table = 'tl_article', bool $skipPaletteCheck = false): array
     {
-        return
-            array_merge(
-                $this->getContainerClasses(self::getProp($varData, $arrFields['containerSize'] ?? 'responsiveContainerSize'), $varData),
-                $this->getSpacingClasses(self::getProp($varData, $arrFields['spacingTop'] ?? 'responsiveSpacingTop'), 't', $varData),
-                $this->getSpacingClasses(self::getProp($varData, $arrFields['spacingBottom'] ?? 'responsiveSpacingBottom'), 'b', $varData),
+        $arrSpecs = [
+            ['containerSize', 'responsiveContainerSize', 'getContainerClasses'],
+            ['spacingTop',    'responsiveSpacingTop',    'getSpacingTopClasses'],
+            ['spacingBottom', 'responsiveSpacingBottom', 'getSpacingBottomClasses'],
+        ];
+
+        $type = self::getProp($varData, 'type') ?: null;
+
+        $arrClasses = [];
+        foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
+            $strField = $arrFields[$strKey] ?? $strDefaultField;
+            if (!$this->isFieldInPalette($strField, $type, $table, $skipPaletteCheck)) {
+                continue;
+            }
+            $varValue = self::getProp($varData, $strField);
+            // getContainerClasses re-gates on its own field name; this spec was already gated
+            // above (on responsiveContainerSize), so skip its inner palette check.
+            $arrClasses = array_merge(
+                $arrClasses,
+                'getContainerClasses' === $strMethod
+                    ? $this->getContainerClasses($varValue, $type, $table, $strField, true)
+                    : $this->$strMethod($varValue)
             );
+        }
+        return $arrClasses;
     }
 
     public function getFlexDirectionClasses($strData): array
@@ -146,15 +259,56 @@ class ResponsiveFrontendService
         return $this->getResponsiveClasses($strData, 'varJustifyContentClasses');
     }
 
-    public function getAllInnerContainerClasses($varData, array $arrFields = []): array
+    public function getAllInnerContainerClasses($varData, array $arrFields = [], string $table = 'tl_content', bool $skipPaletteCheck = false): array
     {
-        return
-            array_merge(
-                $this->getFlexDirectionClasses(self::getProp($varData, $arrFields['flexDirection'] ?? 'responsiveFlexDirection'), $varData),
-                $this->getFlexWrapClasses(self::getProp($varData, $arrFields['flexWrap'] ?? 'responsiveFlexWrap'), $varData),
-                $this->getAlignItemsClasses(self::getProp($varData, $arrFields['alignItems'] ?? 'responsiveAlignItems'), $varData),
-                $this->getAlignContentClasses(self::getProp($varData, $arrFields['alignContent'] ?? 'responsiveAlignContent'), $varData),
-                $this->getJustifyContentClasses(self::getProp($varData, $arrFields['justifyContent'] ?? 'responsiveJustifyContent'), $varData),
-            );
+        $arrSpecs = [
+            ['flexDirection',  'responsiveFlexDirection',  'getFlexDirectionClasses'],
+            ['flexWrap',       'responsiveFlexWrap',       'getFlexWrapClasses'],
+            ['alignItems',     'responsiveAlignItems',     'getAlignItemsClasses'],
+            ['alignContent',   'responsiveAlignContent',   'getAlignContentClasses'],
+            ['justifyContent', 'responsiveJustifyContent', 'getJustifyContentClasses'],
+        ];
+
+        $type = self::getProp($varData, 'type') ?: null;
+
+        $arrClasses = [];
+        foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
+            $strField = $arrFields[$strKey] ?? $strDefaultField;
+            if (!$this->isFieldInPalette($strField, $type, $table, $skipPaletteCheck)) {
+                continue;
+            }
+            $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField), $varData));
+        }
+        return $arrClasses;
+    }
+
+    /**
+     * Returns whether the field is part of the resolved palette.
+     *
+     * Fails closed: a field only renders when it is positively confirmed in the type's palette
+     * for the given table. A missing type, or a type that is not a palette in $table (the usual
+     * symptom of a wrong table / wrong source being passed), returns false - so such mismatches
+     * surface immediately as missing classes instead of silently rendering and lingering.
+     *
+     * Callers that legitimately operate on typeless data (an article or form body that has no
+     * per-record type and renders from its table's "default" palette) opt out via $skipPaletteCheck.
+     */
+    protected function isFieldInPalette(string $strField, ?string $type, string $table = 'tl_content', bool $skipPaletteCheck = false): bool
+    {
+        if ($skipPaletteCheck) {
+            return true;
+        }
+
+        if ($type === null || $type === '') {
+            return false;
+        }
+
+        Controller::loadDataContainer($table);
+
+        if (!isset($GLOBALS['TL_DCA'][$table]['palettes'][$type])) {
+            return false;
+        }
+
+        return $this->paletteManipulator->hasField($type, $table, $strField);
     }
 }

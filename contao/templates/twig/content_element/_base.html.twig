@@ -1,7 +1,18 @@
 {% extends "@Contao/content_element/_base.html.twig" %}
 
 {% set attributes = attributes|default(attrs()).addClass(getAllResponsiveClasses(data|default)).mergeWith(attributes|default) %}
-{% set attributes = data|default ? attributes|default(attrs()).addClass(getContainerClasses(data.responsiveContainer|default)).mergeWith(attributes|default) : attributes %}
+{% set attributes = data|default ? attributes|default(attrs()).addClass(getContainerClasses(data.responsiveContainer|default, data.type|default)).mergeWith(attributes|default) : attributes %}
+
+{% if type is defined and type == 'element_group' and data|default %}
+    {% set groupSpacingTopClasses = getSpacingClasses(data.responsiveGroupSpacingTop|default(''), 't') %}
+    {% set groupSpacingBottomClasses = getSpacingClasses(data.responsiveGroupSpacingBottom|default(''), 'b') %}
+    {% if groupSpacingTopClasses %}
+        {% set attributes = attributes.addClass(groupSpacingTopClasses|join(' ')).set('data-spacing-top') %}
+    {% endif %}
+    {% if groupSpacingBottomClasses %}
+        {% set attributes = attributes.addClass(groupSpacingBottomClasses|join(' ')).set('data-spacing-bottom') %}
+    {% endif %}
+{% endif %}
 
 {% set inner_classes = getAllInnerContainerClasses(data|default)|join(" ") %}
 

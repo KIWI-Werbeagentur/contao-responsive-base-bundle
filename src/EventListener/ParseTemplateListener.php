@@ -4,21 +4,54 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\EventListener;
 
 use Contao\Controller;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
+use Contao\Module;
+use Contao\ModuleProxy;
 use Contao\StringUtil;
 use Contao\System;
+use Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver;
 
 
 #[AsHook('parseTemplate')]
 class ParseTemplateListener
 {
+    public function __construct(protected ResponsiveModuleClassResolver $classResolver)
+    {
+    }
+
     public function __invoke($objTemplate)
     {
         if ($objTemplate->typePrefix == 'mod_') {
             self::wrapListItems($objTemplate);
         }
 
+        // Fragment modules render through ModuleProxy, so the getFrontendModule hook cannot reach
+        // their template. When such a module uses a legacy template it is rendered here via a real
+        // FrontendTemplate - inject the resolved responsive column classes into its class attribute.
+        // Modern Twig fragment templates are handled by the frontend_module/_base.html.twig override
+        // (they never reach this hook); legacy Modules are handled by the getFrontendModule hook and
+        // are excluded by the ModuleProxy check below, so classes are never applied twice.
+        if (str_starts_with((string) $objTemplate->getName(), 'mod_')) {
+            $this->addFragmentModuleClasses($objTemplate);
+        }
+
         if (str_starts_with($objTemplate->getName(), 'fe_page')) {
             self::setLayoutSizes($objTemplate);
+        }
+    }
+
+    protected function addFragmentModuleClasses($objTemplate): void
+    {
+        $arrRow = $objTemplate->getData();
+        $strType = $arrRow['type'] ?? null;
+
+        if (!$strType || Module::findClass($strType) !== ModuleProxy::class) {
+            return;
+        }
+
+        $arrClasses = $this->classResolver->resolveColumnClasses($arrRow);
+
+        if ($arrClasses) {
+            $objTemplate->class = trim(($objTemplate->class ?? '') . ' ' . implode(' ', $arrClasses));
         }
     }
 
@@ -30,17 +63,33 @@ class ParseTemplateListener
             $objModel = $objTemplate;
         }
 
-        $objTargetWithClasses = ($objModel->cte ?? false) && $objModel->cte->addResponsiveChildren ? $objModel->cte : $objModel;
+        // isResponsiveChildren marks values resolved and propagated by GetFrontendModuleListener
+        // (outermost wrapper, then CTE, then own row) - treat those as authoritative over the raw
+        // cte backref so the item columns cannot diverge from the inner container classes. The cte
+        // preference remains for the first parse and for external callers passing a bare model.
+        $objTargetWithClasses = $objModel->isResponsiveChildren
+            ? $objModel
+            : (($objModel->cte ?? false) && $objModel->cte->addResponsiveChildren ? $objModel->cte : $objModel);
 
         if (!$objTargetWithClasses->addResponsiveChildren || !$objTargetWithClasses->responsiveColsItems) return;
 
-        //Checks if DCA-Palette has Settings for children (usually used for lists)
-        if (!in_array($objModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']))) return;
+        // Require an entry in the config-level allow-list: its value is the template property
+        // name that holds the list items (e.g. 'newslist' => 'articles', 'eventlist' => 'events'),
+        // and the code below indexes that map unconditionally - no fallback is possible. A
+        // hasField()-only path (as in GetFrontendModuleListener) is not enough here for that
+        // reason; a third-party module that declares addResponsiveChildren without registering
+        // in includePalettes.container has nothing for this listener to wrap.
+        $arrIncludePalettes = $GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? [];
+        if (!array_key_exists($objModel->type, $arrIncludePalettes)) return;
 
         $strColumnClasses = implode(" ", System::getContainer()->get('kiwi.contao.responsive.frontend')->getColClasses($objTargetWithClasses->responsiveColsItems));
-        $varChildren = ($objTemplate->{$GLOBALS['responsive']['tl_module']['includePalettes']['container'][$objModel->type]});
+        $varChildren = ($objTemplate->{$arrIncludePalettes[$objModel->type]});
 
-        if (is_array($varChildren) && $objModel->isResponsive) {
+        // Wrap only on the reparse triggered by GetFrontendModuleListener (neither flag is ever
+        // set before the first parse), so the items are wrapped exactly once. isResponsiveChildren
+        // marks a resolved children source (own row, CTE or wrapper); isResponsive is kept for
+        // external callers that pass a pre-flagged model.
+        if (is_array($varChildren) && ($objModel->isResponsive || $objModel->isResponsiveChildren)) {
             foreach ($varChildren as &$varChild) {
                 $varChild = System::getContainer()->get('twig')->render('@KiwiResponsiveBase/list_child.html.twig', [
                     'baseClass' => $objModel->baseClass,
@@ -50,7 +99,7 @@ class ParseTemplateListener
             }
         }
 
-        $objTemplate->{$GLOBALS['responsive']['tl_module']['includePalettes']['container'][$objModel->type]} = $varChildren;
+        $objTemplate->{$arrIncludePalettes[$objModel->type]} = $varChildren;
     }
 
     public static function mapSidebars(&$objTemplate): array
