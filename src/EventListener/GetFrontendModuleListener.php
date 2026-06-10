@@ -92,6 +92,17 @@ class GetFrontendModuleListener
 
                 $objModule->Template->hasResponsiveChildren = $hasResponsiveChildren;
                 $objModule->Template->innerClass = $arrInnerClasses;
+
+                // The per-item column classes are applied on the reparse by
+                // ParseTemplateListener::wrapListItems, which reads the children settings from the
+                // template - and the template only carries the module's own row. Propagate the
+                // resolved source's values so wrapper/CTE settings win there too. The dedicated
+                // isResponsiveChildren flag (instead of widening isResponsive, which means "outer
+                // column classes were applied") doubles as the reparse marker: it is only ever set
+                // here, after the first parse, so the items are wrapped exactly once.
+                $objModule->Template->addResponsiveChildren = $objSource->addResponsiveChildren;
+                $objModule->Template->responsiveColsItems = $objSource->responsiveColsItems;
+                $objModule->Template->isResponsiveChildren = true;
             }
 
             // HOOK: customize Template Data

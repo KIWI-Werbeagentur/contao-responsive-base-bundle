@@ -63,7 +63,13 @@ class ParseTemplateListener
             $objModel = $objTemplate;
         }
 
-        $objTargetWithClasses = ($objModel->cte ?? false) && $objModel->cte->addResponsiveChildren ? $objModel->cte : $objModel;
+        // isResponsiveChildren marks values resolved and propagated by GetFrontendModuleListener
+        // (outermost wrapper, then CTE, then own row) - treat those as authoritative over the raw
+        // cte backref so the item columns cannot diverge from the inner container classes. The cte
+        // preference remains for the first parse and for external callers passing a bare model.
+        $objTargetWithClasses = $objModel->isResponsiveChildren
+            ? $objModel
+            : (($objModel->cte ?? false) && $objModel->cte->addResponsiveChildren ? $objModel->cte : $objModel);
 
         if (!$objTargetWithClasses->addResponsiveChildren || !$objTargetWithClasses->responsiveColsItems) return;
 
@@ -79,7 +85,11 @@ class ParseTemplateListener
         $strColumnClasses = implode(" ", System::getContainer()->get('kiwi.contao.responsive.frontend')->getColClasses($objTargetWithClasses->responsiveColsItems));
         $varChildren = ($objTemplate->{$arrIncludePalettes[$objModel->type]});
 
-        if (is_array($varChildren) && $objModel->isResponsive) {
+        // Wrap only on the reparse triggered by GetFrontendModuleListener (neither flag is ever
+        // set before the first parse), so the items are wrapped exactly once. isResponsiveChildren
+        // marks a resolved children source (own row, CTE or wrapper); isResponsive is kept for
+        // external callers that pass a pre-flagged model.
+        if (is_array($varChildren) && ($objModel->isResponsive || $objModel->isResponsiveChildren)) {
             foreach ($varChildren as &$varChild) {
                 $varChild = System::getContainer()->get('twig')->render('@KiwiResponsiveBase/list_child.html.twig', [
                     'baseClass' => $objModel->baseClass,
