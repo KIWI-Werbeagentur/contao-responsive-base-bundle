@@ -83,9 +83,12 @@ class GetFrontendModuleListener
             // The child still needs to support an inner container structurally, no matter whose values apply
             if ($objSource && ($isField || $hasResponsiveChildren)) {
                 $shallReparse = true;
-                // CTE source: the content element's addResponsiveChildren subpalette is only present in
-                // the backend palette, so skip the frontend-unavailable palette gate and use the row values.
-                $arrInnerClasses = $this->responsiveFrontendService->getAllInnerContainerClasses($objSource->row(), [], $objSource === $objCteModel ? 'tl_content' : 'tl_module', $objSource === $objCteModel);
+                // CTE and wrapper sources expose addResponsiveChildren via a subpalette that is only
+                // present in the backend palette (the CTE selector/subpalette, or the per-record wrapper
+                // injection in IncludesListener::addWrapperResponsiveChildrenSettings), so skip the
+                // frontend-unavailable palette gate and use the row values. Only the module's own record
+                // carries the field in its frontend palette ($isField), where the gate stays meaningful.
+                $arrInnerClasses = $this->responsiveFrontendService->getAllInnerContainerClasses($objSource->row(), [], $objSource === $objCteModel ? 'tl_content' : 'tl_module', $objSource !== $objModuleModel);
 
                 $objModule->Template->hasResponsiveChildren = $hasResponsiveChildren;
                 $objModule->Template->innerClass = $arrInnerClasses;
