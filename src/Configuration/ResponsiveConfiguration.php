@@ -3,7 +3,6 @@
 namespace Kiwi\Contao\ResponsiveBaseBundle\Configuration;
 
 use Contao\DataContainer;
-use Kiwi\Contao\ResponsiveBaseBundle\Interface\ResponsiveConfigurationInterface;
 
 abstract class ResponsiveConfiguration
 {
