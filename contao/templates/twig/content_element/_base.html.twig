@@ -9,8 +9,8 @@
 {% endif %}
 
 {% if type is defined and type == 'element_group' and data|default %}
-    {% set groupSpacingTopClasses = getSpacingClasses(data.responsiveGroupSpacingTop|default(''), 't') %}
-    {% set groupSpacingBottomClasses = getSpacingClasses(data.responsiveGroupSpacingBottom|default(''), 'b') %}
+    {% set groupSpacingTopClasses = getGroupSpacingClasses(data.responsiveGroupSpacingTop|default(''), 't') %}
+    {% set groupSpacingBottomClasses = getGroupSpacingClasses(data.responsiveGroupSpacingBottom|default(''), 'b') %}
     {% if groupSpacingTopClasses %}
         {% set attributes = attributes.addClass(groupSpacingTopClasses|join(' ')).set('data-spacing-top') %}
     {% endif %}
