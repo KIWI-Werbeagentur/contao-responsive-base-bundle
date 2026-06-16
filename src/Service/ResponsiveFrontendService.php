@@ -102,6 +102,16 @@ class ResponsiveFrontendService
     }
 
     /**
+     * Element-group vertical spacing. The base bundle has no per-partial spacing
+     * system, so this is identical to {@see self::getSpacingClasses()}; a layering
+     * bundle (e.g. contao-bootstrap) overrides it to resolve the group partials.
+     */
+    public function getGroupSpacingClasses($strData, $strDirection = ""): array
+    {
+        return $this->getSpacingClasses($strData, $strDirection);
+    }
+
+    /**
      * Convenience wrapper around {@see self::getSpacingClasses()} for the top direction.
      * Allows {@see self::getAllContainerClasses()} to use the same single-arg spec shape as
      * the other aggregator methods.
