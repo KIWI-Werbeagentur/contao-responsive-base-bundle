@@ -1,6 +1,9 @@
 {% extends "@Contao/frontend_module/_base.html.twig" %}
 
-{% set attributes = attributes|default(attrs()).addClass(getModuleResponsiveClasses(data|default)).mergeWith(attributes|default) %}
+{% set attributes = attrs()
+    .addClass(getModuleResponsiveClasses(data|default))
+    .mergeWith(attributes|default)
+%}
 
 {#
     Attributes for the wrapper around a module's own child items, for modules that render those
