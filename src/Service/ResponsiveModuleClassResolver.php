@@ -103,19 +103,32 @@ class ResponsiveModuleClassResolver
      *
      * @return array{0: ?array, 1: string, 2: bool} [source row or null, source table, skip palette check]
      */
-    protected function resolveColumnSourceRow(array $arrRow): array
+    public function resolveColumnSourceRow(array $arrRow): array
     {
-        $arrWrappers = $this->collectWrappers($arrRow['includedVia'] ?? null);
 
-        if ($objWrapper = $this->getWrapperSource($arrWrappers, 'addResponsive')) {
-            return [$objWrapper->row(), 'tl_module', false];
+        // Walk the include chain outermost-first and let the outermost includer win. A module
+        // wrapper that was itself inserted via the "module" content element (CTE) carries that
+        // element as its "cte" backref; the CTE sits one level further out than the wrapper, so it
+        // outranks the wrapper's own settings - and, being the outermost includer, everything below
+        // it too. Wrappers that impose nothing (no cte, no enabled addResponsive) are transparent
+        // and fall through to the next level in.
+        foreach ($this->collectWrappers($arrRow['includedVia'] ?? null) as $objWrapper) {
+            if ($objCte = ($objWrapper->cte ?? null)?->getModel()) {
+                return [$objCte->row(), 'tl_content', true];
+            }
+
+            if ($objWrapper->addResponsive
+                && PaletteManipulatorExtended::create()->hasField($objWrapper->type, 'tl_module', 'addResponsive')
+            ) {
+                return [$objWrapper->row(), 'tl_module', false];
+            }
         }
 
-        // When inserted via the "module" content element (CTE), the columns come from the content
-        // element record. tl_content has no "addResponsive" flag (bootstrap's "responsiveOverwriteRowCols"
-        // etc. gate is enforced inside the frontend service), and its responsive fields live behind a
-        // selector/subpalette absent from the frontend palette - so source it unconditionally and skip
-        // the palette gate, letting the service decide what renders.
+        // The rendered module's own inclusion: a CTE that inserted it directly, otherwise its own
+        // enabled responsive settings. tl_content has no "addResponsive" flag (bootstrap's
+        // "responsiveOverwriteRowCols" etc. gate is enforced inside the frontend service), and its
+        // responsive fields live behind a selector/subpalette absent from the frontend palette - so
+        // source it unconditionally and skip the palette gate, letting the service decide what renders.
         if ($objCte = ($arrRow['cte'] ?? null)?->getModel()) {
             return [$objCte->row(), 'tl_content', true];
         }

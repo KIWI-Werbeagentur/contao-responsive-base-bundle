@@ -25,6 +25,12 @@ class GetFrontendModuleListener
         // module wrappers, see RootPageDependentModulesControllerDecorator / IncludesModuleTrait)
         $arrWrappers = $this->classResolver->collectWrappers($objModuleModel->includedVia ?? null);
 
+        // Resolve which row supplies the responsive column classes while the backref is still set
+        // (the consume below clears it). The outermost includer wins: a wrapper inserted via the
+        // "module" content element contributes that element, which outranks the wrapper's own and
+        // the module's own settings - see ResponsiveModuleClassResolver::resolveColumnSourceRow().
+        [$arrSourceRow, $strSourceTable, $blnSkipPalette] = $this->classResolver->resolveColumnSourceRow($objModuleModel->row());
+
         // Consume our own backref so a shared registry model rendered again does not inherit it
         if (isset($objModuleModel->includedVia)) {
             $objModuleModel->includedVia = null;
@@ -39,31 +45,16 @@ class GetFrontendModuleListener
             $objTargetWithClasses = $objCteModel ?? $objModuleModel;
             $objModule->Template->baseClass = $objModule->typePrefix . $objModule->type;
 
-            // Responsive Module Settings: the outermost enabled wrapper wins; otherwise a module
-            // inserted via CTE takes its columns from the content element (whose own enable flag -
-            // tl_content has no "addResponsive"; bootstrap's "responsiveOverwriteRowCols" etc. - is
-            // enforced inside the frontend service), otherwise the module's own addResponsive applies.
-            $objSource = $this->classResolver->getWrapperSource($arrWrappers, 'addResponsive');
-
-            if (!$objSource) {
-                if ($objCteModel) {
-                    $objSource = $objCteModel;
-                } elseif ($objModuleModel->addResponsive && PaletteManipulatorExtended::create()->hasField($objModuleModel->type, 'tl_module', 'addResponsive')) {
-                    $objSource = $objModuleModel;
-                }
-            }
-
-            if ($objSource) {
+            // Responsive Module Settings: apply the source resolved above (outermost includer
+            // first). For a CTE source the palette gate is skipped - the content element's
+            // responsive fields live behind a selector/subpalette absent from the frontend palette,
+            // so the service self-gates (responsiveOverwriteRowCols).
+            if ($arrSourceRow) {
                 $shallReparse = true;
-                // Compute against the source's own table. For a CTE source skip the palette gate: the
-                // content element's responsive fields live behind a selector/subpalette that is not
-                // present in the frontend palette, so the service self-gates (responsiveOverwriteRowCols).
-                $arrClasses = $this->responsiveFrontendService->getAllResponsiveClasses($objSource->row(), [], $objSource === $objCteModel ? 'tl_content' : 'tl_module', $objSource === $objCteModel);
-
-                $strResponsiveClasses = implode(' ', $arrClasses);
+                $arrClasses = $this->responsiveFrontendService->getAllResponsiveClasses($arrSourceRow, [], $strSourceTable, $blnSkipPalette);
 
                 $objModule->Template->isResponsive = true;
-                $objModule->Template->class = trim($objModule->Template->class . ' ' . $strResponsiveClasses);
+                $objModule->Template->class = trim($objModule->Template->class . ' ' . implode(' ', $arrClasses));
             }
 
             //Responsive Children Settings
