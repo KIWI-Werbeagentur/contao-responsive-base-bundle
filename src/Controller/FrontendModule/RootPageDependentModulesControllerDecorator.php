@@ -50,8 +50,13 @@ class RootPageDependentModulesControllerDecorator
 
     protected function tagChildModule(Request $request, ModuleModel $model): ?ModuleModel
     {
-        // Skip resolving the child unless this wrapper imposes settings or was itself included
-        if (!isset($model->includedVia) && !$model->addResponsive && !$model->addResponsiveChildren) {
+
+        // Skip resolving the child unless this wrapper imposes settings or was itself included -
+        // either via another module wrapper ("includedVia") or via the "module" content element
+        // ("cte"). The latter must propagate too: a CTE-inserted wrapper carries the content
+        // element's responsive settings, which the child has to inherit (the CTE is the outermost
+        // includer and wins in ResponsiveModuleClassResolver::resolveColumnSourceRow()).
+        if (!isset($model->includedVia) && !isset($model->cte) && !$model->addResponsive && !$model->addResponsiveChildren) {
             return null;
         }
 
