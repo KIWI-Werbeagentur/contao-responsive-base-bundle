@@ -6,11 +6,23 @@
 {% if type is defined and type == 'element_group' and data|default %}
     {% set groupSpacingTopClasses = getGroupSpacingClasses(data.responsiveGroupSpacingTop|default(''), 't') %}
     {% set groupSpacingBottomClasses = getGroupSpacingClasses(data.responsiveGroupSpacingBottom|default(''), 'b') %}
+    {# move the spacing data-attribute to 'content__main' when using a background element, mirroring mod_article. #}
+    {% set groupHasBackground = data.background and hasBackground(data.background) %}
     {% if groupSpacingTopClasses %}
-        {% set attributes = attributes.addClass(groupSpacingTopClasses|join(' ')).set('data-spacing-top') %}
+        {% set attributes = attrs().addClass(groupSpacingTopClasses|join(' ')).mergeWith(attributes|default) %}
+        {% if groupHasBackground %}
+            {% set content_main_attributes = attrs().set('data-spacing-top').mergeWith(content_main_attributes|default) %}
+        {% else %}
+            {% set attributes = attrs().set('data-spacing-top').mergeWith(attributes|default) %}
+        {% endif %}
     {% endif %}
     {% if groupSpacingBottomClasses %}
-        {% set attributes = attributes.addClass(groupSpacingBottomClasses|join(' ')).set('data-spacing-bottom') %}
+        {% set attributes = attrs().addClass(groupSpacingBottomClasses|join(' ')).mergeWith(attributes|default) %}
+        {% if groupHasBackground %}
+            {% set content_main_attributes = attrs().set('data-spacing-bottom').mergeWith(content_main_attributes|default) %}
+        {% else %}
+            {% set attributes = attrs().set('data-spacing-bottom').mergeWith(attributes|default) %}
+        {% endif %}
     {% endif %}
 {% endif %}
 
