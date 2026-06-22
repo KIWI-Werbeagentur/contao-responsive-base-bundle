@@ -152,7 +152,9 @@ class ResponsiveFrontendService implements ResetInterface
                     return $arrOptions[$name] ?? $matched;
                 }, $strClass);
 
-                $arrClasses[] = $strClass;
+                if ($strClass !== '') {
+                    $arrClasses[] = $strClass;
+                }
             }
         }
         return $arrClasses;
