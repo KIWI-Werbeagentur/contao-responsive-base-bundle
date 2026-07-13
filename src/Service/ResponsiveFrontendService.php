@@ -91,7 +91,7 @@ class ResponsiveFrontendService
         return $this->getResponsiveClasses($strData, 'varAlignSelfClasses');
     }
 
-    public function getSpacingClasses($strData, $strDirection = ""): array
+    public function getSpacingClasses(string|null $strData, string $strDirection = ""): array
     {
         return $this->getResponsiveClasses($strData, 'varSpacingClasses', [
             'direction'     => $strDirection,
@@ -104,7 +104,7 @@ class ResponsiveFrontendService
      * system, so this is identical to {@see self::getSpacingClasses()}; a layering
      * bundle (e.g. contao-bootstrap) overrides it to resolve the group partials.
      */
-    public function getGroupSpacingClasses($strData, $strDirection = ""): array
+    public function getGroupSpacingClasses(string|null $strData, string $strDirection = ""): array
     {
         return $this->getSpacingClasses($strData, $strDirection);
     }
@@ -114,7 +114,7 @@ class ResponsiveFrontendService
      * Allows {@see self::getAllContainerClasses()} to use the same single-arg spec shape as
      * the other aggregator methods.
      */
-    public function getSpacingTopClasses($strData): array
+    public function getSpacingTopClasses(string|null $strData): array
     {
         return $this->getSpacingClasses($strData, 't');
     }
@@ -122,7 +122,7 @@ class ResponsiveFrontendService
     /**
      * Convenience wrapper around {@see self::getSpacingClasses()} for the bottom direction.
      */
-    public function getSpacingBottomClasses($strData): array
+    public function getSpacingBottomClasses(string|null $strData): array
     {
         return $this->getSpacingClasses($strData, 'b');
     }
