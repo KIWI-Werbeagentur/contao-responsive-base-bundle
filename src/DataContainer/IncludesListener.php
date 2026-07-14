@@ -33,7 +33,7 @@ class IncludesListener
         }
 
         //Add Childrens Legend
-        if ($strType && $GLOBALS['TL_CTE']['includes'][$strType] ?? false) {
+        if ($strType && ($GLOBALS['TL_CTE']['includes'][$strType] ?? false)) {
             $intTarget = $objDca->getCurrentRecord()[$strType] ?? null;
 
             $objModel = $strTargetClass::findByPk($intTarget);
