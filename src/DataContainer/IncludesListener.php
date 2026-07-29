@@ -22,7 +22,7 @@ class IncludesListener
         if (!$strTargetClass) return;
 
         //Label Children
-        if (in_array($objDca->getCurrentRecord()['type'], array_keys($GLOBALS['TL_CTE']['includes']))) {
+        if (in_array($objDca->getCurrentRecord()['type'], array_keys($GLOBALS['TL_CTE']['includes'] ?? []))) {
             $objInclude = $strTargetClass::findByPk($objDca->getCurrentRecord()[$objDca->getCurrentRecord()['type']] ?? null);
 
             if($objInclude){
@@ -38,7 +38,7 @@ class IncludesListener
 
             $objModel = $strTargetClass::findByPk($intTarget);
 
-            if ($objModel && in_array($objModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']))) {
+            if ($objModel && in_array($objModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []))) {
                 PaletteManipulatorExtended::create()
                     ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                     ->addField(['addResponsiveChildren'], 'items_legend', PaletteManipulator::POSITION_APPEND)
