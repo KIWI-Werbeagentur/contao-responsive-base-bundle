@@ -75,7 +75,6 @@ class ResponsiveWidget extends Widget
 
     public function generate(): string
     {
-        System::loadLanguageFile('default', 'de');
         $arrInputs = [];
         $arrConfigurations = [];
 
