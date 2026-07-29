@@ -1,111 +1,91 @@
 <?php
 
-$GLOBALS['TL_LANG']['responsive']['responsiveContainerSize'] = [
-    0 => "Container Size"
+$GLOBALS['TL_LANG']['responsive']['responsive'] = "Set responsively";
+$GLOBALS['TL_LANG']['responsive']['inherit'] = "- Inherit -";
+
+$GLOBALS['TL_LANG']['responsive']['flexDirection']['row'] = "Horizontal [row]";
+$GLOBALS['TL_LANG']['responsive']['flexDirection']['column'] = "Vertical [column]";
+$GLOBALS['TL_LANG']['responsive']['flexDirection']['row-reverse'] = "Horizontal reverse [row-reverse]";
+$GLOBALS['TL_LANG']['responsive']['flexDirection']['column-reverse'] = "Vertical reverse [column-reverse]";
+
+$GLOBALS['TL_LANG']['responsive']['flexWrap']['wrap'] = "Wrap [wrap]";
+$GLOBALS['TL_LANG']['responsive']['flexWrap']['nowrap'] = "Don't wrap [nowrap]";
+$GLOBALS['TL_LANG']['responsive']['flexWrap']['wrap-reverse'] = "Wrap at start [wrap-reverse]";
+
+$GLOBALS['TL_LANG']['responsive']['flexItems']['auto'] = "Default [auto]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['stretch'] = "Stretch [stretch]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['baseline'] = "Baseline [baseline]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['start'] = "Start [start]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['center'] = "Center [center]";
+$GLOBALS['TL_LANG']['responsive']['flexItems']['end'] = "End [end]";
+
+$GLOBALS['TL_LANG']['responsive']['flexContent']['normal'] = "Normal [normal]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['start'] = "Start [start]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['end'] = "End [end]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['center']="Center [center]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['space-between'] = "Space Between [space-between]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['space-around'] = "Space Around [space-around]";
+$GLOBALS['TL_LANG']['responsive']['flexContent']['space-evenly'] = "Space Evenly [space-evenly]";
+
+$GLOBALS['TL_LANG']['responsive']['flexContainer']['default'] = "Column element";
+
+$GLOBALS['TL_LANG']['responsive']['addResponsive'] = [
+    0 => "Set responsive width",
+];
+
+$GLOBALS['TL_LANG']['responsive']['addResponsiveChildren'] = [
+    0 => "Set responsive width for child elements",
+];
+
+$GLOBALS['TL_LANG']['responsive']['overwriteResponsiveChildren'] = [
+    0 => "Override responsive width for child elements",
+    1 => "Override the module settings <i>%s</i>",
 ];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveFlexDirection'] = [
-    0 => "Main Axis",
+    0 => "Main axis",
     1 => "flex-direction",
 ];
 
-$GLOBALS['TL_LANG']['responsive']['responsiveFlexWrap'] = [
-    0 => "Line Break",
-    1 => "flex-wrap",
-];
-
 $GLOBALS['TL_LANG']['responsive']['responsiveAlignItems'] = [
-    0 => "Element Alignment",
+    0 => "Element alignment on peripheral axis (per row/column)",
     1 => "align-items",
 ];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveJustifyContent'] = [
-    0 => "Alignment on Main Axis",
+    0 => "Alignment on main axis (all elements)",
     1 => "justify-content",
 ];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveAlignContent'] = [
-    0 => "Alignment on Peripheral Axis",
+    0 => "Alignment on peripheral axis (all elements)",
     1 => "align-content",
 ];
 
-$GLOBALS['TL_LANG']['responsive']['responsiveSpacingTop'] = [
-    0 => "Space Top",
-];
-
-$GLOBALS['TL_LANG']['responsive']['responsiveSpacingBottom'] = [
-    0 => "Space Bottom",
-];
-
-$GLOBALS['TL_LANG']['responsive']['responsive'] = "Responsive Settings";
-$GLOBALS['TL_LANG']['responsive']['inherit'] = "- Inherit -";
-
-$GLOBALS['TL_LANG']['responsive']['flexDirection']['row'] = "Horizontal";
-$GLOBALS['TL_LANG']['responsive']['flexDirection']['column'] = "Vertical";
-$GLOBALS['TL_LANG']['responsive']['flexDirection']['row-reverse'] = "Horizontal Reverse";
-$GLOBALS['TL_LANG']['responsive']['flexDirection']['column-reverse'] = "Vertical Reverse";
-
-$GLOBALS['TL_LANG']['responsive']['flexDirection']['default'] = "Default";
-
-$GLOBALS['TL_LANG']['responsive']['flexWrap']['wrap'] = "Wrap";
-$GLOBALS['TL_LANG']['responsive']['flexWrap']['nowrap'] = "Don't wrap";
-$GLOBALS['TL_LANG']['responsive']['flexWrap']['wrap-reverse'] = "Wrap at beginning";
-
-$GLOBALS['TL_LANG']['responsive']['flexItems']['normal'] = "Normal";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['auto'] = "Normal";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['stretch'] = "Stretch";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['baseline'] = "Baseline";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['flex-start'] = "Start";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['center'] = "Center";
-$GLOBALS['TL_LANG']['responsive']['flexItems']['flex-end'] = "End";
-
-$GLOBALS['TL_LANG']['responsive']['flexContent']['normal'] = "Normal";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['flex-start'] = "Start";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['center']="Center";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['flex-end'] = "End";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-between'] = "Space Between";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-around'] = "Space Around";
-$GLOBALS['TL_LANG']['responsive']['flexContent']['space-evenly'] = "Space Evenly";
-
-$GLOBALS['TL_LANG']['responsive']['spacings']['default'][0] = "Default";
-$GLOBALS['TL_LANG']['responsive']['spacings']['none'][0] = "None";
-$GLOBALS['TL_LANG']['responsive']['spacings']['gap'][0] = "Grid Gap | Half";
-$GLOBALS['TL_LANG']['responsive']['spacings']['gap-full'][0] = "Grid Gap | Full";
-$GLOBALS['TL_LANG']['responsive']['spacings']['xs'][0] = "Extra Small";
-$GLOBALS['TL_LANG']['responsive']['spacings']['sm'][0] = "Small";
-$GLOBALS['TL_LANG']['responsive']['spacings']['md'][0] = "Medium";
-$GLOBALS['TL_LANG']['responsive']['spacings']['lg'][0] = "Large";
-$GLOBALS['TL_LANG']['responsive']['spacings']['xl'][0] = "Extra Large";
-
-$GLOBALS['TL_LANG']['responsive']['responsiveOrder'] = [
-    0 => "Order as digit",
-    1 => "order"
-];
-
-$GLOBALS['TL_LANG']['responsive']['responsiveAlignSelf'] = [
-    0 => "Alignment",
-    1 => "align-self"
+$GLOBALS['TL_LANG']['responsive']['responsiveFlexWrap'] = [
+    0 => "Line break",
+    1 => "flex-wrap",
 ];
 
 $GLOBALS['TL_LANG']['responsive']['responsiveCols'] = [
     0 => "Width",
     1 => "Width in columns",
     'options' => [
-        12 => "12 Columns",
-        11 => "11 Columns",
-        10 => "10 Columns",
-        9 => "9 Columns",
-        8 => "8 Columns",
-        7 => "7 Columns",
-        6 => "6 Columns",
-        5 => "5 Columns",
-        4 => "4 Columns",
-        3 => "3 Columns",
-        2 => "2 Columns",
-        1 => "1 Column",
-        "auto" => "Content dependent",
-        "fill" => "Fill row",
-        "hidden" => "Hidden"
+        12 => "12 columns",
+        11 => "11 columns",
+        10 => "10 columns",
+        9 => "9 columns",
+        8 => "8 columns",
+        7 => "7 columns",
+        6 => "6 columns",
+        5 => "5 columns",
+        4 => "4 columns",
+        3 => "3 columns",
+        2 => "2 columns",
+        1 => "1 column",
+        "auto" => "Content aware [auto]",
+        "fill" => "Fill row []",
+        "hidden" => "Hidden [none]"
     ]
 ];
 
@@ -113,19 +93,41 @@ $GLOBALS['TL_LANG']['responsive']['responsiveOffsets'] = [
     0 => "Offset from left",
     1 => "Offset in columns",
     'options' => [
-        12 => "12 Columns",
-        11 => "11 Columns",
-        10 => "10 Columns",
-        9 => "9 Columns",
-        8 => "8 Columns",
-        7 => "7 Columns",
-        6 => "6 Columns",
-        5 => "5 Columns",
-        4 => "4 Columns",
-        3 => "3 Columns",
-        2 => "2 Columns",
-        1 => "1 Column",
-        "auto" => "Right",
-        "none" => "No offset"
+        12 => "12 columns",
+        11 => "11 columns",
+        10 => "10 columns",
+        9 => "9 columns",
+        8 => "8 columns",
+        7 => "7 columns",
+        6 => "6 columns",
+        5 => "5 columns",
+        4 => "4 columns",
+        3 => "3 columns",
+        2 => "2 columns",
+        1 => "1 column",
+        "auto" => "Right [auto]",
+        "none" => "No offset [none]"
     ]
+];
+
+$GLOBALS['TL_LANG']['responsive']['responsiveOrder'] = [
+    0 => "Order (as number)",
+    1 => "order",
+];
+
+$GLOBALS['TL_LANG']['responsive']['responsiveAlignSelf'] = [
+    0 => "Alignment",
+    1 => "align-self"
+];
+
+$GLOBALS['TL_LANG']['responsive']['responsiveSpacingTop'] = [
+    0 => "Top spacing",
+];
+
+$GLOBALS['TL_LANG']['responsive']['responsiveSpacingBottom'] = [
+    0 => "Bottom spacing",
+];
+
+$GLOBALS['TL_LANG']['responsive']['responsiveContainerSize'] = [
+    0 => "Container size"
 ];
