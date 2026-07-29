@@ -3,8 +3,6 @@
 $GLOBALS['TL_LANG']['tl_form_field']['layout_legend'] = "Layoutbereich";
 $GLOBALS['TL_LANG']['tl_form_field']['items_legend'] = "Kindelemente";
 
-$GLOBALS['TL_LANG']['tl_form_field']['flexContainer']['default'] = "Spalten-Element";
-
 $GLOBALS['TL_LANG']['tl_form_field']['responsiveContainer'] = [
     0 => "Layout-Typ"
 ];

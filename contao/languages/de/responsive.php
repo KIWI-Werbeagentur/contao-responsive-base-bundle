@@ -8,13 +8,10 @@ $GLOBALS['TL_LANG']['responsive']['flexDirection']['column'] = "Vertikal [column
 $GLOBALS['TL_LANG']['responsive']['flexDirection']['row-reverse'] = "Horizontal Reverse [row-reverse]";
 $GLOBALS['TL_LANG']['responsive']['flexDirection']['column-reverse'] = "Vertikal Reverse [column-reverse]";
 
-$GLOBALS['TL_LANG']['responsive']['flexDirection']['default'] = "Default";
-
 $GLOBALS['TL_LANG']['responsive']['flexWrap']['wrap'] = "Umbrechen [wrap]";
 $GLOBALS['TL_LANG']['responsive']['flexWrap']['nowrap'] = "Nicht umbrechen [nowrap]";
 $GLOBALS['TL_LANG']['responsive']['flexWrap']['wrap-reverse'] = "Vorne umbrechen [wrap-reverse]";
 
-$GLOBALS['TL_LANG']['responsive']['flexItems']['normal'] = "Standard [normal]";
 $GLOBALS['TL_LANG']['responsive']['flexItems']['auto'] = "Standard [auto]";
 $GLOBALS['TL_LANG']['responsive']['flexItems']['stretch'] = "Wachsend [stretch]";
 $GLOBALS['TL_LANG']['responsive']['flexItems']['baseline'] = "Grundlinie [baseline]";
@@ -29,6 +26,8 @@ $GLOBALS['TL_LANG']['responsive']['flexContent']['center']="Mitte [center]";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['space-between'] = "Verteilt [space-between]";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['space-around'] = "Verteilt mit halben Platz nach außen [space-around]";
 $GLOBALS['TL_LANG']['responsive']['flexContent']['space-evenly'] = "Verteilt mit Platz nach außen [space-evenly]";
+
+$GLOBALS['TL_LANG']['responsive']['flexContainer']['default'] = "Spalten-Element";
 
 $GLOBALS['TL_LANG']['responsive']['addResponsive'] = [
     0 => "Responsive Breite festlegen",
