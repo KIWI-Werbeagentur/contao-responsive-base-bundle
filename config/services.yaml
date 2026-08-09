@@ -5,6 +5,10 @@ services:
   kiwi.contao.responsive.frontend:
     public: true
     class: Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService
+  Kiwi\Contao\ResponsiveBaseBundle\Migration\ContainerColumnConflictMigration:
+    arguments:
+      - '@database_connection'
+      - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver:
     arguments:
       - '@kiwi.contao.responsive.frontend'

@@ -181,8 +181,15 @@ class ResponsiveFrontendService
      * Bundles layering further conditions on column output - contao-bootstrap suppresses columns
      * when responsiveOverwriteRowCols is unset, i.e. when the parent's row-cols should win -
      * override this method rather than the class-generating ones.
+     *
+     * Public because it is the authoritative definition of "this record's columns do not render":
+     * ContainerColumnConflictMigration asks it directly instead of re-deriving container-capability
+     * from $GLOBALS['responsive'][...]['includePalettes']['container']. Those two answers agree
+     * only for as long as LoadDataContainerListener keeps the field and the config list aligned,
+     * so the migration selects exactly the records this method strands rather than a parallel
+     * approximation of them.
      */
-    protected function suppressesColumns($varData, string $table = 'tl_content', bool $skipPaletteCheck = false): bool
+    public function suppressesColumns($varData, string $table = 'tl_content', bool $skipPaletteCheck = false): bool
     {
         if (!self::getProp($varData, 'responsiveContainer')) {
             return false;
