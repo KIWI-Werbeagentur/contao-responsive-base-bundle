@@ -307,13 +307,41 @@ class ResponsiveFrontendService
             return true;
         }
 
+        // Both rejections below are indistinguishable, in the rendered output, from "this record
+        // simply has no responsive settings" - the element just silently loses its classes. That
+        // is precisely how a stale template override goes unnoticed: a pre-1.1 copy of
+        // form_fieldsetStart.html.twig still calls getAllResponsiveClasses(arrConfiguration) with
+        // no table, so it lands here with a null type against tl_content and drops everything.
+        // Announce it instead of failing quietly.
         if ($type === null || $type === '') {
+            trigger_deprecation(
+                'kiwi/contao-responsive-base',
+                '1.1',
+                'Resolving responsive field "%s" without a record type (table "%s") is deprecated and '
+                .'yields no classes. Pass the record itself (e.g. "this" rather than a widget '
+                .'configuration array) together with its table, or opt out via $skipPaletteCheck for '
+                .'genuinely typeless data. Check for an outdated project-level template override.',
+                $strField,
+                $table,
+            );
+
             return false;
         }
 
         Controller::loadDataContainer($table);
 
         if (!isset($GLOBALS['TL_DCA'][$table]['palettes'][$type])) {
+            trigger_deprecation(
+                'kiwi/contao-responsive-base',
+                '1.1',
+                'Resolving responsive field "%s" for type "%s" against table "%s", which has no such '
+                .'palette, is deprecated and yields no classes. This usually means the wrong $table '
+                .'was passed - check for an outdated project-level template override.',
+                $strField,
+                $type,
+                $table,
+            );
+
             return false;
         }
 
