@@ -142,6 +142,7 @@ class ResponsiveFrontendService
         ];
 
         $type = self::getProp($varData, 'type') ?: null;
+        $blnSuppressColumns = $this->suppressesColumns($varData, $table, $skipPaletteCheck);
 
         $arrClasses = [];
         foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
@@ -149,18 +150,50 @@ class ResponsiveFrontendService
             if (!$this->isFieldInPalette($strField, $type, $table, $skipPaletteCheck)) {
                 continue;
             }
-            if ('tl_content' == $table) {
-                if (in_array($type, $GLOBALS['responsive']['tl_content']['includePalettes']['container'] ?? [])) {
-                    if (self::getProp($varData, 'responsiveContainer')) {
-                        if (in_array($strKey, ['cols', 'offsets'])) {
-                            continue;
-                        }
-                    }
-                }
+            if ($blnSuppressColumns && in_array($strKey, ['cols', 'offsets'], true)) {
+                continue;
             }
             $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField), $varData));
         }
         return $arrClasses;
+    }
+
+    /**
+     * Whether this record's column classes give way to its container.
+     *
+     * An element that sizes itself as a container must not ALSO carry column and offset
+     * classes: the two express competing widths and the container wins. Order and align-self
+     * are unaffected - they still apply to a container-mode element.
+     *
+     * This is the single place that decides it. It used to live in two: an inline
+     * `'tl_content' == $table` branch here (keyed on includePalettes.container membership) and
+     * a `not this.responsiveContainer` conditional in form_fieldsetStart.html.twig. Same rule,
+     * two conditions, two layers - so fixing one silently left the other behind, and the form
+     * path additionally re-applied order/align-self OUTSIDE the palette gate (fail-open, in a
+     * code path that had otherwise moved to fail-closed).
+     *
+     * Membership is now derived from the palette itself: a type that offers responsiveContainer
+     * is by definition container-capable. That is equivalent to the old includePalettes lookup
+     * (element_group is the only tl_content type carrying the field, fieldsetStart the only one
+     * in tl_form_field) while working identically for every table, so form templates no longer
+     * need a rule of their own.
+     *
+     * Bundles layering further conditions on column output - contao-bootstrap suppresses columns
+     * when responsiveOverwriteRowCols is unset, i.e. when the parent's row-cols should win -
+     * override this method rather than the class-generating ones.
+     */
+    protected function suppressesColumns($varData, string $table = 'tl_content', bool $skipPaletteCheck = false): bool
+    {
+        if (!self::getProp($varData, 'responsiveContainer')) {
+            return false;
+        }
+
+        return $this->isFieldInPalette(
+            'responsiveContainer',
+            self::getProp($varData, 'type') ?: null,
+            $table,
+            $skipPaletteCheck,
+        );
     }
 
     /**
