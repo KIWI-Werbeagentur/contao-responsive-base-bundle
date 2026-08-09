@@ -30,7 +30,7 @@
     },
     "conflict": {
         "contao/manager-plugin": "<2.0 || >=3.0",
-        "kiwi/contao-bootstrap": "<1.0.6"
+        "kiwi/contao-bootstrap": "<1.1.1"
     },
     "autoload": {
         "psr-4" : {
