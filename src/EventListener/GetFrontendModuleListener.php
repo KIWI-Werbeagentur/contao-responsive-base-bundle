@@ -60,7 +60,7 @@ class GetFrontendModuleListener
             //Responsive Children Settings
             $isField = PaletteManipulatorExtended::create()->hasField($objModuleModel->type, 'tl_module', 'addResponsiveChildren');
             $objTargetWithClasses = $objTargetWithClasses->addResponsiveChildren ? $objTargetWithClasses : $objModuleModel;
-            $hasResponsiveChildren = in_array($objModuleModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']));
+            $hasResponsiveChildren = in_array($objModuleModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []));
 
             // Flag-only wrapper check: the wrapper gets addResponsiveChildren per record in the
             // backend only (see IncludesListener::addWrapperResponsiveChildrenSettings), so the
