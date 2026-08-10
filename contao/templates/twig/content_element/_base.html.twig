@@ -12,7 +12,7 @@
     {% set groupSpacingTopClasses = getGroupSpacingClasses(data.responsiveGroupSpacingTop|default(''), 't') %}
     {% set groupSpacingBottomClasses = getGroupSpacingClasses(data.responsiveGroupSpacingBottom|default(''), 'b') %}
     {# move the spacing data-attribute to 'content__main' when using a background element, mirroring mod_article. #}
-    {% set groupHasBackground = data.background and hasBackground(data.background) %}
+    {% set groupHasBackground = data.background|default and hasBackground(data.background|default) %}
     {% if groupSpacingTopClasses %}
         {% set attributes = attrs().addClass(groupSpacingTopClasses|join(' ')).mergeWith(attributes|default) %}
         {% if groupHasBackground %}
