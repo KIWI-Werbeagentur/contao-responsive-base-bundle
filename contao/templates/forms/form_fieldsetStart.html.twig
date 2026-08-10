@@ -17,6 +17,6 @@
 
 <fieldset{{ fieldsetAttrs }}>
     <div class="fieldset__inside {{ getAllInnerContainerClasses(this, table='tl_form_field')|join(' ') }}">
-        {% if this.label %}
+        {% if this.label is not empty %}
             <legend>{{ this.label|insert_tag_raw }}</legend>
         {% endif %}
