@@ -9,9 +9,13 @@ use Twig\TwigFunction;
 
 class ResponsiveExtension extends AbstractExtension
 {
+    /**
+     * @param object|null $designerFrontendService kiwi/contao-designer's frontend service when that bundle is installed, otherwise null.
+     */
     public function __construct(
         protected ResponsiveFrontendService $responsiveFrontendService,
         protected ResponsiveModuleClassResolver $moduleClassResolver,
+        protected object|null $designerFrontendService = null,
     ){}
 
     public function getFunctions(): array
@@ -30,6 +34,12 @@ class ResponsiveExtension extends AbstractExtension
             new TwigFunction('getSpacingClasses', [$this->responsiveFrontendService, 'getSpacingClasses']),
             new TwigFunction('getGroupSpacingClasses', [$this->responsiveFrontendService, 'getGroupSpacingClasses']),
             new TwigFunction('getAllContainerClasses', [$this->responsiveFrontendService, 'getAllContainerClasses']),
+
+            // Fallback, so content_element/_base.html.twig compiles without kiwi/contao-designer present
+            new TwigFunction(
+                'hasBackground',
+                fn (string|null $strBackground): bool => (bool) $this->designerFrontendService?->hasBackground($strBackground),
+            ),
         ];
     }
 }

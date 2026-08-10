@@ -49,5 +49,6 @@ services:
     arguments:
       - '@kiwi.contao.responsive.frontend'
       - '@Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver'
+      - '@?kiwi.contao.designer.frontend'
     tags:
       - 'twig.extension'
