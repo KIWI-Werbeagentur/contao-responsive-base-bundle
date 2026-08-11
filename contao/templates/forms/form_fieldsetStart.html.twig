@@ -6,10 +6,7 @@
 {% set fieldsetAttrs = attrs()
     .addClass('fieldset formbody__area')
     .addClass(cleanClasses)
-    .addClass(getContainerClasses(this.responsiveContainer, type=this.type, table='tl_form_field'))
-    {# Container mode suppresses column/offset classes; order and align-self survive. That rule
-       lives in ResponsiveFrontendService::suppressesColumns() for every table, so this template
-       no longer carries its own copy - and order/align-self stay palette-gated on the way. #}
+    .addClass(getContainerClasses(this.responsiveContainer|default, type=this.type, table='tl_form_field'))
     .addClass(getAllResponsiveClasses(this, table='tl_form_field'))
     .setIfExists('data-cff-condition', cffCondition)
     .mergeWith(fieldsetAttrs|default)
