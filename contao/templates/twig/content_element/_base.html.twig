@@ -33,6 +33,17 @@
 
 {% set inner_classes = getAllInnerContainerClasses(data|default)|join(" ") %}
 
+{#
+    Attributes for the wrapper around an element's own child items, for elements that render those
+    items themselves instead of nesting fragments (e.g. a list of persons): they only know where
+    their items sit, so they render the wrapper and output these attributes on it. Nested fragments
+    need none of this - they are wrapped generically in the "inner" block below.
+
+    Merges an already existing value, so the element template (and a template overriding it) can
+    add its own attributes at the top and still receive the classes here.
+#}
+{% set items_attributes = attrs().addClass(inner_classes).mergeWith(items_attributes|default) %}
+
 {%- block inner %}
     {% if nested_fragments %}
         <div class="content__inside inside {{ inner_classes }}">{{ parent() }}</div>

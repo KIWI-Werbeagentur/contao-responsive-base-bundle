@@ -1,3 +1,17 @@
 {% extends "@Contao/frontend_module/_base.html.twig" %}
 
 {% set attributes = attributes|default(attrs()).addClass(getModuleResponsiveClasses(data|default)).mergeWith(attributes|default) %}
+
+{#
+    Attributes for the wrapper around a module's own child items, for modules that render those
+    items themselves (e.g. a list of persons): they only know where their items sit, so they render
+    the wrapper and output these attributes on it. The counterpart for modules rendering a legacy
+    template is the "innerClass" the getFrontendModule hook hands over.
+
+    Merges an already existing value, so the module template (and a template overriding it) can add
+    its own attributes at the top and still receive the classes here.
+#}
+{% set items_attributes = attrs()
+    .addClass(getAllInnerContainerClasses(data|default, table='tl_module'))
+    .mergeWith(items_attributes|default)
+%}

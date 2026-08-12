@@ -307,8 +307,33 @@ class ResponsiveFrontendService
         return $this->getResponsiveClasses($strData, 'varJustifyContentClasses');
     }
 
+    /**
+     * Returns whether the record offers its children settings behind the addResponsiveChildren
+     * selector but has it disabled - in which case none of those settings apply.
+     *
+     * Only palettes registered as "children" (see LoadDataContainerListener::addChildrenSettings)
+     * carry that field: for them the values live in a subpalette and are meaningless while the
+     * selector is off. Container palettes carry the same settings unconditionally and have no such
+     * field, so they are unaffected.
+     *
+     * Callers operating on typeless data ($skipPaletteCheck) cannot resolve a palette and have
+     * already established their source, so the check does not apply to them.
+     */
+    protected function hasChildrenSettingsDisabled($varData, string $table, bool $skipPaletteCheck): bool
+    {
+        if ($skipPaletteCheck || self::getProp($varData, 'addResponsiveChildren')) {
+            return false;
+        }
+
+        return $this->isFieldInPalette('addResponsiveChildren', self::getProp($varData, 'type') ?: null, $table);
+    }
+
     public function getAllInnerContainerClasses($varData, array $arrFields = [], string $table = 'tl_content', bool $skipPaletteCheck = false): array
     {
+        if ($this->hasChildrenSettingsDisabled($varData, $table, $skipPaletteCheck)) {
+            return [];
+        }
+
         $arrSpecs = [
             ['flexDirection',  'responsiveFlexDirection',  'getFlexDirectionClasses'],
             ['flexWrap',       'responsiveFlexWrap',       'getFlexWrapClasses'],
