@@ -11,7 +11,7 @@
 {% set spacingBottomClasses = getSpacingClasses(responsiveSpacingBottom|default(''), 'b') %}
 {% set articleWrapperAttributes = articleWrapperAttributes|default(attrs()) %}
 {# move the spacing to 'mod_article__main' when using a background element #}
-{% if background and hasBackground(background) and not backgroundOverwrite %}
+{% if background|default and hasBackground(background|default) and not backgroundOverwrite|default %}
     {% set articleMainAttributes = articleMainAttributes|default(attrs()) %}
     {% if spacingTopClasses %}
         {% set articleMainAttributes = articleMainAttributes.set("data-spacing-top") %}
