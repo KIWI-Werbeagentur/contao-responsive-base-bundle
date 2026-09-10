@@ -5,6 +5,7 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\Service;
 use Contao\Controller;
 use Contao\StringUtil;
 use Contao\System;
+use Contao\Widget;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
 
@@ -24,6 +25,41 @@ class ResponsiveFrontendService
             return $varTarget->{$strProp} ?? "";
         }
         return "";
+    }
+
+    /**
+     * Resolve the DCA record type $varData's palette is looked up by.
+     *
+     * For rows and models that is simply the "type" property, but a Contao form widget is not
+     * a plain record: FormText::__get('type') answers with the HTML5 *input* type derived from
+     * the field's rgxp - "email", "tel", "number", "url", "date" - not with the tl_form_field
+     * record type, which stays "text". Reading "type" straight off such a widget therefore
+     * gates against a palette that cannot exist, and since the gate fails closed the field
+     * silently loses every responsive class (with a deprecation from isFieldInPalette() that
+     * blames the caller's $table rather than the widget).
+     *
+     * A widget's class is the reliable source: $GLOBALS['TL_FFL'] maps exactly the record types
+     * to their widget classes. Only widgets are treated this way; every other caller keeps the
+     * plain property lookup.
+     */
+    protected static function resolveType($varData): ?string
+    {
+        if ($varData instanceof Widget) {
+            $arrFfl = $GLOBALS['TL_FFL'] ?? [];
+
+            if (false !== ($strType = array_search($varData::class, $arrFfl, true))) {
+                return $strType;
+            }
+
+            // an app may register a subclass of a core widget under its own type
+            foreach ($arrFfl as $strType => $strClass) {
+                if ($varData instanceof $strClass) {
+                    return $strType;
+                }
+            }
+        }
+
+        return self::getProp($varData, 'type') ?: null;
     }
 
     public function getResponsiveClasses(string|null $strData, string $strMapping, array $arrOptions = []): array
@@ -141,7 +177,7 @@ class ResponsiveFrontendService
             ['align-self', 'responsiveAlignSelf',  'getAlignSelfClasses'],
         ];
 
-        $type = self::getProp($varData, 'type') ?: null;
+        $type = self::resolveType($varData);
         $blnSuppressColumns = $this->suppressesColumns($varData, $table, $skipPaletteCheck);
 
         $arrClasses = [];
@@ -197,7 +233,7 @@ class ResponsiveFrontendService
 
         return $this->isFieldInPalette(
             'responsiveContainer',
-            self::getProp($varData, 'type') ?: null,
+            self::resolveType($varData),
             $table,
             $skipPaletteCheck,
         );
@@ -261,7 +297,7 @@ class ResponsiveFrontendService
             ['spacingBottom', 'responsiveSpacingBottom', 'getSpacingBottomClasses'],
         ];
 
-        $type = self::getProp($varData, 'type') ?: null;
+        $type = self::resolveType($varData);
 
         $arrClasses = [];
         foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
@@ -325,7 +361,7 @@ class ResponsiveFrontendService
             return false;
         }
 
-        return $this->isFieldInPalette('addResponsiveChildren', self::getProp($varData, 'type') ?: null, $table);
+        return $this->isFieldInPalette('addResponsiveChildren', self::resolveType($varData), $table);
     }
 
     public function getAllInnerContainerClasses($varData, array $arrFields = [], string $table = 'tl_content', bool $skipPaletteCheck = false): array
@@ -342,7 +378,7 @@ class ResponsiveFrontendService
             ['justifyContent', 'responsiveJustifyContent', 'getJustifyContentClasses'],
         ];
 
-        $type = self::getProp($varData, 'type') ?: null;
+        $type = self::resolveType($varData);
 
         $arrClasses = [];
         foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
