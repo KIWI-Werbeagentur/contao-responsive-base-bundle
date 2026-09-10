@@ -2,13 +2,47 @@
 
 {% if data|default %}
     {% set attributes = attrs()
-        .addClass(getContainerClasses(data.responsiveContainer|default))
+        .addClass(getContainerClasses(data.responsiveContainer|default, data.type|default))
         .addClass(getAllResponsiveClasses(data))
         .mergeWith(attributes|default)
     %}
 {% endif %}
 
+{% if type is defined and type == 'element_group' and data|default %}
+    {% set groupSpacingTopClasses = getGroupSpacingClasses(data.responsiveGroupSpacingTop|default(''), 't') %}
+    {% set groupSpacingBottomClasses = getGroupSpacingClasses(data.responsiveGroupSpacingBottom|default(''), 'b') %}
+    {# move the spacing data-attribute to 'content__main' when using a background element, mirroring mod_article. #}
+    {% set groupHasBackground = data.background|default and hasBackground(data.background|default) %}
+    {% if groupSpacingTopClasses %}
+        {% set attributes = attrs().addClass(groupSpacingTopClasses|join(' ')).mergeWith(attributes|default) %}
+        {% if groupHasBackground %}
+            {% set content_main_attributes = attrs().set('data-spacing-top').mergeWith(content_main_attributes|default) %}
+        {% else %}
+            {% set attributes = attrs().set('data-spacing-top').mergeWith(attributes|default) %}
+        {% endif %}
+    {% endif %}
+    {% if groupSpacingBottomClasses %}
+        {% set attributes = attrs().addClass(groupSpacingBottomClasses|join(' ')).mergeWith(attributes|default) %}
+        {% if groupHasBackground %}
+            {% set content_main_attributes = attrs().set('data-spacing-bottom').mergeWith(content_main_attributes|default) %}
+        {% else %}
+            {% set attributes = attrs().set('data-spacing-bottom').mergeWith(attributes|default) %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+
 {% set inner_classes = getAllInnerContainerClasses(data|default)|join(" ") %}
+
+{#
+    Attributes for the wrapper around an element's own child items, for elements that render those
+    items themselves instead of nesting fragments (e.g. a list of persons): they only know where
+    their items sit, so they render the wrapper and output these attributes on it. Nested fragments
+    need none of this - they are wrapped generically in the "inner" block below.
+
+    Merges an already existing value, so the element template (and a template overriding it) can
+    add its own attributes at the top and still receive the classes here.
+#}
+{% set items_attributes = attrs().addClass(inner_classes).mergeWith(items_attributes|default) %}
 
 {%- block inner %}
     {% if nested_fragments %}
