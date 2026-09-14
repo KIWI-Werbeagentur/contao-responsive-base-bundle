@@ -4,8 +4,8 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\Controller\FrontendModule;
 
 use Contao\CoreBundle\Controller\FrontendModule\RootPageDependentModulesController;
 use Contao\CoreBundle\Framework\ContaoFramework;
-use Contao\CoreBundle\Routing\PageFinder;
 use Contao\ModuleModel;
+use Contao\PageModel;
 use Contao\StringUtil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,7 +27,6 @@ class RootPageDependentModulesControllerDecorator
     public function __construct(
         protected RootPageDependentModulesController $inner,
         protected ContaoFramework $framework,
-        protected PageFinder $pageFinder,
     ) {
     }
 
@@ -60,7 +59,10 @@ class RootPageDependentModulesControllerDecorator
             return null;
         }
 
-        if (!$objPage = $this->pageFinder->getCurrentPage($request)) {
+        // Resolve the page the same way the inner controller does (see
+        // AbstractFragmentController::getPageModel()), so we always tag the child it
+        // actually renders.
+        if (!($objPage = $request->attributes->get('pageModel')) instanceof PageModel) {
             return null;
         }
 

@@ -27,7 +27,6 @@ services:
     arguments:
       - '@.inner'
       - '@contao.framework'
-      - '@contao.routing.page_finder'
   Kiwi\Contao\ResponsiveBaseBundle\DataContainer\IncludesListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\DataContainer\WrapperListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\LoadDataContainerListener: ~
