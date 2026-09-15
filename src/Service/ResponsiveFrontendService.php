@@ -408,6 +408,13 @@ class ResponsiveFrontendService
             return true;
         }
 
+        Controller::loadDataContainer($table);
+
+        // early return to skip type check for type-less tables
+        if (!\in_array('type', $GLOBALS['TL_DCA'][$table]['palettes']['__selector__'] ?? [], true)) {
+            return true;
+        }
+
         // Both rejections below are indistinguishable, in the rendered output, from "this record
         // simply has no responsive settings" - the element just silently loses its classes. That
         // is precisely how a stale template override goes unnoticed: a pre-1.1 copy of
@@ -428,8 +435,6 @@ class ResponsiveFrontendService
 
             return false;
         }
-
-        Controller::loadDataContainer($table);
 
         if (!isset($GLOBALS['TL_DCA'][$table]['palettes'][$type])) {
             trigger_deprecation(
