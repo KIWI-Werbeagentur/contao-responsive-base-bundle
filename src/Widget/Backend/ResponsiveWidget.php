@@ -36,8 +36,17 @@ class ResponsiveWidget extends Widget
         $strInputType = $this->arrDca['responsiveInputType'] ?? '';
         $strClass = $GLOBALS['BE_FFL'][$strInputType];
         $arrValues = StringUtil::deserialize($this->value, true);
+        // A field offering core's blank option can express "not set" at the base breakpoint,
+        // so the base must not be mandatory there - otherwise the empty choice is rejected on
+        // save. Fields without it keep the mandatory base exactly as before. `base` is passed
+        // separately because it no longer coincides with `mandatory`.
+        $blnHasBlankOption = (bool) ($this->arrDca['eval']['includeBlankOption'] ?? false);
+
         foreach ($this->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
-            $this->arrWidgets[$arrBreakpoint['modifier']] = $this->generateFormField($strClass, $strBreakpoint, $arrBreakpoint['modifier'], $arrValues, ['mandatory' => $i == 0]);
+            $this->arrWidgets[$arrBreakpoint['modifier']] = $this->generateFormField($strClass, $strBreakpoint, $arrBreakpoint['modifier'], $arrValues, [
+                'base' => $i === 0,
+                'mandatory' => $i === 0 && !$blnHasBlankOption,
+            ]);
             $i++;
         }
     }
@@ -63,9 +72,40 @@ class ResponsiveWidget extends Widget
         $objWidget->strId = "{$this->strField}{$strModifier}";
         $objWidget->storeValues = true;
         $objWidget->mandatory = $arrOptions['mandatory'] ?? 0;
-        $objWidget->options = (($arrOptions['mandatory'] ?? 0) ? ($this->arrConfiguration['options'] ?? []) : array_merge([['value' => self::INHERIT_OPTION_VALUE, 'label' => ($GLOBALS['TL_LANG']['responsive']['inherit'] ?? 'inherit')]], ($this->arrConfiguration['options'] ?? [])));
-        if (!($arrOptions['mandatory'] ?? 0) && \in_array($arrValues[$strBreakpoint] ?? null, [null, ''], true)) {
-            $objWidget->value = self::INHERIT_OPTION_VALUE;
+
+        $blnBase = (bool) ($arrOptions['base'] ?? false);
+        $arrOpts = $this->arrConfiguration['options'] ?? [];
+
+        if (!$blnBase) {
+            // Per-breakpoint selects offer "- Inherit -" and never the base's blank entry:
+            // taking over the next lower breakpoint's value is a different statement from
+            // having no value at all. getAttributesFromDca() prepends the blank entry to the
+            // options of every sub-widget of a field with includeBlankOption, so drop it here.
+            $arrOpts = array_values(array_filter($arrOpts, static fn ($arrOption) => ($arrOption['value'] ?? null) !== ''));
+            $arrOpts = array_merge([['value' => self::INHERIT_OPTION_VALUE, 'label' => ($GLOBALS['TL_LANG']['responsive']['inherit'] ?? 'inherit')]], $arrOpts);
+        }
+
+        $objWidget->options = $arrOpts;
+
+        if (\in_array($arrValues[$strBreakpoint] ?? null, [null, ''], true)) {
+            if (!$blnBase) {
+                $objWidget->value = self::INHERIT_OPTION_VALUE;
+            } elseif (
+                !($this->arrDca['eval']['includeBlankOption'] ?? false)
+                && ($varDefault = $this->arrDca['default'][$strBreakpoint] ?? null) !== null
+                && $varDefault !== ''
+            ) {
+                // No blank option, so the base cannot say "not set". Left empty it would render
+                // with nothing selected, the browser would preselect whatever is first in the
+                // option list, and the next save would silently store that — which is how an
+                // unconfigured field ends up written as the first concrete option. Preselect the
+                // field's declared DCA default instead, so it round-trips as the value it would
+                // have been created with.
+                $objWidget->value = $varDefault;
+            }
+            // Base *with* a blank option: leave the value empty. Widget::optionSelected()
+            // compares loosely, so '' == null preselects the blank entry on its own, and the
+            // field round-trips unchanged.
         }
         $objWidget->label = $GLOBALS['TL_LANG']['responsive']['breakpoint'][$strBreakpoint][0] ?? $strBreakpoint;
         $objWidget->currentRecord = $this->currentRecord;
