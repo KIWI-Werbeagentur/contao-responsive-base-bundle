@@ -51,3 +51,11 @@ services:
       - '@?kiwi.contao.designer.frontend'
     tags:
       - 'twig.extension'
+  # Extension point. A bundle layering further conditions on column output swaps this service's
+  # class for its own subclass (see OverrideServiceCompilerPass in contao-bootstrap) so that
+  # exactly one migration runs and writes every field the install actually has - the fields and
+  # the selector gating them belong to one setting and must be written together.
+  kiwi.contao.responsive.migration.delegated_module_columns:
+    class: Kiwi\Contao\ResponsiveBaseBundle\Migration\DelegatedModuleColumnsMigration
+    arguments:
+      - '@database_connection'
