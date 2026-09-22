@@ -6,6 +6,8 @@ use Contao\CoreBundle\DataContainer\PaletteManipulator;
 use Contao\CoreBundle\DependencyInjection\Attribute\AsCallback;
 use Contao\DataContainer;
 use Contao\Input;
+use Contao\ModuleModel;
+use Contao\StringUtil;
 use Contao\System;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 
@@ -26,7 +28,7 @@ class IncludesListener
             $objInclude = $strTargetClass::findByPk($objDca->getCurrentRecord()[$objDca->getCurrentRecord()['type']] ?? null);
 
             if($objInclude){
-                $arrClasses = System::getContainer()->get('kiwi.contao.responsive.frontend')->getAllInnerContainerClasses($objInclude->row());
+                $arrClasses = System::getContainer()->get('kiwi.contao.responsive.frontend')->getAllInnerContainerClasses($objInclude->row(), [], 'tl_module');
                 $GLOBALS['TL_DCA']['tl_content']['fields']['addResponsiveChildren']['label'] = &$GLOBALS['TL_LANG']['responsive']['overwriteResponsiveChildren'];
                 $GLOBALS['TL_DCA']['tl_content']['fields']['addResponsiveChildren']['label'][1] = sprintf($GLOBALS['TL_LANG']['responsive']['overwriteResponsiveChildren'][1] ?? "", "(".implode(" ", $arrClasses).")");
             }
@@ -43,6 +45,50 @@ class IncludesListener
                     ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                     ->addField(['addResponsiveChildren'], 'items_legend', PaletteManipulator::POSITION_APPEND)
                     ->applyToPalettes([$strType], 'tl_content');
+            }
+        }
+    }
+
+    /**
+     * Offer addResponsiveChildren on module wrappers that alias another module (root page,
+     * language or page dependent) when at least one of the included modules supports it,
+     * so the wrapper can override the children settings of the module it aliases
+     * (see GetFrontendModuleListener::getWrapperSource).
+     */
+    #[AsCallback(table: 'tl_module', target: 'config.onload')]
+    public function addWrapperResponsiveChildrenSettings(DataContainer $objDca): void
+    {
+        $arrRecord = $objDca->getCurrentRecord() ?? [];
+        $strType = $arrRecord['type'] ?? '';
+
+        $arrModuleIds = match ($strType) {
+            'root_page_dependent_modules' => StringUtil::deserialize($arrRecord['rootPageDependentModules'] ?? '', true),
+            'languageDependentModule' => array_column(StringUtil::deserialize($arrRecord['languageDependentModules'] ?? '', true), 'mod'),
+            'dynamicModule' => array_column(StringUtil::deserialize($arrRecord['dynamicModule'] ?? '', true), 'module'),
+            default => null,
+        };
+
+        if (!$arrModuleIds) {
+            return;
+        }
+
+        $arrContainerTypes = array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []);
+
+        foreach (array_filter($arrModuleIds) as $intId) {
+            $objModule = ModuleModel::findByPk($intId);
+
+            if (!$objModule) {
+                continue;
+            }
+
+            // Same condition the frontend listener uses to apply children settings to the child
+            if (in_array($objModule->type, $arrContainerTypes) || PaletteManipulatorExtended::create()->hasField($objModule->type, 'tl_module', 'addResponsiveChildren')) {
+                PaletteManipulatorExtended::create()
+                    ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
+                    ->addField(['addResponsiveChildren'], 'items_legend', PaletteManipulator::POSITION_APPEND)
+                    ->applyToPalettes([$strType], 'tl_module');
+
+                return;
             }
         }
     }

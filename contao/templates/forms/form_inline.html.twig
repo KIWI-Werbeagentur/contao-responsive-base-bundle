@@ -2,7 +2,7 @@
 
 {% set bodyClasses = "" %}
 {% set fields %}
-    <div class="formbody__inside {{ getAllInnerContainerClasses(_context)|join(" ") }}">
+    <div class="formbody__inside {{ getAllInnerContainerClasses(_context, table='tl_form', skipPaletteCheck=true)|join(" ") }}">
         {{ fields|raw }}
     </div>
 {% endset %}

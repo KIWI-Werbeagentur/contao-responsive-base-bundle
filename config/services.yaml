@@ -5,6 +5,13 @@ services:
   kiwi.contao.responsive.frontend:
     public: true
     class: Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService
+  Kiwi\Contao\ResponsiveBaseBundle\Migration\ContainerColumnConflictMigration:
+    arguments:
+      - '@database_connection'
+      - '@kiwi.contao.responsive.frontend'
+  Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver:
+    arguments:
+      - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveDesignerFrontendService:
     public: true
     decorates: kiwi.contao.designer.frontend
@@ -14,8 +21,13 @@ services:
     arguments:
       - '@contao.framework'
       - '@twig'
+  Kiwi\Contao\ResponsiveBaseBundle\Controller\FrontendModule\RootPageDependentModulesControllerDecorator:
+    public: true
+    decorates: Contao\CoreBundle\Controller\FrontendModule\RootPageDependentModulesController
+    arguments:
+      - '@.inner'
+      - '@contao.framework'
   Kiwi\Contao\ResponsiveBaseBundle\DataContainer\IncludesListener: ~
-  Kiwi\Contao\ResponsiveBaseBundle\DataContainer\ResponsiveConfigListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\DataContainer\WrapperListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\LoadDataContainerListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\ParseTemplateListener: ~
@@ -27,8 +39,23 @@ services:
     public: true
     arguments:
       - '@kiwi.contao.responsive.frontend'
+      - '@Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver'
+  Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetContentElementListener:
+    public: true
+    arguments:
+      - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Twig\ResponsiveExtension:
     arguments:
       - '@kiwi.contao.responsive.frontend'
+      - '@Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver'
+      - '@?kiwi.contao.designer.frontend'
     tags:
       - 'twig.extension'
+  # Extension point. A bundle layering further conditions on column output swaps this service's
+  # class for its own subclass (see OverrideServiceCompilerPass in contao-bootstrap) so that
+  # exactly one migration runs and writes every field the install actually has - the fields and
+  # the selector gating them belong to one setting and must be written together.
+  kiwi.contao.responsive.migration.delegated_module_columns:
+    class: Kiwi\Contao\ResponsiveBaseBundle\Migration\DelegatedModuleColumnsMigration
+    arguments:
+      - '@database_connection'
