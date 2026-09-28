@@ -13,7 +13,10 @@ class ParseWidgetListener
     {
         $request = System::getContainer()->get('request_stack')->getCurrentRequest();
         if (!System::getContainer()->get('contao.routing.scope_matcher')->isBackendRequest($request)) {
-            $objWidget->rowClasses .= implode(" ", System::getContainer()->get('kiwi.contao.responsive.frontend')->getAllResponsiveClasses($objWidget));
+            $objWidget->rowClasses .= implode(" ", System::getContainer()->get('kiwi.contao.responsive.frontend')->getAllResponsiveClasses(
+                $objWidget,
+                table: 'tl_form_field',
+            ));
             return $objWidget->inherit();
         }
         return $strBuffer;

@@ -1,5 +1,7 @@
 <?php
 
+use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
+
 $GLOBALS['TL_LANG']['responsive']['responsive'] = "Set responsively";
 $GLOBALS['TL_LANG']['responsive']['inherit'] = "- Inherit -";
 
@@ -41,6 +43,8 @@ $GLOBALS['TL_LANG']['responsive']['overwriteResponsiveChildren'] = [
     0 => "Override responsive width for child elements",
     1 => "Override the module settings <i>%s</i>",
 ];
+
+$GLOBALS['TL_LANG']['responsive']['spacings'][ResponsiveConfiguration::SPACING_NO_OP][0] = "No spacing settings [noop]";
 
 $GLOBALS['TL_LANG']['responsive']['responsiveFlexDirection'] = [
     0 => "Main axis",
