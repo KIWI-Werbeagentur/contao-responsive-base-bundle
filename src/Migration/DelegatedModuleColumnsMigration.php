@@ -9,6 +9,7 @@ use Contao\CoreBundle\Migration\MigrationResult;
 use Contao\StringUtil;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ParameterType;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -17,9 +18,10 @@ use Psr\Log\LoggerInterface;
  *
  * Column classes for a rendered module come from whichever record is considered its
  * outermost includer. That resolution used to honour only a content element inserting the
- * rendered module itself; a module reached through a wrapper - a root-page- or
- * language-dependent module, which delegates to a different module per root page - fell
- * back to its own tl_module row. Now the outermost includer wins in every case, which is
+ * rendered module itself; a module reached through a wrapper - core's root page dependent
+ * modules, or kiwi/contao-core-bundle's language dependent and dynamic (page dependent)
+ * modules, each delegating to a different module per context - fell back to its own
+ * tl_module row. Now the outermost includer wins in every case, which is
  * the intended behaviour: whoever places an element has the first call on how it is styled.
  *
  * For existing content that moves the authoritative record. Everything the inner module
@@ -28,12 +30,16 @@ use Psr\Log\LoggerInterface;
  * so whatever they hold was never a decision anyone made or saw. Restoring the previous
  * rendering therefore means carrying the inner module's settings up to the element.
  *
- * Which module an element rendered is normally determinable: the element's page resolves to
- * a root page, and the wrapper's per-root-page map names the module for it. Where the
- * context has no single root page - an element in news, events, a static article, or any
- * other parent this cannot walk - every delegated module is read instead. If they all agree
- * there is still exactly one answer and it is used; only genuine disagreement is left alone
- * and reported, because one include element cannot express a per-root-page difference.
+ * Which module an element rendered is normally determinable: the element's page, and the
+ * page tree above it, select the module the same way each wrapper does at runtime - by root
+ * page, by root page language, or by the nearest configured page. Where the context has no
+ * page - an element in news, events, a static article, or any other parent this cannot walk -
+ * every delegated module is read instead. If they all agree there is still exactly one answer
+ * and it is used; only genuine disagreement is left alone and reported, because one include
+ * element cannot express a per-context difference.
+ *
+ * Wrappers nested in wrappers are not supported and not followed: the module a map names is
+ * taken as the one that rendered.
  *
  * This bundle writes the fields it defines - responsiveCols and responsiveOffsets. A bundle
  * layering further conditions on column output extends this class and overrides
@@ -47,6 +53,20 @@ use Psr\Log\LoggerInterface;
 class DelegatedModuleColumnsMigration extends AbstractMigration
 {
     private const EMPTY_SERIALIZED = ['', 'a:0:{}', 'N;'];
+
+    /**
+     * Wrapper module type => tl_module column holding its delegation config. The kiwi types
+     * come from kiwi/contao-core-bundle, which is optional - a type whose column is missing is
+     * skipped.
+     */
+    private const WRAPPER_COLUMNS = [
+        'root_page_dependent_modules' => 'rootPageDependentModules',
+        'languageDependentModule' => 'languageDependentModules',
+        'dynamicModule' => 'dynamicModule',
+    ];
+
+    /** @var array<string, string> wrapper types available on this install => config column */
+    private array $arrWrapperColumns = [];
 
     /** @var list<array{id:int, values:array<string,string>}>|null */
     private ?array $arrUpdates = null;
@@ -187,12 +207,12 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
         $arrUpdates = [];
 
         foreach ($this->fetchCandidates() as $arrCandidate) {
-            $arrMap = StringUtil::deserialize($arrCandidate['rootPageDependentModules'], true);
-            if ($arrMap === []) {
+            $arrConfig = StringUtil::deserialize($arrCandidate['wrapperConfig'], true);
+            if ($arrConfig === []) {
                 continue;
             }
 
-            $arrModuleIds = $this->resolveRenderedModuleIds($arrCandidate, $arrMap);
+            $arrModuleIds = $this->resolveRenderedModuleIds($arrCandidate, $arrConfig);
             if ($arrModuleIds === []) {
                 continue;
             }
@@ -230,6 +250,9 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
     }
 
     /**
+     * Include elements placing a wrapper, one query per wrapper type installed. The wrapper's
+     * type and config are aliased so all types share one shape.
+     *
      * @return list<array<string, mixed>>
      */
     private function fetchCandidates(): array
@@ -240,17 +263,23 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
         ));
 
         $strSelect = implode(', ', array_map(static fn (string $c) => 'c.' . $c, $arrColumns));
+        $arrCandidates = [];
 
-        return $this->connection->fetchAllAssociative(
-            "SELECT {$strSelect}, m.rootPageDependentModules
-               FROM tl_content c
-               INNER JOIN tl_module m ON m.id = c.module
-              WHERE c.type = 'module'
-                AND m.rootPageDependentModules IS NOT NULL
-                AND m.rootPageDependentModules NOT IN (?)",
-            [self::EMPTY_SERIALIZED],
-            [ArrayParameterType::STRING],
-        );
+        foreach ($this->arrWrapperColumns as $strType => $strColumn) {
+            array_push($arrCandidates, ...$this->connection->fetchAllAssociative(
+                "SELECT {$strSelect}, m.type AS wrapperType, m.{$strColumn} AS wrapperConfig
+                   FROM tl_content c
+                   INNER JOIN tl_module m ON m.id = c.module
+                  WHERE c.type = 'module'
+                    AND m.type = ?
+                    AND m.{$strColumn} IS NOT NULL
+                    AND m.{$strColumn} NOT IN (?)",
+                [$strType, self::EMPTY_SERIALIZED],
+                [ParameterType::STRING, ArrayParameterType::STRING],
+            ));
+        }
+
+        return $arrCandidates;
     }
 
     /**
@@ -268,43 +297,144 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
     }
 
     /**
-     * The module(s) an include element may render: the one for its own root page when that can
-     * be determined (none if the wrapper has no module for it), otherwise every module the
-     * wrapper delegates to.
+     * The module(s) an include element may render: the one its wrapper selects for the
+     * element's page when that can be determined (none if the wrapper selects nothing there),
+     * otherwise every module the wrapper delegates to.
      *
      * @param array<string, mixed> $arrCandidate
-     * @param array<mixed, mixed>  $arrMap       root page id => module id
+     * @param array<mixed, mixed>  $arrConfig    the wrapper's deserialized delegation config
      *
      * @return list<int>
      */
-    private function resolveRenderedModuleIds(array $arrCandidate, array $arrMap): array
+    private function resolveRenderedModuleIds(array $arrCandidate, array $arrConfig): array
     {
-        $intRootPage = $this->resolveRootPageId($arrCandidate);
+        $arrChain = $this->resolvePageChain($arrCandidate);
 
-        // A resolved root page settles it either way: an unmapped root renders no delegated module
-        // at all (the wrapper returns an empty response), so there is nothing to carry over.
-        if ($intRootPage !== null) {
-            return (int) ($arrMap[$intRootPage] ?? 0) > 0 ? [(int) $arrMap[$intRootPage]] : [];
-        }
-
-        $arrIds = [];
-
-        foreach ($arrMap as $varModuleId) {
-            if ((int) $varModuleId > 0) {
-                $arrIds[] = (int) $varModuleId;
-            }
-        }
-
-        return array_values(array_unique($arrIds));
+        return match ($arrCandidate['wrapperType']) {
+            'root_page_dependent_modules' => $this->resolveRootPageDependent($arrConfig, $arrChain),
+            'languageDependentModule' => $this->resolveLanguageDependent($arrConfig, $arrChain),
+            'dynamicModule' => $this->resolveDynamic($arrConfig, $arrChain),
+            default => [],
+        };
     }
 
     /**
-     * Walks the parent chain to the owning page, then up to its root page. Null when the chain
-     * leaves what can be resolved here (news, events, static articles, …).
+     * RootPageDependentModulesController: the module mapped to the page's root page. An unmapped
+     * root renders no delegated module at all (the wrapper returns an empty response).
+     *
+     * @param array<mixed, mixed>              $arrMap   root page id => module id
+     * @param list<array<string, mixed>>|null  $arrChain
+     *
+     * @return list<int>
+     */
+    private function resolveRootPageDependent(array $arrMap, ?array $arrChain): array
+    {
+        $arrRoot = $this->findRootPage($arrChain);
+
+        if ($arrRoot === null) {
+            return $this->positiveIds($arrMap);
+        }
+
+        $intModule = (int) ($arrMap[$arrRoot['id']] ?? 0);
+
+        return $intModule > 0 ? [$intModule] : [];
+    }
+
+    /**
+     * LanguageDependentModule::getModuleModel(): the module for the page language (the root
+     * page's), else for the root's fallback language, else the first configured module that
+     * exists. The first entry per language wins.
+     *
+     * @param array<mixed, mixed>              $arrEntries list of ['language' => ..., 'mod' => ...]
+     * @param list<array<string, mixed>>|null  $arrChain
+     *
+     * @return list<int>
+     */
+    private function resolveLanguageDependent(array $arrEntries, ?array $arrChain): array
+    {
+        $arrByLanguage = [];
+
+        foreach ($arrEntries as $arrEntry) {
+            if (\is_array($arrEntry) && !isset($arrByLanguage[$arrEntry['language'] ?? ''])) {
+                $arrByLanguage[$arrEntry['language'] ?? ''] = (int) ($arrEntry['mod'] ?? 0);
+            }
+        }
+
+        $arrRoot = $this->findRootPage($arrChain);
+
+        if ($arrRoot === null) {
+            return $this->positiveIds($arrByLanguage);
+        }
+
+        $arrExisting = $this->existingModuleIds($this->positiveIds($arrByLanguage));
+        $arrLanguages = [(string) $arrRoot['language'], $this->resolveFallbackLanguage($arrRoot)];
+
+        foreach ($arrLanguages as $strLanguage) {
+            $intModule = $arrByLanguage[$strLanguage] ?? 0;
+
+            if ($strLanguage !== '' && isset($arrExisting[$intModule])) {
+                return [$intModule];
+            }
+        }
+
+        foreach ($arrByLanguage as $intModule) {
+            if (isset($arrExisting[$intModule])) {
+                return [$intModule];
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * DynamicModule::getModuleModel(): walking up from the element's page, the first page with
+     * an entry decides - unless that entry is marked "not inherited" and belongs to an ancestor
+     * rather than the page itself. An entry without a module renders nothing. Later entries for
+     * the same page win.
+     *
+     * @param array<mixed, mixed>              $arrEntries list of ['page' => ..., 'module' => ..., 'notInherited' => ...]
+     * @param list<array<string, mixed>>|null  $arrChain
+     *
+     * @return list<int>
+     */
+    private function resolveDynamic(array $arrEntries, ?array $arrChain): array
+    {
+        $arrByPage = [];
+
+        foreach ($arrEntries as $arrEntry) {
+            if (\is_array($arrEntry)) {
+                $arrByPage[(int) ($arrEntry['page'] ?? 0)] = [
+                    'module' => (int) ($arrEntry['module'] ?? 0),
+                    'notInherited' => (bool) ($arrEntry['notInherited'] ?? false),
+                ];
+            }
+        }
+
+        if ($arrChain === null) {
+            return $this->positiveIds(array_column($arrByPage, 'module'));
+        }
+
+        foreach ($arrChain as $i => $arrPage) {
+            $arrEntry = $arrByPage[(int) $arrPage['id']] ?? null;
+
+            if ($arrEntry !== null && (!$arrEntry['notInherited'] || $i === 0)) {
+                return $arrEntry['module'] > 0 ? [$arrEntry['module']] : [];
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * The element's page followed by its ancestors up to the top of the tree. Null when the
+     * element's parent chain leaves what can be resolved here (news, events, static
+     * articles, …) or the page tree is broken.
      *
      * @param array<string, mixed> $arrCandidate
+     *
+     * @return list<array<string, mixed>>|null
      */
-    private function resolveRootPageId(array $arrCandidate): ?int
+    private function resolvePageChain(array $arrCandidate): ?array
     {
         $intPid = (int) $arrCandidate['pid'];
         $strPtable = (string) ($arrCandidate['ptable'] ?: 'tl_article');
@@ -334,24 +464,99 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
             return null;
         }
 
+        $arrChain = [];
         $arrSeen = [];
 
         while ($intPageId > 0 && !isset($arrSeen[$intPageId])) {
             $arrSeen[$intPageId] = true;
 
-            $arrPage = $this->connection->fetchAssociative('SELECT id, pid, type FROM tl_page WHERE id = ?', [$intPageId]);
+            $arrPage = $this->connection->fetchAssociative('SELECT id, pid, type, language, dns, fallback FROM tl_page WHERE id = ?', [$intPageId]);
             if (!$arrPage) {
                 return null;
             }
 
-            if ('root' === $arrPage['type']) {
-                return (int) $arrPage['id'];
-            }
-
+            $arrChain[] = $arrPage;
             $intPageId = (int) $arrPage['pid'];
         }
 
+        return $arrChain;
+    }
+
+    /**
+     * @param list<array<string, mixed>>|null $arrChain
+     *
+     * @return array<string, mixed>|null
+     */
+    private function findRootPage(?array $arrChain): ?array
+    {
+        foreach ($arrChain ?? [] as $arrPage) {
+            if ('root' === $arrPage['type']) {
+                return $arrPage;
+            }
+        }
+
         return null;
+    }
+
+    /**
+     * PageModel::loadDetails()' rootFallbackLanguage: the root's own language if it is the
+     * fallback, else that of the published fallback root of the same domain.
+     *
+     * @param array<string, mixed> $arrRoot
+     */
+    private function resolveFallbackLanguage(array $arrRoot): string
+    {
+        if ($arrRoot['fallback']) {
+            return (string) $arrRoot['language'];
+        }
+
+        $intTime = time();
+
+        return (string) $this->connection->fetchOne(
+            "SELECT language FROM tl_page
+              WHERE type = 'root' AND dns = ? AND fallback = 1 AND published = 1
+                AND (start = '' OR start <= ?) AND (stop = '' OR stop > ?)
+              ORDER BY sorting LIMIT 1",
+            [$arrRoot['dns'], $intTime, $intTime],
+        );
+    }
+
+    /**
+     * @param iterable<mixed> $varIds
+     *
+     * @return list<int>
+     */
+    private function positiveIds(iterable $varIds): array
+    {
+        $arrIds = [];
+
+        foreach ($varIds as $varId) {
+            if ((int) $varId > 0) {
+                $arrIds[] = (int) $varId;
+            }
+        }
+
+        return array_values(array_unique($arrIds));
+    }
+
+    /**
+     * @param list<int> $arrIds
+     *
+     * @return array<int, true>
+     */
+    private function existingModuleIds(array $arrIds): array
+    {
+        if ($arrIds === []) {
+            return [];
+        }
+
+        $arrExisting = $this->connection->fetchFirstColumn(
+            'SELECT id FROM tl_module WHERE id IN (?)',
+            [$arrIds],
+            [ArrayParameterType::INTEGER],
+        );
+
+        return array_fill_keys(array_map('intval', $arrExisting), true);
     }
 
     /**
@@ -449,8 +654,15 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
             }
         }
 
-        return \in_array('rootPageDependentModules', $arrModule, true)
-            && \in_array('responsiveCols', $arrModule, true)
-            && \in_array('responsiveOffsets', $arrModule, true);
+        if (!\in_array('responsiveCols', $arrModule, true) || !\in_array('responsiveOffsets', $arrModule, true)) {
+            return false;
+        }
+
+        $this->arrWrapperColumns = array_filter(
+            self::WRAPPER_COLUMNS,
+            static fn (string $strColumn) => \in_array($strColumn, $arrModule, true),
+        );
+
+        return $this->arrWrapperColumns !== [];
     }
 }
