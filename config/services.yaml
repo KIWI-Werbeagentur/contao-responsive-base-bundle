@@ -59,3 +59,4 @@ services:
     class: Kiwi\Contao\ResponsiveBaseBundle\Migration\DelegatedModuleColumnsMigration
     arguments:
       - '@database_connection'
+      - '@logger'

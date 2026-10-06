@@ -9,6 +9,7 @@ use Contao\CoreBundle\Migration\MigrationResult;
 use Contao\StringUtil;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
+use Psr\Log\LoggerInterface;
 
 /**
  * Shared resolution for migrations that repair include elements rendering a *delegated*
@@ -53,8 +54,12 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
     /** @var list<array{id:int, reason:string}> */
     private array $arrAmbiguous = [];
 
-    public function __construct(protected readonly Connection $connection)
-    {
+    private bool $blnAmbiguousReported = false;
+
+    public function __construct(
+        protected readonly Connection $connection,
+        private readonly ?LoggerInterface $logger = null,
+    ) {
     }
 
     public function getName(): string
@@ -94,7 +99,42 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
             return false;
         }
 
-        return $this->collectUpdates() !== [];
+        $arrUpdates = $this->collectUpdates();
+
+        // Ambiguous elements are never written, so they cannot make this migration pending -
+        // it would stay pending forever and contao:migrate would loop. Report them on their own
+        // instead, on every migrate until they are resolved by hand, since the run result
+        // message alone never appears when they are all there is.
+        $this->reportAmbiguous();
+
+        return $arrUpdates !== [];
+    }
+
+    private function reportAmbiguous(): void
+    {
+        if ($this->arrAmbiguous === [] || $this->blnAmbiguousReported) {
+            return;
+        }
+
+        $this->blnAmbiguousReported = true;
+
+        $this->logger?->error(
+            '{count} include element(s) need manual resolution: the delegated modules they may '
+            . 'render disagree about their columns, which a single include element cannot '
+            . 'express, so they may no longer render what they used to: {elements}.',
+            [
+                'count' => \count($this->arrAmbiguous),
+                'elements' => $this->formatAmbiguous(),
+            ],
+        );
+    }
+
+    private function formatAmbiguous(): string
+    {
+        return implode(', ', array_map(
+            static fn (array $arr) => sprintf('tl_content.%d (%s)', $arr['id'], $arr['reason']),
+            $this->arrAmbiguous,
+        ));
     }
 
     public function run(): MigrationResult
@@ -125,10 +165,7 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
                 ' %d element(s) need manual resolution because the modules they may render disagree '
                 . 'about their columns, which a single include element cannot express: %s.',
                 \count($this->arrAmbiguous),
-                implode(', ', array_map(
-                    static fn (array $arr) => sprintf('tl_content.%d (%s)', $arr['id'], $arr['reason']),
-                    $this->arrAmbiguous,
-                )),
+                $this->formatAmbiguous(),
             );
         }
 
