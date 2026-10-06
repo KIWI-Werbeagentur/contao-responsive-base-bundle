@@ -8,9 +8,22 @@ use Contao\System;
 use Contao\Widget;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
+use Psr\Log\LoggerInterface;
 
 class ResponsiveFrontendService
 {
+    /**
+     * Palette gate rejections already logged, so a misconfigured template does not log once per
+     * field and element.
+     *
+     * @var array<string, true>
+     */
+    private array $arrLoggedRejections = [];
+
+    public function __construct(private readonly ?LoggerInterface $logger = null)
+    {
+    }
+
     public static function propExists($varTarget, $strProp)
     {
         return (is_array($varTarget) && array_key_exists($strProp, $varTarget)) || (is_object($varTarget) && property_exists($varTarget, $strProp));
@@ -35,7 +48,7 @@ class ResponsiveFrontendService
      * the field's rgxp - "email", "tel", "number", "url", "date" - not with the tl_form_field
      * record type, which stays "text". Reading "type" straight off such a widget therefore
      * gates against a palette that cannot exist, and since the gate fails closed the field
-     * silently loses every responsive class (with a deprecation from isFieldInPalette() that
+     * silently loses every responsive class (with an error logged by isFieldInPalette() that
      * blames the caller's $table rather than the widget).
      *
      * A widget's class is the reliable source: $GLOBALS['TL_FFL'] maps exactly the record types
@@ -352,8 +365,8 @@ class ResponsiveFrontendService
      * selector is off. Container palettes carry the same settings unconditionally and have no such
      * field, so they are unaffected.
      *
-     * Callers operating on typeless data ($skipPaletteCheck) cannot resolve a palette and have
-     * already established their source, so the check does not apply to them.
+     * Callers that skip the palette gate ($skipPaletteCheck) have already established their
+     * source, so the check does not apply to them.
      */
     protected function hasChildrenSettingsDisabled($varData, string $table, bool $skipPaletteCheck): bool
     {
@@ -399,8 +412,10 @@ class ResponsiveFrontendService
      * symptom of a wrong table / wrong source being passed), returns false - so such mismatches
      * surface immediately as missing classes instead of silently rendering and lingering.
      *
-     * Callers that legitimately operate on typeless data (an article or form body that has no
-     * per-record type and renders from its table's "default" palette) opt out via $skipPaletteCheck.
+     * Tables without type-keyed palettes (no "type" selector, e.g. tl_article) are gated against
+     * their "default" palette instead; one lacking that too (a wrong or nonexistent $table) also
+     * returns false. Callers that have already established their source can still opt out of the
+     * gate entirely via $skipPaletteCheck.
      */
     protected function isFieldInPalette(string $strField, ?string $type, string $table = 'tl_content', bool $skipPaletteCheck = false): bool
     {
@@ -410,9 +425,25 @@ class ResponsiveFrontendService
 
         Controller::loadDataContainer($table);
 
-        // early return to skip type check for type-less tables
+        // A table only has type-keyed palettes if "type" is a selector - that is what makes
+        // DC_Table::getPalette() resolve palettes by its value. Typeless tables (tl_article,
+        // tl_layout, tl_form) render from "default", so gate against that palette instead: the
+        // record's type is irrelevant there, but a wrong or nonexistent $table still fails closed.
         if (!\in_array('type', $GLOBALS['TL_DCA'][$table]['palettes']['__selector__'] ?? [], true)) {
-            return true;
+            if (!isset($GLOBALS['TL_DCA'][$table]['palettes']['default'])) {
+                $this->logRejection(
+                    'Responsive field "{field}" cannot be resolved against table "{table}": it has '
+                    .'neither type-keyed palettes nor a "default" palette, so no classes are rendered. '
+                    .'This usually means the wrong $table was passed - check for an outdated '
+                    .'project-level template override.',
+                    $strField,
+                    $table,
+                );
+
+                return false;
+            }
+
+            return PaletteManipulatorExtended::create()->hasField('default', $table, $strField);
         }
 
         // Both rejections below are indistinguishable, in the rendered output, from "this record
@@ -422,13 +453,12 @@ class ResponsiveFrontendService
         // no table, so it lands here with a null type against tl_content and drops everything.
         // Announce it instead of failing quietly.
         if ($type === null || $type === '') {
-            trigger_deprecation(
-                'kiwi/contao-responsive-base',
-                '1.1',
-                'Resolving responsive field "%s" without a record type (table "%s") is deprecated and '
-                .'yields no classes. Pass the record itself (e.g. "this" rather than a widget '
-                .'configuration array) together with its table, or opt out via $skipPaletteCheck for '
-                .'genuinely typeless data. Check for an outdated project-level template override.',
+            $this->logRejection(
+                'Responsive field "{field}" cannot be resolved without a record type (table '
+                .'"{table}"), so no classes are rendered. Pass the record itself (e.g. "this" rather '
+                .'than a widget configuration array) together with its table, or opt out via '
+                .'$skipPaletteCheck for genuinely typeless data. Check for an outdated project-level '
+                .'template override.',
                 $strField,
                 $table,
             );
@@ -437,20 +467,35 @@ class ResponsiveFrontendService
         }
 
         if (!isset($GLOBALS['TL_DCA'][$table]['palettes'][$type])) {
-            trigger_deprecation(
-                'kiwi/contao-responsive-base',
-                '1.1',
-                'Resolving responsive field "%s" for type "%s" against table "%s", which has no such '
-                .'palette, is deprecated and yields no classes. This usually means the wrong $table '
+            $this->logRejection(
+                'Responsive field "{field}" cannot be resolved for type "{type}": table "{table}" has '
+                .'no such palette, so no classes are rendered. This usually means the wrong $table '
                 .'was passed - check for an outdated project-level template override.',
                 $strField,
-                $type,
                 $table,
+                $type,
             );
 
             return false;
         }
 
         return PaletteManipulatorExtended::create()->hasField($type, $table, $strField);
+    }
+
+    /**
+     * Logs a palette gate rejection as an error: the element silently loses its responsive
+     * classes, which is a broken render rather than a deprecated call. Logged once per
+     * message/table/type, independent of the field.
+     */
+    private function logRejection(string $strMessage, string $strField, string $table, ?string $type = null): void
+    {
+        $strKey = $strMessage.'|'.$table.'|'.$type;
+
+        if (isset($this->arrLoggedRejections[$strKey])) {
+            return;
+        }
+
+        $this->arrLoggedRejections[$strKey] = true;
+        $this->logger?->error($strMessage, ['field' => $strField, 'table' => $table, 'type' => $type]);
     }
 }
