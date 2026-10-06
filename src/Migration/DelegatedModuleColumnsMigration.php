@@ -269,7 +269,8 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
 
     /**
      * The module(s) an include element may render: the one for its own root page when that can
-     * be determined, otherwise every module the wrapper delegates to.
+     * be determined (none if the wrapper has no module for it), otherwise every module the
+     * wrapper delegates to.
      *
      * @param array<string, mixed> $arrCandidate
      * @param array<mixed, mixed>  $arrMap       root page id => module id
@@ -280,8 +281,10 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
     {
         $intRootPage = $this->resolveRootPageId($arrCandidate);
 
-        if ($intRootPage !== null && isset($arrMap[$intRootPage]) && (int) $arrMap[$intRootPage] > 0) {
-            return [(int) $arrMap[$intRootPage]];
+        // A resolved root page settles it either way: an unmapped root renders no delegated module
+        // at all (the wrapper returns an empty response), so there is nothing to carry over.
+        if ($intRootPage !== null) {
+            return (int) ($arrMap[$intRootPage] ?? 0) > 0 ? [(int) $arrMap[$intRootPage]] : [];
         }
 
         $arrIds = [];
