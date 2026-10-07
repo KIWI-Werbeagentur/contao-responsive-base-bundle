@@ -33,7 +33,9 @@ services:
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\LoadDataContainerListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\ParseTemplateListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\AlterSchemesScss: ~
-  Kiwi\Contao\ResponsiveBaseBundle\EventListener\ParseWidgetListener: ~
+  Kiwi\Contao\ResponsiveBaseBundle\EventListener\LoadFormFieldListener:
+    arguments:
+      - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetAllEventsListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\GeneratePageListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetFrontendModuleListener:
