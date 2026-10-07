@@ -6,6 +6,7 @@ $GLOBALS['TL_LANG']['responsive']['spacings'][ResponsiveConfiguration::SPACING_N
 
 $GLOBALS['TL_LANG']['responsive']['responsive'] = "Responsiv einstellen";
 $GLOBALS['TL_LANG']['responsive']['inherit'] = "- Erben -";
+$GLOBALS['TL_LANG']['responsive']['noOpAfterValue'] = 'Die Option „Keine Abstandseinstellungen“ beim Breakpoint „%s“ hat keine Wirkung: der bei „%s“ gesetzte Wert gilt dort weiter. Bitte „Erben“ oder einen Wert wählen.';
 
 $GLOBALS['TL_LANG']['responsive']['flexDirection']['row'] = "Horizontal [row]";
 $GLOBALS['TL_LANG']['responsive']['flexDirection']['column'] = "Vertikal [column]";

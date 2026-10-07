@@ -6,6 +6,7 @@ use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
 use Contao\Widget;
+use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
 
 class ResponsiveWidget extends Widget
 {
@@ -156,11 +157,54 @@ class ResponsiveWidget extends Widget
             }
         }
 
+        if ($this->validatesAllBreakpoints()) {
+            $this->validateNoOpAfterValue($arrValues);
+        }
+
         if($this->arrErrors){
             return '';
         }
 
         return serialize($arrValues);
+    }
+
+    /**
+     * Whether every breakpoint's value is saved. The optional widget saves only the base value
+     * while its "responsive" toggle is off, so rules spanning breakpoints must not judge the
+     * hidden, discarded ones.
+     */
+    protected function validatesAllBreakpoints(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Rejects the no-op option above a breakpoint that has a value. It suppresses the class only
+     * for its own breakpoint, so the lower value keeps applying there - the opposite of what
+     * "no settings" suggests. At the base breakpoint, or with nothing set below, it is fine.
+     *
+     * @param array<string, string> $arrValues breakpoint => value, in breakpoint order
+     */
+    protected function validateNoOpAfterValue(array $arrValues): void
+    {
+        $strValueBreakpoint = null;
+
+        foreach ($arrValues as $strBreakpoint => $strValue) {
+            if ($strValue !== ResponsiveConfiguration::SPACING_NO_OP) {
+                $strValueBreakpoint ??= $strBreakpoint;
+                continue;
+            }
+
+            if ($strValueBreakpoint !== null) {
+                $this->addError(sprintf(
+                    $GLOBALS['TL_LANG']['responsive']['noOpAfterValue'] ?? 'The no-op option at breakpoint "%s" has no effect: the value set at "%s" keeps applying. Choose "inherit" or a value instead.',
+                    $GLOBALS['TL_LANG']['responsive']['breakpoint'][$strBreakpoint][0] ?? $strBreakpoint,
+                    $GLOBALS['TL_LANG']['responsive']['breakpoint'][$strValueBreakpoint][0] ?? $strValueBreakpoint,
+                ));
+
+                return;
+            }
+        }
     }
 
     protected function parseChildWidget(string $strBreakpoint, array $arrBreakpoint): string

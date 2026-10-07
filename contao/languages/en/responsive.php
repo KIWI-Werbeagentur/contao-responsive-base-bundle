@@ -4,6 +4,7 @@ use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
 
 $GLOBALS['TL_LANG']['responsive']['responsive'] = "Set responsively";
 $GLOBALS['TL_LANG']['responsive']['inherit'] = "- Inherit -";
+$GLOBALS['TL_LANG']['responsive']['noOpAfterValue'] = 'The "no spacing settings" option at breakpoint "%s" has no effect: the value set at "%s" keeps applying there. Choose "inherit" or a value instead.';
 
 $GLOBALS['TL_LANG']['responsive']['flexDirection']['row'] = "Horizontal [row]";
 $GLOBALS['TL_LANG']['responsive']['flexDirection']['column'] = "Vertical [column]";
