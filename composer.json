@@ -18,7 +18,8 @@
         "php": "^8.3.11",
         "contao/core-bundle": "^5.3",
         "kiwi/contao-cmx": "^1.0",
-        "psr/log": "^1.1 || ^2.0 || ^3.0"
+        "psr/log": "^1.1 || ^2.0 || ^3.0",
+        "symfony/polyfill-php84": "^1.31"
     },
     "require-dev": {
         "contao/manager-plugin": "^2.0"
