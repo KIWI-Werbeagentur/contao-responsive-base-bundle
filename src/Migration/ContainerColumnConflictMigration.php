@@ -9,6 +9,7 @@ use Contao\CoreBundle\Migration\MigrationResult;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService;
+use Psr\Log\LoggerInterface;
 
 /**
  * Resolves records that carry BOTH a container size and column settings.
@@ -90,6 +91,7 @@ final class ContainerColumnConflictMigration extends AbstractMigration
     public function __construct(
         private readonly Connection $connection,
         private readonly ResponsiveFrontendService $responsiveFrontendService,
+        private readonly ?LoggerInterface $logger = null,
     ) {
     }
 
@@ -133,6 +135,17 @@ final class ContainerColumnConflictMigration extends AbstractMigration
 
             $total += \count($ids);
             $messages[] = \sprintf('%s: %d (%s)', $table, \count($ids), implode(', ', $ids));
+
+            // The rewritten field is the one the predicate tests, so after this run the affected
+            // records can no longer be found again - persist the list for the review the result
+            // message asks for. Logged as an error so it reaches the log file even when the
+            // migration runs unmonitored.
+            $this->logger?->error(
+                'Switched {count} {table} record(s) to "Spalten-Element" so their stored column '
+                .'settings render again; they no longer emit their container class. Review the '
+                .'affected pages: {ids}.',
+                ['count' => \count($ids), 'table' => $table, 'ids' => implode(', ', $ids)],
+            );
         }
 
         return $this->createResult(

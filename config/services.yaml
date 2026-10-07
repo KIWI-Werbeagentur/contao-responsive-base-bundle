@@ -9,6 +9,7 @@ services:
     arguments:
       - '@database_connection'
       - '@kiwi.contao.responsive.frontend'
+      - '@logger'
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver:
     arguments:
       - '@kiwi.contao.responsive.frontend'
