@@ -97,6 +97,13 @@ class ResponsiveFrontendService
                     continue;
                 }
 
+                // Only breakpoint-keyed entries can render. A payload that is not a serialized
+                // array ('N;', a bare scalar) comes back from deserialize() wrapped as [0 => ...],
+                // and a stored breakpoint may since have been removed from the configuration.
+                if (!isset($objConfig->arrBreakpoints[$strBreakpoint])) {
+                    continue;
+                }
+
                 if ($objConfig->{$strMapping}) {
                     $strClass = is_array($objConfig->{$strMapping}) ? ($objConfig->{$strMapping}[$varValue] ?? '') : $objConfig->{$strMapping};
                 } else {

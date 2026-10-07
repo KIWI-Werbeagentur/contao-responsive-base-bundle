@@ -614,11 +614,17 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
     /**
      * Serialized responsive payload as a comparable map.
      *
+     * Anything that is not a serialized array - 'N;', a bare scalar - holds no breakpoint
+     * values and is empty. StringUtil::deserialize($v, true) would instead wrap it as
+     * [0 => $v], which the frontend renders as nothing (there is no breakpoint 0) but which
+     * would count here as a setting.
+     *
      * @return array<string, string>
      */
     private function normalize(?string $strValue): array
     {
-        $arrValues = $strValue ? StringUtil::deserialize($strValue, true) : [];
+        $varValues = StringUtil::deserialize($strValue);
+        $arrValues = \is_array($varValues) ? $varValues : [];
         $arrOut = [];
 
         foreach ($arrValues as $strBreakpoint => $varValue) {
