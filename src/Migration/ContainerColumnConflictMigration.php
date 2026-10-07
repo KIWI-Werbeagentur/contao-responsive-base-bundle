@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Kiwi\Contao\ResponsiveBaseBundle\Migration;
 
+use Contao\Controller;
 use Contao\CoreBundle\Migration\AbstractMigration;
 use Contao\CoreBundle\Migration\MigrationResult;
 use Doctrine\DBAL\ArrayParameterType;
@@ -209,7 +210,17 @@ final class ContainerColumnConflictMigration extends AbstractMigration
 
         $ids = [];
 
+        Controller::loadDataContainer($table);
+
         foreach ($rows as $row) {
+            // A type without a palette - left over from an uninstalled extension, or missing
+            // altogether - is not rendered by the frontend at all, so its columns are not
+            // stranded. Skip it here: the palette gate would reach the same answer, but log it
+            // as a misconfigured template call, which this is not.
+            if (!isset($GLOBALS['TL_DCA'][$table]['palettes'][(string) $row['type']])) {
+                continue;
+            }
+
             // The SQL above only narrows; the decision is the frontend's own rule, asked directly
             // so the two can never disagree. skipPaletteCheck stays false - the palette gate is
             // exactly what determines container-capability here.
