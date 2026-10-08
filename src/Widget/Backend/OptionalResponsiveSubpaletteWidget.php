@@ -19,10 +19,15 @@ class OptionalResponsiveSubpaletteWidget extends OptionalResponsiveWidget
 
         foreach ($this->arrDca['subpalettes'] as $k => $v) {
             // do not add options twice that have already been added via options
-            if (array_find($this->arrOptions, fn($item) => $item['value'] === $k)) continue;
+            // Compare as strings: numeric subpalette keys arrive as integers, but a loose == would
+            // also equate distinct numeric strings such as '01' and 1.
+            if (array_find($this->arrOptions, fn($item) => (string) $item['value'] === (string) $k)) continue;
+            // Same label resolution as Widget::getAttributesFromDca(): a reference entry may be
+            // a [label, description] pair, and an empty label falls back to the key.
+            $varLabel = $this->arrDca['reference'][$k] ?? null;
             $this->arrOptions[] = [
                 'value' => $k,
-                'label' => $this->arrDca['reference'][$k] ?? $k,
+                'label' => (\is_array($varLabel) ? ($varLabel[0] ?? null) : $varLabel) ?: $k,
             ];
         }
 

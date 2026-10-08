@@ -1,7 +1,10 @@
 <?php
 
+use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
+
 $GLOBALS['TL_LANG']['responsive']['responsive'] = "Set responsively";
 $GLOBALS['TL_LANG']['responsive']['inherit'] = "- Inherit -";
+$GLOBALS['TL_LANG']['responsive']['noOpAfterValue'] = 'The "no spacing settings" option at breakpoint "%s" has no effect: the value set at "%s" keeps applying there. Choose "inherit" or a value instead.';
 
 $GLOBALS['TL_LANG']['responsive']['flexDirection']['row'] = "Horizontal [row]";
 $GLOBALS['TL_LANG']['responsive']['flexDirection']['column'] = "Vertical [column]";
@@ -41,6 +44,8 @@ $GLOBALS['TL_LANG']['responsive']['overwriteResponsiveChildren'] = [
     0 => "Override responsive width for child elements",
     1 => "Override the module settings <i>%s</i>",
 ];
+
+$GLOBALS['TL_LANG']['responsive']['spacings'][ResponsiveConfiguration::SPACING_NO_OP][0] = "No spacing settings [noop]";
 
 $GLOBALS['TL_LANG']['responsive']['responsiveFlexDirection'] = [
     0 => "Main axis",
