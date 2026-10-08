@@ -9,11 +9,14 @@
     .addClass(getContainerClasses(this.responsiveContainer|default, type=this.type, table='tl_form_field'))
     .addClass(getAllResponsiveClasses(this, table='tl_form_field'))
     .setIfExists('data-cff-condition', cffCondition)
+    .set('aria-labelledby', "ctrl_#{this.id}_legend", this.label is not empty)
     .mergeWith(fieldsetAttrs|default)
 %}
 
 <fieldset{{ fieldsetAttrs }}>
     <div class="fieldset__inside {{ getAllInnerContainerClasses(this, table='tl_form_field')|join(' ') }}">
         {% if this.label is not empty %}
-            <legend>{{ this.label|insert_tag_raw }}</legend>
+            {# The legend sits inside the wrapper, so it is not the fieldset's rendered legend;
+               aria-labelledby on the fieldset restores the group name. #}
+            <legend id="ctrl_{{ this.id }}_legend">{{ this.label|insert_tag_raw }}</legend>
         {% endif %}
