@@ -191,7 +191,8 @@ class ResponsiveWidget extends Widget
 
         foreach ($arrValues as $strBreakpoint => $strValue) {
             if ($strValue !== ResponsiveConfiguration::SPACING_NO_OP) {
-                $strValueBreakpoint ??= $strBreakpoint;
+                // The nearest lower value is the one that keeps applying, so track the latest.
+                $strValueBreakpoint = $strBreakpoint;
                 continue;
             }
 
