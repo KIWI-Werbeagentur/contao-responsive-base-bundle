@@ -188,8 +188,43 @@ class ResponsiveFrontendService
         return (new $GLOBALS['responsive']['config']())->strRow ?? '';
     }
 
-    public function getAllResponsiveClasses($varData, array $arrFields = [], string $table = 'tl_content', bool $skipPaletteCheck = false): array
+    /**
+     * Resolves the $table argument of the public class helpers.
+     *
+     * Callers predating the palette gate - project templates and controllers, third-party
+     * bundles - pass no table. Gating them against a guessed default table fails closed and
+     * strips every class (a tl_module row or a typeless article context has no tl_content
+     * palette), so they get the ungated pre-1.1 behaviour instead: the stored values render, as
+     * they did before the update. A warning is logged once per helper so they can be found and
+     * updated. A table passed explicitly keeps the gate.
+     *
+     * @return array{0: string, 1: bool} the table to gate against and the effective $skipPaletteCheck
+     */
+    protected function resolveTableArgument(?string $table, bool $skipPaletteCheck, string $strDefaultTable, string $strMethod): array
     {
+        if (null !== $table) {
+            return [$table, $skipPaletteCheck];
+        }
+
+        $strKey = 'missing-table|'.$strMethod;
+
+        if (!isset($this->arrLoggedRejections[$strKey])) {
+            $this->arrLoggedRejections[$strKey] = true;
+            $this->logger?->warning(
+                '{method}() was called without a table, so its responsive classes are rendered without '
+                .'the palette check. Pass the record\'s table (e.g. table=\'tl_module\') - check for an '
+                .'outdated project-level template override, controller or third-party bundle.',
+                ['method' => $strMethod],
+            );
+        }
+
+        return [$strDefaultTable, true];
+    }
+
+    public function getAllResponsiveClasses($varData, array $arrFields = [], ?string $table = null, bool $skipPaletteCheck = false): array
+    {
+        [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_content', __FUNCTION__);
+
         $arrSpecs = [
             ['cols',       'responsiveCols',       'getColClasses'],
             ['offsets',    'responsiveOffsets',    'getOffsetClasses'],
@@ -245,8 +280,10 @@ class ResponsiveFrontendService
      * so the migration selects exactly the records this method strands rather than a parallel
      * approximation of them.
      */
-    public function suppressesColumns($varData, string $table = 'tl_content', bool $skipPaletteCheck = false): bool
+    public function suppressesColumns($varData, ?string $table = null, bool $skipPaletteCheck = false): bool
     {
+        [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_content', __FUNCTION__);
+
         if (!self::getProp($varData, 'responsiveContainer')) {
             return false;
         }
@@ -284,13 +321,14 @@ class ResponsiveFrontendService
      *
      * @param string|null $strData          Container-size key looked up in $arrContainerSizes.
      * @param string|null $type             Record type for palette gating. Null fails the gate (closed).
-     * @param string      $table            DCA table whose palette is consulted.
+     * @param string|null $table            DCA table whose palette is consulted. Null skips the gate, see {@see self::resolveTableArgument()}.
      * @param string      $field            Name of the DCA field $strData was sourced from.
      * @param bool         $skipPaletteCheck Bypass the palette gate (typeless / already-gated callers).
      */
-    public function getContainerClasses($strData, ?string $type = null, string $table = 'tl_content', string $field = 'responsiveContainer', bool $skipPaletteCheck = false): array
+    public function getContainerClasses($strData, ?string $type = null, ?string $table = null, string $field = 'responsiveContainer', bool $skipPaletteCheck = false): array
     {
         if (!$strData) return [];
+        [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_content', __FUNCTION__);
         if (!$this->isFieldInPalette($field, $type, $table, $skipPaletteCheck)) {
             return [];
         }
@@ -305,12 +343,13 @@ class ResponsiveFrontendService
      * Unlike the sibling aggregators, this method operates on the article/layout level: the
      * fields it reads (`responsiveContainerSize`, `responsiveSpacingTop`, `responsiveSpacingBottom`)
      * live on `tl_article` and `tl_layout` via the `containerSize` / `space` DCA buckets, not
-     * on `tl_content`. The `$table` default therefore differs from the sibling aggregators -
-     * `tl_article` is the dominant caller (mod_article.html.twig); layout-level callers
-     * override with `tl_layout`.
+     * on `tl_content`. Callers pass `tl_article` (mod_article.html.twig) or `tl_layout`; without a
+     * table the gate is skipped, see {@see self::resolveTableArgument()}.
      */
-    public function getAllContainerClasses($varData, array $arrFields = [], string $table = 'tl_article', bool $skipPaletteCheck = false): array
+    public function getAllContainerClasses($varData, array $arrFields = [], ?string $table = null, bool $skipPaletteCheck = false): array
     {
+        [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_article', __FUNCTION__);
+
         $arrSpecs = [
             ['containerSize', 'responsiveContainerSize', 'getContainerClasses'],
             ['spacingTop',    'responsiveSpacingTop',    'getSpacingTopClasses'],
@@ -384,8 +423,10 @@ class ResponsiveFrontendService
         return $this->isFieldInPalette('addResponsiveChildren', self::resolveType($varData), $table);
     }
 
-    public function getAllInnerContainerClasses($varData, array $arrFields = [], string $table = 'tl_content', bool $skipPaletteCheck = false): array
+    public function getAllInnerContainerClasses($varData, array $arrFields = [], ?string $table = null, bool $skipPaletteCheck = false): array
     {
+        [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_content', __FUNCTION__);
+
         if ($this->hasChildrenSettingsDisabled($varData, $table, $skipPaletteCheck)) {
             return [];
         }

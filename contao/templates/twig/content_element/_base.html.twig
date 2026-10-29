@@ -2,8 +2,8 @@
 
 {% if data|default %}
     {% set attributes = attrs()
-        .addClass(getContainerClasses(data.responsiveContainer|default, data.type|default))
-        .addClass(getAllResponsiveClasses(data))
+        .addClass(getContainerClasses(data.responsiveContainer|default, data.type|default, 'tl_content'))
+        .addClass(getAllResponsiveClasses(data, table='tl_content'))
         .mergeWith(attributes|default)
     %}
 {% endif %}
@@ -31,7 +31,7 @@
     {% endif %}
 {% endif %}
 
-{% set inner_classes = getAllInnerContainerClasses(data|default)|join(" ") %}
+{% set inner_classes = getAllInnerContainerClasses(data|default, table='tl_content')|join(" ") %}
 
 {#
     Attributes for the wrapper around an element's own child items, for elements that render those
