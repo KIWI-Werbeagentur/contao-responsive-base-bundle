@@ -6,12 +6,12 @@ use Contao\ModuleModel;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 
 /**
- * Resolves the responsive outer column classes for a frontend module, applying the
- * wrapper chain (root page / language / page dependent module) via the "includedVia"
- * backref, the CTE relation, or the module's own settings - outermost wins.
+ * Resolves the responsive outer column classes and the children settings source for a frontend
+ * module, applying the wrapper chain (root page / language / page dependent module) via the
+ * "includedVia" backref, the CTE relation, or the module's own settings - outermost wins.
  *
- * The wrapper walk (collectWrappers/getWrapperSource) is shared with the legacy
- * getFrontendModule hook. The row-based resolveColumnClasses() is used by the
+ * The wrapper walk (collectWrappers) is shared with the legacy getFrontendModule hook and the
+ * getAllEvents hook (resolveChildrenSource). The row-based resolveColumnClasses() is used by the
  * frontend_module/_base.html.twig override (modern fragment templates) and the
  * parseTemplate hook (fragment modules using a legacy template).
  */
@@ -72,26 +72,41 @@ class ResponsiveModuleClassResolver
     }
 
     /**
-     * Returns the outermost wrapper that has $strFlag available in its own palette and enabled.
-     * Disabled or unavailable levels are transparent and fall through to the next one.
+     * Resolves which record supplies the children (inner container) settings, and its table.
      *
-     * @param ModuleModel[] $arrWrappers
+     * The same "outermost includer wins" rule as the column settings, walked outermost first: per
+     * wrapper the include element that placed it, then the wrapper itself; then the include
+     * element that placed the rendered module directly; then the module's own record. Unlike
+     * columns, every level - include elements included - opts in via its own addResponsiveChildren
+     * toggle; a disabled level is transparent and falls through to the next one in.
+     *
+     * The wrapper's flag is read without a palette check: it gets addResponsiveChildren per record
+     * in the backend only (see IncludesListener::addWrapperResponsiveChildrenSettings), so its
+     * frontend palette cannot tell. The caller still checks that the rendered module supports an
+     * inner container structurally.
+     *
+     * @param object        $objModule   the rendered module (its model or Module instance)
+     * @param ModuleModel[] $arrWrappers outermost first, see collectWrappers()
+     *
+     * @return array{0: ?object, 1: string} [source record or null, its table]
      */
-    public function getWrapperSource(array $arrWrappers, string $strFlag, bool $blnCheckPalette = true): ?ModuleModel
+    public function resolveChildrenSource(object $objModule, array $arrWrappers): array
     {
         foreach ($arrWrappers as $objWrapper) {
-            if (!$objWrapper->{$strFlag}) {
-                continue;
+            if (($objCte = ($objWrapper->cte ?? null)?->getModel()) && $objCte->addResponsiveChildren) {
+                return [$objCte, 'tl_content'];
             }
 
-            if ($blnCheckPalette && !PaletteManipulatorExtended::create()->hasField($objWrapper->type, 'tl_module', $strFlag)) {
-                continue;
+            if ($objWrapper->addResponsiveChildren) {
+                return [$objWrapper, 'tl_module'];
             }
-
-            return $objWrapper;
         }
 
-        return null;
+        if (($objCte = ($objModule->cte ?? null)?->getModel()) && $objCte->addResponsiveChildren) {
+            return [$objCte, 'tl_content'];
+        }
+
+        return [$objModule->addResponsiveChildren ? $objModule : null, 'tl_module'];
     }
 
     /**

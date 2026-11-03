@@ -21,16 +21,12 @@ class GetAllEventsListener
         // This hook fires during compile(), before the getFrontendModule hook runs (and the
         // reparse there does not recompile) - so the template propagation in
         // GetFrontendModuleListener cannot reach it. Resolve the children source here with the
-        // same precedence: outermost wrapper, then CTE, then the module's own settings. Read
+        // same precedence: outermost enabled includer, then the module's own settings. Read
         // the backref only - GetFrontendModuleListener consumes it afterwards.
         $arrWrappers = $this->classResolver->collectWrappers($objModule->includedVia ?? null);
-        $objSource = $this->classResolver->getWrapperSource($arrWrappers, 'addResponsiveChildren', false);
+        [$objSource] = $this->classResolver->resolveChildrenSource($objModule, $arrWrappers);
 
-        if (!$objSource) {
-            $objSource = ($objModule->cte ?? null)?->addResponsiveChildren ? $objModule->cte->getModel() : $objModule;
-        }
-
-        if(!$objSource->addResponsiveChildren || !$objSource->responsiveColsItems) return $arrEvents;
+        if(!$objSource || !$objSource->responsiveColsItems) return $arrEvents;
 
         // Checks the runtime DCA palette (true source of truth, picks up palettes added by
         // third-party bundles) AND the config-level allow-list. Mirrors the gate idiom of

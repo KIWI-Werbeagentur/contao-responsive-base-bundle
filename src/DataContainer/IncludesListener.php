@@ -53,7 +53,7 @@ class IncludesListener
      * Offer addResponsiveChildren on module wrappers that alias another module (root page,
      * language or page dependent) when at least one of the included modules supports it,
      * so the wrapper can override the children settings of the module it aliases
-     * (see GetFrontendModuleListener::getWrapperSource).
+     * (see ResponsiveModuleClassResolver::resolveChildrenSource).
      */
     #[AsCallback(table: 'tl_module', target: 'config.onload')]
     public function addWrapperResponsiveChildrenSettings(DataContainer $objDca): void

@@ -10,6 +10,12 @@ services:
       - '@database_connection'
       - '@kiwi.contao.responsive.frontend'
       - '@logger'
+  Kiwi\Contao\ResponsiveBaseBundle\Migration\ObsoleteIncluderSettingsMigration:
+    arguments:
+      - '@database_connection'
+  Kiwi\Contao\ResponsiveBaseBundle\Migration\ImplicitModuleFlagsMigration:
+    arguments:
+      - '@database_connection'
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver:
     arguments:
       - '@kiwi.contao.responsive.frontend'

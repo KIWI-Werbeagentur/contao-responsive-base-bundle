@@ -39,10 +39,6 @@ class GetFrontendModuleListener
         if ($objModule->Template) {
             $shallReparse = false;
 
-            // When inserted via the "module" content element (CTE), the column settings come from
-            // the content element record instead of the module's own.
-            $objCteModel = $objModuleModel->cte?->getModel() ?: null;
-            $objTargetWithClasses = $objCteModel ?? $objModuleModel;
             $objModule->Template->baseClass = $objModule->typePrefix . $objModule->type;
 
             // Responsive Module Settings: apply the source resolved above (outermost includer
@@ -59,17 +55,11 @@ class GetFrontendModuleListener
 
             //Responsive Children Settings
             $isField = PaletteManipulatorExtended::create()->hasField($objModuleModel->type, 'tl_module', 'addResponsiveChildren');
-            $objTargetWithClasses = $objTargetWithClasses->addResponsiveChildren ? $objTargetWithClasses : $objModuleModel;
             $hasResponsiveChildren = in_array($objModuleModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []));
 
-            // Flag-only wrapper check: the wrapper gets addResponsiveChildren per record in the
-            // backend only (see IncludesListener::addWrapperResponsiveChildrenSettings), so the
-            // palette cannot be inspected here - the child gate below ensures applicability
-            $objSource = $this->classResolver->getWrapperSource($arrWrappers, 'addResponsiveChildren', false);
-
-            if (!$objSource && $objTargetWithClasses->addResponsiveChildren) {
-                $objSource = $objTargetWithClasses;
-            }
+            // Outermost enabled includer first, like the columns - see
+            // ResponsiveModuleClassResolver::resolveChildrenSource()
+            [$objSource, $strChildrenTable] = $this->classResolver->resolveChildrenSource($objModuleModel, $arrWrappers);
 
             // The child still needs to support an inner container structurally, no matter whose values apply
             if ($objSource && ($isField || $hasResponsiveChildren)) {
@@ -79,7 +69,7 @@ class GetFrontendModuleListener
                 // injection in IncludesListener::addWrapperResponsiveChildrenSettings), so skip the
                 // frontend-unavailable palette gate and use the row values. Only the module's own record
                 // carries the field in its frontend palette ($isField), where the gate stays meaningful.
-                $arrInnerClasses = $this->responsiveFrontendService->getAllInnerContainerClasses($objSource->row(), [], $objSource === $objCteModel ? 'tl_content' : 'tl_module', $objSource !== $objModuleModel);
+                $arrInnerClasses = $this->responsiveFrontendService->getAllInnerContainerClasses($objSource->row(), [], $strChildrenTable, $objSource !== $objModuleModel);
 
                 $objModule->Template->hasResponsiveChildren = $hasResponsiveChildren;
                 $objModule->Template->innerClass = $arrInnerClasses;

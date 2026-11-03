@@ -49,9 +49,15 @@ use Psr\Log\LoggerInterface;
  * and responsiveOffsets - so on that install the flag and the values are one setting and have
  * to be written together, in one statement, by one migration. Hence a service override rather
  * than a second migration: there is only ever one, and it adapts to what is installed.
+ *
+ * It runs only on the upgrade from 1.0 ({@see DetectsUpgradeFrom10Trait}). The rows it selects
+ * are compared against the inner module on every scan, so without that gate a later, deliberate
+ * change to an include element's columns would be written back on the next contao:migrate.
  */
 class DelegatedModuleColumnsMigration extends AbstractMigration
 {
+    use DetectsUpgradeFrom10Trait;
+
     private const EMPTY_SERIALIZED = ['', 'a:0:{}', 'N;'];
 
     /**
@@ -115,7 +121,7 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
 
     public function shouldRun(): bool
     {
-        if (!$this->hasRequiredColumns()) {
+        if (!$this->hasRequiredColumns() || !$this->isUpgradeFrom10($this->connection)) {
             return false;
         }
 
@@ -123,8 +129,7 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
 
         // Ambiguous elements are never written, so they cannot make this migration pending -
         // it would stay pending forever and contao:migrate would loop. Report them on their own
-        // instead, on every migrate until they are resolved by hand, since the run result
-        // message alone never appears when they are all there is.
+        // instead, since the run result message alone never appears when they are all there is.
         $this->reportAmbiguous();
 
         return $arrUpdates !== [];
