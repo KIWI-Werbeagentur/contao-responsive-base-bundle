@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Kiwi\Contao\ResponsiveBaseBundle\Migration;
 
+use Contao\Controller;
 use Contao\CoreBundle\Migration\AbstractMigration;
 use Contao\CoreBundle\Migration\MigrationResult;
 use Contao\StringUtil;
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\ParameterType;
+use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -41,8 +43,10 @@ use Psr\Log\LoggerInterface;
  * Wrappers nested in wrappers are not supported and not followed: the module a map names is
  * taken as the one that rendered.
  *
- * This bundle writes the fields it defines - responsiveCols and responsiveOffsets. A bundle
- * layering further conditions on column output extends this class and overrides
+ * This bundle writes the fields it defines - every field the module's column classes were built
+ * from (see {@see self::COLUMN_FIELDS}), not just the widths: an order or align-self left on the
+ * include element would otherwise replace the module's just the same. A bundle layering
+ * further conditions on column output extends this class and overrides
  * {@see self::getValuesToWrite()} / {@see self::getRequiredContentColumns()} to add its own,
  * then replaces this service definition with the subclass. contao-bootstrap does exactly that
  * for responsiveOverwriteRowCols, which is the selector whose subpalette holds responsiveCols
@@ -59,6 +63,17 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
     use DetectsUpgradeFrom10Trait;
 
     private const EMPTY_SERIALIZED = ['', 'a:0:{}', 'N;'];
+
+    /**
+     * Resolved key => field, everything ResponsiveFrontendService::getAllResponsiveClasses()
+     * renders for a module's outer column.
+     */
+    private const COLUMN_FIELDS = [
+        'cols' => 'responsiveCols',
+        'offsets' => 'responsiveOffsets',
+        'order' => 'responsiveOrder',
+        'alignSelf' => 'responsiveAlignSelf',
+    ];
 
     /**
      * Wrapper module type => tl_module column holding its delegation config. The kiwi types
@@ -97,16 +112,23 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
      * The columns this migration writes onto an include element, given the settings of the
      * module it renders. Return an empty array to leave the row alone.
      *
-     * @param array{cols: string, offsets: string} $arrResolved
+     * Every value is either a setting the module rendered or '' - also all of them, when the module
+     * rendered no column classes at all, so the element is cleared rather than left to render
+     * whatever it happens to hold.
+     *
+     * @param array{cols: string, offsets: string, order: string, alignSelf: string} $arrResolved
      *
      * @return array<string, string>
      */
     protected function getValuesToWrite(array $arrResolved): array
     {
-        return [
-            'responsiveCols' => $arrResolved['cols'],
-            'responsiveOffsets' => $arrResolved['offsets'],
-        ];
+        $arrValues = [];
+
+        foreach (self::COLUMN_FIELDS as $strKey => $strField) {
+            $arrValues[$strField] = $arrResolved[$strKey];
+        }
+
+        return $arrValues;
     }
 
     /**
@@ -116,7 +138,7 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
      */
     protected function getRequiredContentColumns(): array
     {
-        return ['responsiveCols', 'responsiveOffsets'];
+        return array_values(self::COLUMN_FIELDS);
     }
 
     public function shouldRun(): bool
@@ -232,8 +254,8 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
                 continue;
             }
 
-            // The module rendered no responsive classes at all - there is nothing to carry over,
-            // and writing anything here would invent columns that never existed.
+            // None of the delegated modules exists - the wrapper renders nothing, with or without
+            // the element's settings.
             if ($arrResolved === []) {
                 continue;
             }
@@ -289,12 +311,15 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
 
     /**
      * A serialized responsive payload compares by value, so the same setting stored with
-     * different scalar types (i:12 vs s:2:"12") counts as unchanged. Plain scalars compare
-     * as strings.
+     * different scalar types (i:12 vs s:2:"12") counts as unchanged, and a cleared target ('')
+     * matches a stored payload without values (a:0:{}, N;, only empty breakpoints). Plain
+     * scalars compare as strings.
      */
     private function valuesMatch(mixed $varStored, string $strTarget): bool
     {
-        if (str_starts_with($strTarget, 'a:')) {
+        $blnStoredPayload = \is_string($varStored) && (str_starts_with($varStored, 'a:') || 'N;' === $varStored);
+
+        if (str_starts_with($strTarget, 'a:') || ('' === $strTarget && $blnStoredPayload)) {
             return $this->normalize(\is_string($varStored) ? $varStored : null) === $this->normalize($strTarget);
         }
 
@@ -565,17 +590,23 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
     }
 
     /**
-     * The shared column settings of the given modules, [] when they render nothing at all, or
-     * null when they disagree.
+     * The column settings the given modules rendered - every field '' that rendered nothing -,
+     * [] when none of them exists, or null when they disagree.
+     *
+     * "Rendered" follows rb 1.0's getFrontendModule hook: a module's column settings applied
+     * whenever its type offers addResponsive in the palette, whatever the toggle said - 1.0
+     * compared the char(1) toggle with `=== 0`, which never matched. Hence the toggle is not read
+     * here, which also keeps the result independent of ImplicitModuleFlagsMigration enabling
+     * those toggles in the same run.
      *
      * @param list<int> $arrModuleIds
      *
-     * @return array{cols: string, offsets: string}|array{}|null
+     * @return array{cols: string, offsets: string, order: string, alignSelf: string}|array{}|null
      */
     private function collectModuleSettings(array $arrModuleIds): array|null
     {
         $arrRows = $this->connection->fetchAllAssociative(
-            'SELECT id, addResponsive, responsiveCols, responsiveOffsets FROM tl_module WHERE id IN (?)',
+            'SELECT id, type, ' . implode(', ', self::COLUMN_FIELDS) . ' FROM tl_module WHERE id IN (?)',
             [$arrModuleIds],
             [ArrayParameterType::INTEGER],
         );
@@ -584,36 +615,26 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
             return [];
         }
 
+        Controller::loadDataContainer('tl_module');
+        $objPalettes = PaletteManipulatorExtended::create();
         $arrSeen = [];
         $arrFirst = null;
 
         foreach ($arrRows as $arrRow) {
-            // A module with its responsive settings switched off rendered no classes; that is a
-            // distinct answer, and mixing it with one that did render is a disagreement.
-            $blnOn = (bool) $arrRow['addResponsive'];
+            $blnRendered = $objPalettes->hasField((string) $arrRow['type'], 'tl_module', 'addResponsive');
+            $arrValues = [];
 
-            $arrSeen[json_encode([
-                $blnOn,
-                $blnOn ? $this->normalize($arrRow['responsiveCols']) : [],
-                $blnOn ? $this->normalize($arrRow['responsiveOffsets']) : [],
-            ])] = true;
+            foreach (self::COLUMN_FIELDS as $strKey => $strField) {
+                $arrValues[$strKey] = $blnRendered && $this->normalize($arrRow[$strField]) !== []
+                    ? (string) $arrRow[$strField]
+                    : '';
+            }
 
-            $arrFirst ??= [
-                'on' => $blnOn,
-                'cols' => (string) ($arrRow['responsiveCols'] ?? ''),
-                'offsets' => (string) ($arrRow['responsiveOffsets'] ?? ''),
-            ];
+            $arrSeen[json_encode(array_map(fn (string $strValue) => $this->normalize($strValue), $arrValues))] = true;
+            $arrFirst ??= $arrValues;
         }
 
-        if (\count($arrSeen) > 1) {
-            return null;
-        }
-
-        if (!$arrFirst['on'] || $this->normalize($arrFirst['cols']) === []) {
-            return [];
-        }
-
-        return ['cols' => $arrFirst['cols'], 'offsets' => $arrFirst['offsets']];
+        return \count($arrSeen) > 1 ? null : $arrFirst;
     }
 
     /**
@@ -665,8 +686,10 @@ class DelegatedModuleColumnsMigration extends AbstractMigration
             }
         }
 
-        if (!\in_array('responsiveCols', $arrModule, true) || !\in_array('responsiveOffsets', $arrModule, true)) {
-            return false;
+        foreach (self::COLUMN_FIELDS as $strColumn) {
+            if (!\in_array($strColumn, $arrModule, true)) {
+                return false;
+            }
         }
 
         $this->arrWrapperColumns = array_filter(
