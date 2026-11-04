@@ -26,17 +26,18 @@ use Psr\Log\LoggerInterface;
  * ---------------------------
  * The rule that strands these records is this bundle's, and so is everything the predicate
  * reads: the responsiveContainer field (tl_content and tl_form_field), the container-capable
- * palette list, and the fieldset template. contao-bootstrap only contributes one *extra*
- * suppression condition (responsiveOverwriteRowCols). Shipping the migration there would have
- * left every project that pairs responsive-base with a different framework bundle - bootstrap
- * is a "suggest", not a "require" - with the regression and no fix.
+ * palette list, and the fieldset template. contao-bootstrap only contributes *extra* conditions
+ * on column output. Shipping the migration there would have left every project that pairs
+ * responsive-base with a different framework bundle - bootstrap is a "suggest", not a
+ * "require" - with the regression and no fix.
  *
- * responsiveOverwriteRowCols is therefore consulted defensively, via columnExists():
- *   - with contao-bootstrap installed, its BootstrapFrontendService::getColClasses() only ever
- *     applied columns when that flag was set, so records without it were already rendering
- *     without columns before 1.1 and must not be touched;
- *   - without it, no such gate exists, every container+columns record really did render both,
- *     and the condition correctly drops out of the predicate.
+ * Those extra conditions are therefore not restated here: whether a record's columns rendered
+ * before 1.1 is asked of the frontend service's getColClasses()/getOffsetClasses(), which a
+ * framework bundle overrides. With contao-bootstrap that applies responsiveOverwriteRowCols -
+ * but only where the parent table offers row-cols (tl_article, tl_content, tl_module). Under any
+ * other parent, e.g. tl_static_article or tl_news, the flag is not consulted and the columns
+ * always rendered, flag or not. Without contao-bootstrap the base methods render whatever is
+ * stored.
  *
  * WHAT IT DOES
  * ------------
@@ -66,7 +67,10 @@ final class ContainerColumnConflictMigration extends AbstractMigration
     use DetectsUpgradeFrom10Trait;
 
     /**
-     * table => [container field, column fields, extra conditions]
+     * table => [container field, column fields, context fields]
+     *
+     * Context fields are selected when present so the frontend service's column methods see what
+     * they decide on (bootstrap: ptable and responsiveOverwriteRowCols); they never narrow the SQL.
      *
      * No type list: which types are container-capable is not restated here at all. The SQL only
      * narrows to "has a container value and some column value", and every candidate is then put
@@ -81,12 +85,12 @@ final class ContainerColumnConflictMigration extends AbstractMigration
         'tl_content' => [
             'container' => 'responsiveContainer',
             'columns' => ['responsiveCols', 'responsiveOffsets'],
-            'requireFlag' => 'responsiveOverwriteRowCols',
+            'context' => ['ptable', 'responsiveOverwriteRowCols'],
         ],
         'tl_form_field' => [
             'container' => 'responsiveContainer',
             'columns' => ['responsiveCols', 'responsiveOffsets'],
-            'requireFlag' => null,
+            'context' => [],
         ],
     ];
 
@@ -198,18 +202,17 @@ final class ContainerColumnConflictMigration extends AbstractMigration
             )).')',
         ];
 
-        // Absent when contao-bootstrap is not installed - and then correctly omitted, because
-        // without it nothing gated column output on this flag in the first place.
-        if ($config['requireFlag'] && $this->columnExists($table, $config['requireFlag'])) {
-            $where[] = \sprintf("COALESCE(%s, '') NOT IN ('', '0')", $quote($config['requireFlag']));
-        }
+        // responsiveOverwriteRowCols is absent without contao-bootstrap, ptable on tables that
+        // have no polymorphic parent
+        $context = array_values(array_filter(
+            $config['context'],
+            fn (string $c): bool => $this->columnExists($table, $c),
+        ));
 
         $rows = $this->connection->fetchAllAssociative(
             \sprintf(
-                'SELECT id, %s, %s, %s FROM %s WHERE %s',
-                $quote('type'),
-                $quote($config['container']),
-                implode(', ', array_map($quote, $columns)),
+                'SELECT id, %s FROM %s WHERE %s',
+                implode(', ', array_map($quote, ['type', $config['container'], ...$columns, ...$context])),
                 $quote($table),
                 implode(' AND ', $where),
             ),
@@ -235,11 +238,18 @@ final class ContainerColumnConflictMigration extends AbstractMigration
                 continue;
             }
 
-            foreach ($columns as $column) {
-                if ($this->holdsSelection($row[$column] ?? null)) {
-                    $ids[] = (int) $row['id'];
-                    break;
+            if (\array_key_exists('ptable', $row)) {
+                // Contao treats an empty ptable as tl_article; the DCA loader rejects an empty name
+                $row['ptable'] = '' === (string) $row['ptable'] ? 'tl_article' : (string) $row['ptable'];
+
+                // A parent table that no longer exists (uninstalled extension) renders nothing
+                if (!$this->tableExists($row['ptable'])) {
+                    continue;
                 }
+            }
+
+            if ($this->rendersColumns($row)) {
+                $ids[] = (int) $row['id'];
             }
         }
 
@@ -247,41 +257,29 @@ final class ContainerColumnConflictMigration extends AbstractMigration
     }
 
     /**
-     * The column fields hold serialized per-breakpoint arrays, so "not the empty string" is not
-     * sufficient: a:1:{s:2:"xs";s:0:"";} is a stored-but-empty selection and must not count as
-     * configured, whereas "none" is a deliberate choice and must.
+     * Whether the record's column settings produce classes when the container does not suppress
+     * them - i.e. what they rendered up to 1.0.17, where both class sets were emitted together.
+     * Asked of the frontend service so a framework bundle's own conditions apply (bootstrap's
+     * responsiveOverwriteRowCols and its ptable exception); the base methods ignore $row.
+     * Empty classes (values without a mapping) do not count: they never rendered anything.
+     *
+     * @param array<string, mixed> $row
      */
-    private function holdsSelection(mixed $value): bool
+    private function rendersColumns(array $row): bool
     {
-        if (!\is_string($value) || '' === $value) {
-            return false;
-        }
+        $classes = [
+            ...$this->responsiveFrontendService->getColClasses($row['responsiveCols'] ?? null, $row),
+            ...$this->responsiveFrontendService->getOffsetClasses($row['responsiveOffsets'] ?? null, $row),
+        ];
 
-        $decoded = @unserialize($value, ['allowed_classes' => false]);
+        return [] !== array_filter($classes, static fn ($c): bool => '' !== trim((string) $c));
+    }
 
-        if (false === $decoded && 'b:0;' !== $value) {
-            return '' !== trim($value);
-        }
+    private function tableExists(string $table): bool
+    {
+        static $cache = [];
 
-        if (!\is_array($decoded)) {
-            return \is_scalar($decoded) && '' !== trim((string) $decoded);
-        }
-
-        foreach ($decoded as $entry) {
-            if (\is_array($entry)) {
-                if ($this->holdsSelection(serialize($entry))) {
-                    return true;
-                }
-
-                continue;
-            }
-
-            if (null !== $entry && '' !== trim((string) $entry)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $cache[$table] ??= $this->connection->createSchemaManager()->tablesExist([$table]);
     }
 
     private function columnExists(string $table, string $column): bool
