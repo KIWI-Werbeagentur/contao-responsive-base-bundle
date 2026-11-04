@@ -21,6 +21,7 @@ services:
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver:
     arguments:
       - '@kiwi.contao.responsive.frontend'
+      - '@?logger'
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveDesignerFrontendService:
     public: true
     decorates: kiwi.contao.designer.frontend

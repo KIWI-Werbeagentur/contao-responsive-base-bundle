@@ -4,6 +4,7 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\Service;
 
 use Contao\ModuleModel;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
+use Psr\Log\LoggerInterface;
 
 /**
  * Resolves the responsive outer column classes and the children settings source for a frontend
@@ -18,19 +19,27 @@ use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
  */
 class ResponsiveModuleClassResolver
 {
-    public function __construct(protected ResponsiveFrontendService $responsiveFrontendService)
-    {
+    /** @var array<string, true> */
+    private array $arrLoggedInputs = [];
+
+    public function __construct(
+        protected ResponsiveFrontendService $responsiveFrontendService,
+        protected ?LoggerInterface $logger = null,
+    ) {
     }
 
     /**
      * Returns the resolved responsive column classes for a module row (e.g. $model->row()
      * or a template's data array). Empty when no source applies.
      *
+     * Accepts any input, as it is also a Twig function: null or an empty array mean "no row" and
+     * return nothing; anything else that is not an array is logged (see acceptRow()).
+     *
      * @return string[]
      */
-    public function resolveColumnClasses(?array $arrRow): array
+    public function resolveColumnClasses(mixed $varRow): array
     {
-        if (!$arrRow) {
+        if (!$arrRow = $this->acceptRow($varRow, __FUNCTION__)) {
             return [];
         }
 
@@ -155,7 +164,7 @@ class ResponsiveModuleClassResolver
      */
     public function resolveChildrenClasses(mixed $varRow): array
     {
-        if (!\is_array($varRow) || !$varRow) {
+        if (!$varRow = $this->acceptRow($varRow, __FUNCTION__)) {
             return [];
         }
 
@@ -228,5 +237,41 @@ class ResponsiveModuleClassResolver
                 : null;
 
         return [$arrSource, 'tl_module', false];
+    }
+
+    /**
+     * The row-based methods are Twig functions, so they receive whatever a template passes. null
+     * and an empty array mean "no row" and are not worth a log entry. Anything else that is not an
+     * array - typically '' from a pre-1.1 override calling them with data|default, or a model
+     * object from a custom render - renders no classes, so it is logged instead of failing
+     * silently, once per method and input type.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function acceptRow(mixed $varRow, string $strMethod): ?array
+    {
+        if (\is_array($varRow)) {
+            return $varRow ?: null;
+        }
+
+        if (null === $varRow) {
+            return null;
+        }
+
+        $strType = get_debug_type($varRow);
+        $strKey = $strMethod.'|'.$strType;
+
+        if (!isset($this->arrLoggedInputs[$strKey])) {
+            $this->arrLoggedInputs[$strKey] = true;
+            $this->logger?->error(
+                'Responsive module classes cannot be resolved: {method}() expects the module row as an '
+                .'array, got {type}, so no classes are rendered. Pass the template\'s "data" array (e.g. '
+                .'getModuleResponsiveClasses(data)) - check for an outdated project-level template '
+                .'override or a custom render that passes something else.',
+                ['method' => $strMethod, 'type' => $strType],
+            );
+        }
+
+        return null;
     }
 }

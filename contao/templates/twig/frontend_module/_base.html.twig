@@ -1,6 +1,15 @@
 {% extends "@Contao/frontend_module/_base.html.twig" %}
 
-{% set attributes = attributes|default(attrs()).addClass(getModuleResponsiveClasses(data|default)).mergeWith(attributes|default) %}
+{#
+    Only with a module row, like content_element/_base.html.twig: a template rendered without
+    "data" (custom render, preview) keeps its own attributes, and core's base builds the rest.
+#}
+{% if data|default %}
+    {% set attributes = attrs()
+        .addClass(getModuleResponsiveClasses(data))
+        .mergeWith(attributes|default)
+    %}
+{% endif %}
 
 {#
     Attributes for the wrapper around a module's own child items, for modules that render those
@@ -14,7 +23,9 @@
     The classes come from the outermost enabled includer (wrapper module or "module" content
     element), otherwise the module's own settings - the same source the legacy path uses.
 #}
-{% set items_attributes = attrs()
-    .addClass(getModuleChildrenClasses(data|default))
-    .mergeWith(items_attributes|default)
-%}
+{% if data|default %}
+    {% set items_attributes = attrs()
+        .addClass(getModuleChildrenClasses(data))
+        .mergeWith(items_attributes|default)
+    %}
+{% endif %}
