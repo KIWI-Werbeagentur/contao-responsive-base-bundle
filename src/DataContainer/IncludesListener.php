@@ -10,9 +10,14 @@ use Contao\ModuleModel;
 use Contao\StringUtil;
 use Contao\System;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
+use Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver;
 
 class IncludesListener
 {
+    public function __construct(private readonly ResponsiveModuleClassResolver $moduleClassResolver)
+    {
+    }
+
     #[AsCallback(table: 'tl_content', target: 'config.onload')]
     public function addResponsiveChildrenSettings(DataContainer $objDca): void
     {
@@ -40,12 +45,8 @@ class IncludesListener
 
             $objModel = $strTargetClass::findByPk($intTarget);
 
-            // Same condition the frontend uses to apply children settings to the included module -
-            // container-capable, or offering the field itself (includePalettes.children)
-            if ($objModel && (
-                in_array($objModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []))
-                || ($strType === 'module' && PaletteManipulatorExtended::create()->hasField((string) $objModel->type, 'tl_module', 'addResponsiveChildren'))
-            )) {
+            // The frontend only honours the override where it is offered - one definition for both
+            if ($objModel && $strType === 'module' && $this->moduleClassResolver->offersChildrenOverride((string) $objModel->type)) {
                 PaletteManipulatorExtended::create()
                     ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                     ->addField(['addResponsiveChildren'], 'items_legend', PaletteManipulator::POSITION_APPEND)
@@ -77,8 +78,6 @@ class IncludesListener
             return;
         }
 
-        $arrContainerTypes = array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []);
-
         foreach (array_filter($arrModuleIds) as $intId) {
             $objModule = ModuleModel::findByPk($intId);
 
@@ -86,8 +85,9 @@ class IncludesListener
                 continue;
             }
 
-            // Same condition the frontend listener uses to apply children settings to the child
-            if (in_array($objModule->type, $arrContainerTypes) || PaletteManipulatorExtended::create()->hasField($objModule->type, 'tl_module', 'addResponsiveChildren')) {
+            // Same condition the frontend uses to apply children settings to the child - and the
+            // reason ResponsiveModuleClassResolver::resolveChildrenSource() can read this toggle
+            if ($this->moduleClassResolver->offersChildrenOverride((string) $objModule->type)) {
                 PaletteManipulatorExtended::create()
                     ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                     ->addField(['addResponsiveChildren'], 'items_legend', PaletteManipulator::POSITION_APPEND)

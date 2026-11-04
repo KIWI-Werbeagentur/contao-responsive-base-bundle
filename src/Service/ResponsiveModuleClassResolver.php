@@ -81,10 +81,14 @@ class ResponsiveModuleClassResolver
      * columns, every level - include elements included - opts in via its own addResponsiveChildren
      * toggle; a disabled level is transparent and falls through to the next one in.
      *
-     * The wrapper's flag is read without a palette check: it gets addResponsiveChildren per record
-     * in the backend only (see IncludesListener::addWrapperResponsiveChildrenSettings), so its
-     * frontend palette cannot tell. The caller still checks that the rendered module supports an
-     * inner container structurally.
+     * Every toggle only counts where the backend offers it, like addResponsive for the columns:
+     *   - an include element's toggle only where {@see self::offersChildrenOverride()} offers it for
+     *     the module it places - an element placing a wrapper is never offered one, so a stored
+     *     value there (the field defaults to '1') is never a decision and is ignored;
+     *   - the wrapper's own toggle is offered per record when one of its included modules supports
+     *     children settings (IncludesListener::addWrapperResponsiveChildrenSettings) - its frontend
+     *     palette cannot tell, but the rendered module is one of them, so the caller's check that
+     *     it supports an inner container structurally implies the offer.
      *
      * @param object|array  $varModule   the rendered module: its model, Module instance or row (e.g. a
      *                                   template's data array) - returned as is when it is the source
@@ -95,7 +99,10 @@ class ResponsiveModuleClassResolver
     public function resolveChildrenSource(object|array $varModule, array $arrWrappers): array
     {
         foreach ($arrWrappers as $objWrapper) {
-            if (($objCte = ($objWrapper->cte ?? null)?->getModel()) && $objCte->addResponsiveChildren) {
+            if (($objCte = ($objWrapper->cte ?? null)?->getModel())
+                && $objCte->addResponsiveChildren
+                && $this->offersChildrenOverride((string) $objWrapper->type)
+            ) {
                 return [$objCte, 'tl_content'];
             }
 
@@ -105,14 +112,36 @@ class ResponsiveModuleClassResolver
         }
 
         $objModuleCte = \is_array($varModule) ? ($varModule['cte'] ?? null) : ($varModule->cte ?? null);
+        $strModuleType = (string) (\is_array($varModule) ? ($varModule['type'] ?? '') : $varModule->type);
 
-        if (($objCte = $objModuleCte?->getModel()) && $objCte->addResponsiveChildren) {
+        if (($objCte = $objModuleCte?->getModel())
+            && $objCte->addResponsiveChildren
+            && $this->offersChildrenOverride($strModuleType)
+        ) {
             return [$objCte, 'tl_content'];
         }
 
         $blnOwn = \is_array($varModule) ? ($varModule['addResponsiveChildren'] ?? false) : $varModule->addResponsiveChildren;
 
         return [$blnOwn ? $varModule : null, 'tl_module'];
+    }
+
+    /**
+     * Whether a "module" content element placing a module of this type is offered the
+     * addResponsiveChildren override: the module's resulting palette offers the field itself.
+     * LoadDataContainerListener adds it to the container-capable types (includePalettes.container)
+     * and the ones rendering their own children (includePalettes.children), and any further DCA
+     * manipulation is reflected too - so this reads the outcome rather than restating the config.
+     *
+     * The single definition for the backend palette (IncludesListener) and the frontend resolution
+     * (resolveChildrenSource), so a toggle never counts where nobody could set it. Wrapper types
+     * only get the field per record in the backend, not in their palette, so an element placing a
+     * wrapper is not offered one; the wrapper's own toggle is the place for that override.
+     */
+    public function offersChildrenOverride(string $strModuleType): bool
+    {
+        return '' !== $strModuleType
+            && PaletteManipulatorExtended::create()->hasField($strModuleType, 'tl_module', 'addResponsiveChildren');
     }
 
     /**
@@ -130,11 +159,9 @@ class ResponsiveModuleClassResolver
             return [];
         }
 
-        $strType = (string) ($varRow['type'] ?? '');
-        $blnSupported = \in_array($strType, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []), true)
-            || PaletteManipulatorExtended::create()->hasField($strType, 'tl_module', 'addResponsiveChildren');
-
-        if (!$blnSupported) {
+        // Same structural requirement as the legacy getFrontendModule hook: container-capable or
+        // offering the field - which is also what makes an element placing it offer the override
+        if (!$this->offersChildrenOverride((string) ($varRow['type'] ?? ''))) {
             return [];
         }
 
