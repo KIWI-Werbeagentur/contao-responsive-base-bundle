@@ -269,16 +269,21 @@ class ResponsiveFrontendService
      * in tl_form_field) while working identically for every table, so form templates no longer
      * need a rule of their own.
      *
-     * Bundles layering further conditions on column output - contao-bootstrap suppresses columns
-     * when responsiveOverwriteRowCols is unset, i.e. when the parent's row-cols should win -
-     * override this method rather than the class-generating ones.
+     * It answers only "does the container win over the columns", not "do the columns render".
+     * Framework bundles that add their own conditions on column output put them into the
+     * class-generating methods instead: contao-bootstrap gates getColClasses() and
+     * getOffsetClasses() on responsiveOverwriteRowCols, so with the flag unset the parent's
+     * row-cols win and no column classes are emitted although this method returns false. A caller
+     * that needs the full answer has to go through those methods (or getAllResponsiveClasses()),
+     * not this one. Do not fold such conditions in here: the callers below rely on the narrower
+     * meaning.
      *
-     * Public because it is the authoritative definition of "this record's columns do not render":
-     * ContainerColumnConflictMigration asks it directly instead of re-deriving container-capability
-     * from $GLOBALS['responsive'][...]['includePalettes']['container']. Those two answers agree
-     * only for as long as LoadDataContainerListener keeps the field and the config list aligned,
-     * so the migration selects exactly the records this method strands rather than a parallel
-     * approximation of them.
+     * Public because it is the authoritative definition of "the container strands this record's
+     * columns": ContainerColumnConflictMigration asks it directly instead of re-deriving
+     * container-capability from $GLOBALS['responsive'][...]['includePalettes']['container']. Those
+     * two answers agree only for as long as LoadDataContainerListener keeps the field and the
+     * config list aligned, so the migration selects exactly the records this method strands rather
+     * than a parallel approximation of them. It applies bootstrap's flag in its own query.
      */
     public function suppressesColumns($varData, ?string $table = null, bool $skipPaletteCheck = false): bool
     {
