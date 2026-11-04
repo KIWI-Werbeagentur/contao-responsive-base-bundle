@@ -20,7 +20,7 @@ class ResponsiveExtension extends AbstractExtension
 
     public function getFunctions(): array
     {
-        return [
+        $arrFunctions = [
             new TwigFunction('getModuleResponsiveClasses', [$this->moduleClassResolver, 'resolveColumnClasses']),
             new TwigFunction('getModuleChildrenClasses', [$this->moduleClassResolver, 'resolveChildrenClasses']),
             new TwigFunction('getAllResponsiveClasses', [$this->responsiveFrontendService, 'getAllResponsiveClasses']),
@@ -35,12 +35,14 @@ class ResponsiveExtension extends AbstractExtension
             new TwigFunction('getSpacingClasses', [$this->responsiveFrontendService, 'getSpacingClasses']),
             new TwigFunction('getGroupSpacingClasses', [$this->responsiveFrontendService, 'getGroupSpacingClasses']),
             new TwigFunction('getAllContainerClasses', [$this->responsiveFrontendService, 'getAllContainerClasses']),
-
-            // Fallback, so content_element/_base.html.twig compiles without kiwi/contao-designer present
-            new TwigFunction(
-                'hasBackground',
-                fn (string|null $strBackground): bool => (bool) $this->designerFrontendService?->hasBackground($strBackground),
-            ),
         ];
+
+        // Only without kiwi/contao-designer, so content_element/_base.html.twig still compiles; with it,
+        // the designer registers hasBackground itself and must not be shadowed by this one
+        if (!$this->designerFrontendService) {
+            $arrFunctions[] = new TwigFunction('hasBackground', static fn (mixed $varBackground = null): bool => false);
+        }
+
+        return $arrFunctions;
     }
 }
