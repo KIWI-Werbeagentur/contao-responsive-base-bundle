@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kiwi\Contao\ResponsiveBaseBundle\Migration;
 
 use Contao\Controller;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\Migration\AbstractMigration;
 use Contao\CoreBundle\Migration\MigrationResult;
 use Doctrine\DBAL\ArrayParameterType;
@@ -98,6 +99,7 @@ final class ContainerColumnConflictMigration extends AbstractMigration
 
     public function __construct(
         private readonly Connection $connection,
+        private readonly ContaoFramework $framework,
         private readonly ResponsiveFrontendService $responsiveFrontendService,
         private readonly ?LoggerInterface $logger = null,
     ) {
@@ -220,6 +222,9 @@ final class ContainerColumnConflictMigration extends AbstractMigration
 
         $ids = [];
 
+        // contao:migrate does not boot the framework; the DCA, its hooks and $GLOBALS['responsive']
+        // need it
+        $this->framework->initialize();
         Controller::loadDataContainer($table);
 
         foreach ($rows as $row) {

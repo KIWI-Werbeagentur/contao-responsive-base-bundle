@@ -8,6 +8,7 @@ services:
   Kiwi\Contao\ResponsiveBaseBundle\Migration\ContainerColumnConflictMigration:
     arguments:
       - '@database_connection'
+      - '@contao.framework'
       - '@kiwi.contao.responsive.frontend'
       - '@logger'
   Kiwi\Contao\ResponsiveBaseBundle\Migration\ObsoleteIncluderSettingsMigration:
@@ -16,6 +17,7 @@ services:
   Kiwi\Contao\ResponsiveBaseBundle\Migration\ImplicitModuleFlagsMigration:
     arguments:
       - '@database_connection'
+      - '@contao.framework'
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver:
     arguments:
       - '@kiwi.contao.responsive.frontend'
@@ -68,4 +70,5 @@ services:
     class: Kiwi\Contao\ResponsiveBaseBundle\Migration\DelegatedModuleColumnsMigration
     arguments:
       - '@database_connection'
+      - '@contao.framework'
       - '@logger'

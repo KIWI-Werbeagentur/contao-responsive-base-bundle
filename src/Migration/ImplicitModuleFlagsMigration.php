@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kiwi\Contao\ResponsiveBaseBundle\Migration;
 
 use Contao\Controller;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\Migration\AbstractMigration;
 use Contao\CoreBundle\Migration\MigrationResult;
 use Doctrine\DBAL\ArrayParameterType;
@@ -43,8 +44,10 @@ class ImplicitModuleFlagsMigration extends AbstractMigration
     /** @var array{columns: list<int>, children: list<int>}|null */
     private ?array $arrTargets = null;
 
-    public function __construct(private readonly Connection $connection)
-    {
+    public function __construct(
+        private readonly Connection $connection,
+        private readonly ContaoFramework $framework,
+    ) {
     }
 
     public function getName(): string
@@ -128,6 +131,9 @@ class ImplicitModuleFlagsMigration extends AbstractMigration
             return $this->arrTargets;
         }
 
+        // contao:migrate does not boot the framework; the DCA, its hooks and $GLOBALS['responsive']
+        // need it
+        $this->framework->initialize();
         Controller::loadDataContainer('tl_module');
         $arrContainerTypes = array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []);
         $objPalettes = PaletteManipulatorExtended::create();
