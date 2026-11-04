@@ -13,7 +13,8 @@ use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
  * The wrapper walk (collectWrappers) is shared with the legacy getFrontendModule hook and the
  * getAllEvents hook (resolveChildrenSource). The row-based resolveColumnClasses() is used by the
  * frontend_module/_base.html.twig override (modern fragment templates) and the
- * parseTemplate hook (fragment modules using a legacy template).
+ * parseTemplate hook (fragment modules using a legacy template); resolveChildrenClasses() is its
+ * counterpart for the template's items wrapper.
  */
 class ResponsiveModuleClassResolver
 {
@@ -85,12 +86,13 @@ class ResponsiveModuleClassResolver
      * frontend palette cannot tell. The caller still checks that the rendered module supports an
      * inner container structurally.
      *
-     * @param object        $objModule   the rendered module (its model or Module instance)
+     * @param object|array  $varModule   the rendered module: its model, Module instance or row (e.g. a
+     *                                   template's data array) - returned as is when it is the source
      * @param ModuleModel[] $arrWrappers outermost first, see collectWrappers()
      *
-     * @return array{0: ?object, 1: string} [source record or null, its table]
+     * @return array{0: object|array|null, 1: string} [source record or null, its table]
      */
-    public function resolveChildrenSource(object $objModule, array $arrWrappers): array
+    public function resolveChildrenSource(object|array $varModule, array $arrWrappers): array
     {
         foreach ($arrWrappers as $objWrapper) {
             if (($objCte = ($objWrapper->cte ?? null)?->getModel()) && $objCte->addResponsiveChildren) {
@@ -102,11 +104,56 @@ class ResponsiveModuleClassResolver
             }
         }
 
-        if (($objCte = ($objModule->cte ?? null)?->getModel()) && $objCte->addResponsiveChildren) {
+        $objModuleCte = \is_array($varModule) ? ($varModule['cte'] ?? null) : ($varModule->cte ?? null);
+
+        if (($objCte = $objModuleCte?->getModel()) && $objCte->addResponsiveChildren) {
             return [$objCte, 'tl_content'];
         }
 
-        return [$objModule->addResponsiveChildren ? $objModule : null, 'tl_module'];
+        $blnOwn = \is_array($varModule) ? ($varModule['addResponsiveChildren'] ?? false) : $varModule->addResponsiveChildren;
+
+        return [$blnOwn ? $varModule : null, 'tl_module'];
+    }
+
+    /**
+     * Returns the resolved children (inner container) classes for a module row - the counterpart
+     * of resolveColumnClasses() for the items wrapper of modules rendering their own child items
+     * (frontend_module/_base.html.twig, "items_attributes"). Same source and gate as the legacy
+     * getFrontendModule hook: the outermost enabled includer wins, and the rendered module still
+     * has to support children settings structurally.
+     *
+     * @return string[]
+     */
+    public function resolveChildrenClasses(mixed $varRow): array
+    {
+        if (!\is_array($varRow) || !$varRow) {
+            return [];
+        }
+
+        $strType = (string) ($varRow['type'] ?? '');
+        $blnSupported = \in_array($strType, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []), true)
+            || PaletteManipulatorExtended::create()->hasField($strType, 'tl_module', 'addResponsiveChildren');
+
+        if (!$blnSupported) {
+            return [];
+        }
+
+        [$varSource, $strTable] = $this->resolveChildrenSource($varRow, $this->collectWrappers($varRow['includedVia'] ?? null));
+
+        if (!$varSource) {
+            return [];
+        }
+
+        // Include element and wrapper sources only carry addResponsiveChildren in their backend
+        // palette, so their gate is skipped; the module's own row keeps it (see GetFrontendModuleListener)
+        $blnOwn = \is_array($varSource);
+
+        return $this->responsiveFrontendService->getAllInnerContainerClasses(
+            $blnOwn ? $varSource : $varSource->row(),
+            [],
+            $strTable,
+            !$blnOwn,
+        );
     }
 
     /**

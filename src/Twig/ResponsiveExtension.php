@@ -22,6 +22,7 @@ class ResponsiveExtension extends AbstractExtension
     {
         return [
             new TwigFunction('getModuleResponsiveClasses', [$this->moduleClassResolver, 'resolveColumnClasses']),
+            new TwigFunction('getModuleChildrenClasses', [$this->moduleClassResolver, 'resolveChildrenClasses']),
             new TwigFunction('getAllResponsiveClasses', [$this->responsiveFrontendService, 'getAllResponsiveClasses']),
             new TwigFunction('getColClasses', [$this->responsiveFrontendService, 'getColClasses']),
             new TwigFunction('getOrderClasses', [$this->responsiveFrontendService, 'getOrderClasses']),

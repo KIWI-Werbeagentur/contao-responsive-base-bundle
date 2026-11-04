@@ -40,7 +40,12 @@ class IncludesListener
 
             $objModel = $strTargetClass::findByPk($intTarget);
 
-            if ($objModel && in_array($objModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []))) {
+            // Same condition the frontend uses to apply children settings to the included module -
+            // container-capable, or offering the field itself (includePalettes.children)
+            if ($objModel && (
+                in_array($objModel->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []))
+                || ($strType === 'module' && PaletteManipulatorExtended::create()->hasField((string) $objModel->type, 'tl_module', 'addResponsiveChildren'))
+            )) {
                 PaletteManipulatorExtended::create()
                     ->addLegend('items_legend', ['protected_legend', 'expert_legend'], PaletteManipulator::POSITION_BEFORE)
                     ->addField(['addResponsiveChildren'], 'items_legend', PaletteManipulator::POSITION_APPEND)

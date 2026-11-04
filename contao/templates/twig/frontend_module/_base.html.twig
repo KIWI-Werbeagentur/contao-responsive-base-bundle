@@ -10,8 +10,11 @@
 
     Merges an already existing value, so the module template (and a template overriding it) can add
     its own attributes at the top and still receive the classes here.
+
+    The classes come from the outermost enabled includer (wrapper module or "module" content
+    element), otherwise the module's own settings - the same source the legacy path uses.
 #}
 {% set items_attributes = attrs()
-    .addClass(getAllInnerContainerClasses(data|default, table='tl_module'))
+    .addClass(getModuleChildrenClasses(data|default))
     .mergeWith(items_attributes|default)
 %}
