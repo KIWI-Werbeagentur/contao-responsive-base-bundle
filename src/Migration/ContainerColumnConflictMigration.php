@@ -48,20 +48,23 @@ use Psr\Log\LoggerInterface;
  * the container was being used to fake margins/centering on top of a column, and only one of
  * the two can win. Review the affected pages afterwards.
  *
- * SELF-TERMINATION (no marker table, no date cutoff)
- * --------------------------------------------------
- * The predicate tests responsiveContainer, which is exactly the field the migration rewrites,
- * so after a successful run nothing matches and shouldRun() is false. No ledger is needed and
- * no release date has to be guessed - which matters because installs upgrade at different
- * times, so any fixed cutoff would misclassify late upgraders.
+ * UPGRADE ONLY (no marker table, no date cutoff)
+ * ----------------------------------------------
+ * It runs only on the upgrade from 1.0 ({@see DetectsUpgradeFrom10Trait}), which is detected
+ * from the schema rather than a release date - installs upgrade at different times, so any
+ * fixed cutoff would misclassify late upgraders. Within that run the predicate tests
+ * responsiveContainer, exactly the field the migration rewrites, so after a successful pass
+ * nothing matches any more.
  *
- * If a record acquires the combination again later (configuring columns as "Spalten-Element"
- * and switching to a container afterwards, or duplicating such a record), this migration will
- * legitimately offer itself again: under 1.1 such a record is always in a state where stored
- * settings do not render.
+ * Under 1.1 the combination is a normal, deliberate state: an editor who configures columns as
+ * "Spalten-Element" and then switches to a container keeps the now hidden column values in the
+ * record (Contao does not clear fields of an inactive subpalette), and the container is meant
+ * to win. Without the gate the next contao:migrate would switch such records back.
  */
 final class ContainerColumnConflictMigration extends AbstractMigration
 {
+    use DetectsUpgradeFrom10Trait;
+
     /**
      * table => [container field, column fields, extra conditions]
      *
@@ -103,6 +106,10 @@ final class ContainerColumnConflictMigration extends AbstractMigration
 
     public function shouldRun(): bool
     {
+        if (!$this->isUpgradeFrom10($this->connection)) {
+            return false;
+        }
+
         foreach (array_keys(self::TARGETS) as $table) {
             if ($this->findAffectedIds($table)) {
                 return true;
