@@ -18,6 +18,7 @@ services:
     arguments:
       - '@database_connection'
       - '@contao.framework'
+  Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveBreakpoints: ~
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver:
     arguments:
       - '@kiwi.contao.responsive.frontend'
@@ -31,6 +32,7 @@ services:
     arguments:
       - '@contao.framework'
       - '@twig'
+      - '@Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveBreakpoints'
   Kiwi\Contao\ResponsiveBaseBundle\Controller\FrontendModule\RootPageDependentModulesControllerDecorator:
     public: true
     decorates: Contao\CoreBundle\Controller\FrontendModule\RootPageDependentModulesController
@@ -46,7 +48,7 @@ services:
     arguments:
       - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetAllEventsListener: ~
-  Kiwi\Contao\ResponsiveBaseBundle\EventListener\GeneratePageListener: ~
+  Kiwi\Contao\ResponsiveBaseBundle\EventListener\ResponsiveAssetsListener: ~
   Kiwi\Contao\ResponsiveBaseBundle\EventListener\GetFrontendModuleListener:
     public: true
     arguments:
