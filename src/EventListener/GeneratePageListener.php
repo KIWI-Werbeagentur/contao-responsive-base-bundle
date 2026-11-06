@@ -11,6 +11,6 @@ class GeneratePageListener
 {
     public function __invoke(PageModel $objPage, LayoutModel $objLayout)
     {
-        $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/kiwiresponsivebase/responsive.js|static';
+        $GLOBALS['TL_JAVASCRIPT'][] = 'bundles/kiwiresponsivebase/responsive.js|static|defer';
     }
 }
