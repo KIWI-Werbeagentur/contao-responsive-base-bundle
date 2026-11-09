@@ -20,7 +20,7 @@
 (function () {
     const breakpoints = Object.freeze({{ breakpoints|raw }});
     const keys = Object.keys(breakpoints).sort((a, b) => breakpoints[a].breakpoint - breakpoints[b].breakpoint);
-    const queries = {};
+    const queries = Object.create(null);
     keys.forEach(key => queries[key] = window.matchMedia(`(min-width: ${breakpoints[key].breakpoint}px)`));
 
     const up = key => {
