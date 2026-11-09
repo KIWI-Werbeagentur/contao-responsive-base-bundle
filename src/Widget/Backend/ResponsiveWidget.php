@@ -2,6 +2,7 @@
 
 namespace Kiwi\Contao\ResponsiveBaseBundle\Widget\Backend;
 
+use Contao\Config;
 use Contao\Input;
 use Contao\StringUtil;
 use Contao\System;
@@ -211,5 +212,21 @@ class ResponsiveWidget extends Widget
     protected function parseChildWidget(string $strBreakpoint, array $arrBreakpoint): string
     {
         return $this->arrWidgets[$arrBreakpoint['modifier']]->parse();
+    }
+
+    /**
+     * Parses a sub-palette field of the subpalette widgets, including its help text. be_widget
+     * renders none: core adds it per palette row (DataContainer::help()), which sub-widgets never
+     * pass through, so it is added here the same way.
+     */
+    protected function parseSubWidget(Widget $objSubWidget): string
+    {
+        $strWidget = $objSubWidget->parse();
+
+        if ($objSubWidget->description && Config::get('showHelp')) {
+            $strWidget .= '<p class="tl_help tl_tip">' . $objSubWidget->description . '</p>';
+        }
+
+        return $strWidget;
     }
 }

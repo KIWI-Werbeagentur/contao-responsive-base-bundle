@@ -89,7 +89,7 @@ class OptionalResponsiveSubpaletteWidget extends OptionalResponsiveWidget
         $strWidgets = parent::parseChildWidget($strBreakpoint, $arrBreakpoint);
 
         foreach ($this->arrSubWidgets[$strBreakpoint] ?? [] as $objSubWidget) {
-            $strWidgets .= $objSubWidget->parse();
+            $strWidgets .= $this->parseSubWidget($objSubWidget);
         }
 
         return $strWidgets;
