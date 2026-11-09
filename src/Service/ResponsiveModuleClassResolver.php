@@ -95,7 +95,7 @@ class ResponsiveModuleClassResolver
      *     the module it places - an element placing a wrapper is never offered one, so a stored
      *     value there (the field defaults to '1') is never a decision and is ignored;
      *   - the wrapper's own toggle is offered per record when one of its included modules supports
-     *     children settings (IncludesListener::addWrapperResponsiveChildrenSettings) - its frontend
+     *     children settings (IncludesListener::applyWrapperChildrenToggle) - its frontend
      *     palette cannot tell, but the rendered module is one of them, so the caller's check that
      *     it supports an inner container structurally implies the offer.
      *

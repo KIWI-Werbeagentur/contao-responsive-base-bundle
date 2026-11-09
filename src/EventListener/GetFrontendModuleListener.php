@@ -66,7 +66,7 @@ class GetFrontendModuleListener
                 $shallReparse = true;
                 // CTE and wrapper sources expose addResponsiveChildren via a subpalette that is only
                 // present in the backend palette (the CTE selector/subpalette, or the per-record wrapper
-                // injection in IncludesListener::addWrapperResponsiveChildrenSettings), so skip the
+                // injection in IncludesListener::applyWrapperChildrenToggle), so skip the
                 // frontend-unavailable palette gate and use the row values. Only the module's own record
                 // carries the field in its frontend palette ($isField), where the gate stays meaningful.
                 $arrInnerClasses = $this->responsiveFrontendService->getAllInnerContainerClasses($objSource->row(), [], $strChildrenTable, $objSource !== $objModuleModel);
