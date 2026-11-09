@@ -18,7 +18,9 @@ services:
     arguments:
       - '@database_connection'
       - '@contao.framework'
-  Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveBreakpoints: ~
+  Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveBreakpoints:
+    arguments:
+      $responsiveFrontendService: '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver:
     arguments:
       - '@kiwi.contao.responsive.frontend'
@@ -27,6 +29,8 @@ services:
     public: true
     decorates: kiwi.contao.designer.frontend
     decoration_on_invalid: ignore
+    arguments:
+      $responsiveFrontendService: '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Controller\ResponsiveAssetsController:
     public: true
     arguments:

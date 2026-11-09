@@ -9,8 +9,9 @@ use Contao\Widget;
 use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
 use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
 use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
-class ResponsiveFrontendService
+class ResponsiveFrontendService implements ResetInterface
 {
     /**
      * Palette gate rejections already logged, so a misconfigured template does not log once per
@@ -20,8 +21,39 @@ class ResponsiveFrontendService
      */
     private array $arrLoggedRejections = [];
 
+    /**
+     * One configuration instance per class, see getConfig().
+     *
+     * @var array<class-string, ResponsiveConfiguration>
+     */
+    private array $arrConfigs = [];
+
     public function __construct(private readonly ?LoggerInterface $logger = null)
     {
+    }
+
+    /**
+     * Clears the per-request state, so long-running processes (worker mode, messenger) start each
+     * request with a fresh configuration and log again.
+     */
+    public function reset(): void
+    {
+        $this->arrConfigs = [];
+        $this->arrLoggedRejections = [];
+    }
+
+    /**
+     * The responsive configuration in use ($GLOBALS['responsive']['config']), built once per class.
+     * Construction is not free (the bootstrap configuration derives its scales from the grid config)
+     * and the class helpers need it for nearly every field of every element. Keyed by class, so a
+     * project override registered later still takes effect. Treat it as read-only: it is shared,
+     * also with ResponsiveDesignerFrontendService.
+     */
+    public function getConfig(): ResponsiveConfiguration
+    {
+        $strClass = $GLOBALS['responsive']['config'];
+
+        return $this->arrConfigs[$strClass] ??= new $strClass();
     }
 
     public static function propExists($varTarget, $strProp)
@@ -81,7 +113,7 @@ class ResponsiveFrontendService
 
         if ($strData ?? false) {
             $arrValues = StringUtil::deserialize($strData, true);
-            $objConfig = new $GLOBALS['responsive']['config']();
+            $objConfig = $this->getConfig();
 
             // HOOK: add custom logic
             if (isset($GLOBALS['TL_HOOKS']['alterResponsiveValues']) && \is_array($GLOBALS['TL_HOOKS']['alterResponsiveValues'])) {
@@ -185,7 +217,7 @@ class ResponsiveFrontendService
 
     public function getRowClass(): string
     {
-        return (new $GLOBALS['responsive']['config']())->strRow ?? '';
+        return $this->getConfig()->strRow ?? '';
     }
 
     /**
@@ -338,7 +370,7 @@ class ResponsiveFrontendService
             return [];
         }
 
-        $objConfig = new $GLOBALS['responsive']['config']();
+        $objConfig = $this->getConfig();
         return is_array($objConfig->arrContainerSizes[$strData]) ? $objConfig->arrContainerSizes[$strData] : [$objConfig->arrContainerSizes[$strData]];
     }
 

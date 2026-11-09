@@ -129,7 +129,7 @@ class ParseTemplateListener
             $objTemplate->{'responsiveCols' . $sidebar} = $responsiveFrontendService->getColClasses($objTemplate->layout->{'responsiveCols' . $sidebar});
 
             $prevVal = 0;
-            foreach ((new $GLOBALS['responsive']['config']())->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
+            foreach ($responsiveFrontendService->getConfig()->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
                 if ($arrBreakpointSetting[$strBreakpoint] ?? false) $prevVal = $arrBreakpointSetting[$strBreakpoint];
                 if(!is_numeric($arrBreakpointSetting[$strBreakpoint] ?? 0) || !is_numeric($arrBreakpoints[$strBreakpoint] ?? $prevVal)){
                     $arrBreakpoints[$strBreakpoint] = 'auto';
@@ -145,7 +145,7 @@ class ParseTemplateListener
 
 
         $arrMain = [];
-        foreach ((new $GLOBALS['responsive']['config']())->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
+        foreach ($responsiveFrontendService->getConfig()->arrBreakpoints as $strBreakpoint => $arrBreakpoint) {
             if(!is_numeric($arrBreakpoints[$strBreakpoint] ?? 0)){
                 $arrMain[$strBreakpoint] = 'fill';
             }

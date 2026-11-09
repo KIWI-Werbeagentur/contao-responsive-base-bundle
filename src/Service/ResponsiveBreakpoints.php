@@ -8,7 +8,9 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\Service;
  */
 class ResponsiveBreakpoints
 {
-    private array|null $arrBreakpoints = null;
+    public function __construct(private readonly ResponsiveFrontendService $responsiveFrontendService)
+    {
+    }
 
     /**
      * The breakpoints as JSON, safe to be embedded in an inline <script>.
@@ -51,6 +53,7 @@ class ResponsiveBreakpoints
 
     private function getBreakpoints(): array
     {
-        return $this->arrBreakpoints ??= (new $GLOBALS['responsive']['config']())->arrBreakpoints;
+        // The configuration shared within the request (and reset between requests)
+        return $this->responsiveFrontendService->getConfig()->arrBreakpoints;
     }
 }
