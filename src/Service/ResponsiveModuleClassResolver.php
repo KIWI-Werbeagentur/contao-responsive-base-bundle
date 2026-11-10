@@ -19,6 +19,16 @@ use Psr\Log\LoggerInterface;
  */
 class ResponsiveModuleClassResolver
 {
+    /**
+     * Module types that only include other modules, mapped to the column listing them. Their
+     * addResponsiveChildren is decided per record (IncludesListener), never by their type.
+     */
+    public const WRAPPER_MODULES = [
+        'root_page_dependent_modules' => 'rootPageDependentModules',
+        'languageDependentModule' => 'languageDependentModules',
+        'dynamicModule' => 'dynamicModule',
+    ];
+
     /** @var array<string, true> */
     private array $arrLoggedInputs = [];
 
@@ -144,12 +154,14 @@ class ResponsiveModuleClassResolver
      *
      * The single definition for the backend palette (IncludesListener) and the frontend resolution
      * (resolveChildrenSource), so a toggle never counts where nobody could set it. Wrapper types
-     * only get the field per record in the backend, not in their palette, so an element placing a
-     * wrapper is not offered one; the wrapper's own toggle is the place for that override.
+     * are excluded: IncludesListener adds the field to their palettes in the backend and decides
+     * per record whether it stays, so their palette says nothing about their type. An element
+     * placing a wrapper is not offered one; the wrapper's own toggle is the place for that override.
      */
     public function offersChildrenOverride(string $strModuleType): bool
     {
         return '' !== $strModuleType
+            && !isset(self::WRAPPER_MODULES[$strModuleType])
             && PaletteManipulatorExtended::create()->hasField($strModuleType, 'tl_module', 'addResponsiveChildren');
     }
 

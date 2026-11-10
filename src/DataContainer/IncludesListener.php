@@ -29,12 +29,6 @@ class IncludesListener
 {
     private const FIELD = 'addResponsiveChildren';
 
-    private const WRAPPER_MODULES = [
-        'root_page_dependent_modules' => 'rootPageDependentModules',
-        'languageDependentModule' => 'languageDependentModules',
-        'dynamicModule' => 'dynamicModule',
-    ];
-
     /** The field's own label while a record's label replaces it (a reference into $GLOBALS['TL_LANG']) */
     private mixed $varDefaultLabel = null;
 
@@ -53,7 +47,7 @@ class IncludesListener
     #[AsCallback(table: 'tl_module', target: 'config.onload')]
     public function addWrapperChildrenToggle(): void
     {
-        self::addToggle('tl_module', array_keys(self::WRAPPER_MODULES));
+        self::addToggle('tl_module', array_keys(ResponsiveModuleClassResolver::WRAPPER_MODULES));
     }
 
     /**
@@ -98,11 +92,11 @@ class IncludesListener
         $arrRecord = self::currentRecord($objDca);
         $strType = $arrRecord['type'] ?? '';
 
-        if (!isset(self::WRAPPER_MODULES[$strType])) {
+        if (!isset(ResponsiveModuleClassResolver::WRAPPER_MODULES[$strType])) {
             return $strPalette;
         }
 
-        $arrConfig = StringUtil::deserialize($arrRecord[self::WRAPPER_MODULES[$strType]] ?? '', true);
+        $arrConfig = StringUtil::deserialize($arrRecord[ResponsiveModuleClassResolver::WRAPPER_MODULES[$strType]] ?? '', true);
 
         $arrModuleIds = match ($strType) {
             'root_page_dependent_modules' => $arrConfig,
