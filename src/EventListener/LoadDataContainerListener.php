@@ -54,7 +54,7 @@ class LoadDataContainerListener
                                     $GLOBALS['TL_DCA'][$strTable]['fields'][$fieldName]['exclude'] = false;
                                     $GLOBALS['TL_DCA'][$strTable]['fields'][$fieldName]['eval']['doNotShow'] = true;
                                 }
-                                unset($arrField['subpalettes'][$fieldName]['sql']);
+                                unset($GLOBALS['TL_DCA'][$strTable]['fields'][$fieldName]['sql']);
                             } else {
                                 throw new \Exception('DCA error: subpalette entries of "' . $arrField['inputType'] . '" need to contain a string (referencing an existing dca field) or an array (containing a dca field configuration).');
                             }
