@@ -2,11 +2,60 @@
 
 namespace Kiwi\Contao\ResponsiveBaseBundle\Service;
 
+use Contao\Controller;
 use Contao\StringUtil;
 use Contao\System;
+use Contao\Widget;
+use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
+use Kiwi\Contao\ResponsiveBaseBundle\Configuration\ResponsiveConfiguration;
+use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
-class ResponsiveFrontendService
+class ResponsiveFrontendService implements ResetInterface
 {
+    /**
+     * Palette gate rejections already logged, so a misconfigured template does not log once per
+     * field and element.
+     *
+     * @var array<string, true>
+     */
+    private array $arrLoggedRejections = [];
+
+    /**
+     * One configuration instance per class, see getConfig().
+     *
+     * @var array<class-string, ResponsiveConfiguration>
+     */
+    private array $arrConfigs = [];
+
+    public function __construct(private readonly ?LoggerInterface $logger = null)
+    {
+    }
+
+    /**
+     * Clears the per-request state, so long-running processes (worker mode, messenger) start each
+     * request with a fresh configuration and log again.
+     */
+    public function reset(): void
+    {
+        $this->arrConfigs = [];
+        $this->arrLoggedRejections = [];
+    }
+
+    /**
+     * The responsive configuration in use ($GLOBALS['responsive']['config']), built once per class.
+     * Construction is not free (the bootstrap configuration derives its scales from the grid config)
+     * and the class helpers need it for nearly every field of every element. Keyed by class, so a
+     * project override registered later still takes effect. Treat it as read-only: it is shared,
+     * also with ResponsiveDesignerFrontendService.
+     */
+    public function getConfig(): ResponsiveConfiguration
+    {
+        $strClass = $GLOBALS['responsive']['config'];
+
+        return $this->arrConfigs[$strClass] ??= new $strClass();
+    }
+
     public static function propExists($varTarget, $strProp)
     {
         return (is_array($varTarget) && array_key_exists($strProp, $varTarget)) || (is_object($varTarget) && property_exists($varTarget, $strProp));
@@ -23,13 +72,48 @@ class ResponsiveFrontendService
         return "";
     }
 
+    /**
+     * Resolve the DCA record type $varData's palette is looked up by.
+     *
+     * For rows and models that is simply the "type" property, but a Contao form widget is not
+     * a plain record: FormText::__get('type') answers with the HTML5 *input* type derived from
+     * the field's rgxp - "email", "tel", "number", "url", "date" - not with the tl_form_field
+     * record type, which stays "text". Reading "type" straight off such a widget therefore
+     * gates against a palette that cannot exist, and since the gate fails closed the field
+     * silently loses every responsive class (with an error logged by isFieldInPalette() that
+     * blames the caller's $table rather than the widget).
+     *
+     * A widget's class is the reliable source: $GLOBALS['TL_FFL'] maps exactly the record types
+     * to their widget classes. Only widgets are treated this way; every other caller keeps the
+     * plain property lookup.
+     */
+    protected static function resolveType($varData): ?string
+    {
+        if ($varData instanceof Widget) {
+            $arrFfl = $GLOBALS['TL_FFL'] ?? [];
+
+            if (false !== ($strType = array_search($varData::class, $arrFfl, true))) {
+                return $strType;
+            }
+
+            // an app may register a subclass of a core widget under its own type
+            foreach ($arrFfl as $strType => $strClass) {
+                if ($varData instanceof $strClass) {
+                    return $strType;
+                }
+            }
+        }
+
+        return self::getProp($varData, 'type') ?: null;
+    }
+
     public function getResponsiveClasses(string|null $strData, string $strMapping, array $arrOptions = []): array
     {
         $arrClasses = [];
 
         if ($strData ?? false) {
             $arrValues = StringUtil::deserialize($strData, true);
-            $objConfig = new $GLOBALS['responsive']['config']();
+            $objConfig = $this->getConfig();
 
             // HOOK: add custom logic
             if (isset($GLOBALS['TL_HOOKS']['alterResponsiveValues']) && \is_array($GLOBALS['TL_HOOKS']['alterResponsiveValues'])) {
@@ -38,7 +122,20 @@ class ResponsiveFrontendService
                 }
             }
 
+            $excludeValues = $arrOptions['excludeValues'] ?? [];
+
             foreach ($arrValues as $strBreakpoint => $varValue) {
+                if (\in_array($varValue, $excludeValues, true)) {
+                    continue;
+                }
+
+                // Only breakpoint-keyed entries can render. A payload that is not a serialized
+                // array ('N;', a bare scalar) comes back from deserialize() wrapped as [0 => ...],
+                // and a stored breakpoint may since have been removed from the configuration.
+                if (!isset($objConfig->arrBreakpoints[$strBreakpoint])) {
+                    continue;
+                }
+
                 if ($objConfig->{$strMapping}) {
                     $strClass = is_array($objConfig->{$strMapping}) ? ($objConfig->{$strMapping}[$varValue] ?? '') : $objConfig->{$strMapping};
                 } else {
@@ -82,43 +179,239 @@ class ResponsiveFrontendService
         return $this->getResponsiveClasses($strData, 'varAlignSelfClasses');
     }
 
-    public function getSpacingClasses($strData, $strDirection = ""): array
+    public function getSpacingClasses(string|null $strData, string $strDirection = ""): array
     {
-        return $this->getResponsiveClasses($strData, 'varSpacingClasses', ['direction' => $strDirection]);
+        return $this->getResponsiveClasses($strData, 'varSpacingClasses', [
+            'direction'     => $strDirection,
+            'excludeValues' => [ResponsiveConfiguration::SPACING_NO_OP],
+        ]);
+    }
+
+    /**
+     * Element-group vertical spacing. The base bundle has no per-partial spacing
+     * system, so this is identical to {@see self::getSpacingClasses()}; a layering
+     * bundle (e.g. contao-bootstrap) overrides it to resolve the group partials.
+     */
+    public function getGroupSpacingClasses(string|null $strData, string $strDirection = ""): array
+    {
+        return $this->getSpacingClasses($strData, $strDirection);
+    }
+
+    /**
+     * Convenience wrapper around {@see self::getSpacingClasses()} for the top direction.
+     * Allows {@see self::getAllContainerClasses()} to use the same single-arg spec shape as
+     * the other aggregator methods.
+     */
+    public function getSpacingTopClasses(string|null $strData): array
+    {
+        return $this->getSpacingClasses($strData, 't');
+    }
+
+    /**
+     * Convenience wrapper around {@see self::getSpacingClasses()} for the bottom direction.
+     */
+    public function getSpacingBottomClasses(string|null $strData): array
+    {
+        return $this->getSpacingClasses($strData, 'b');
     }
 
     public function getRowClass(): string
     {
-        return (new $GLOBALS['responsive']['config']())->strRow ?? '';
+        return $this->getConfig()->strRow ?? '';
     }
 
-    public function getAllResponsiveClasses($varData, array $arrFields = []): array
+    /**
+     * Resolves the $table argument of the public class helpers.
+     *
+     * Callers predating the palette gate - project templates and controllers, third-party
+     * bundles - pass no table. Gating them against a guessed default table fails closed and
+     * strips every class (a tl_module row or a typeless article context has no tl_content
+     * palette), so they get the ungated pre-1.1 behaviour instead: the stored values render, as
+     * they did before the update. A warning is logged once per helper so they can be found and
+     * updated. A table passed explicitly keeps the gate.
+     *
+     * @return array{0: string, 1: bool} the table to gate against and the effective $skipPaletteCheck
+     */
+    protected function resolveTableArgument(?string $table, bool $skipPaletteCheck, string $strDefaultTable, string $strMethod): array
     {
-        return
-            array_merge(
-                $this->getColClasses(self::getProp($varData, $arrFields['cols'] ?? 'responsiveCols'), $varData),
-                $this->getOffsetClasses(self::getProp($varData, $arrFields['offsets'] ?? 'responsiveOffsets'), $varData),
-                $this->getOrderClasses(self::getProp($varData, $arrFields['order'] ?? 'responsiveOrder'), $varData),
-                $this->getAlignSelfClasses(self::getProp($varData, $arrFields['align-self'] ?? 'responsiveAlignSelf'), $varData)
+        if (null !== $table) {
+            return [$table, $skipPaletteCheck];
+        }
+
+        $strKey = 'missing-table|'.$strMethod;
+
+        if (!isset($this->arrLoggedRejections[$strKey])) {
+            $this->arrLoggedRejections[$strKey] = true;
+            $this->logger?->warning(
+                '{method}() was called without a table, so its responsive classes are rendered without '
+                .'the palette check. Pass the record\'s table (e.g. table=\'tl_module\') - check for an '
+                .'outdated project-level template override, controller or third-party bundle.',
+                ['method' => $strMethod],
             );
+        }
+
+        return [$strDefaultTable, true];
     }
 
-    public function getContainerClasses($strData): array
+    public function getAllResponsiveClasses($varData, array $arrFields = [], ?string $table = null, bool $skipPaletteCheck = false): array
+    {
+        [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_content', __FUNCTION__);
+
+        $arrSpecs = [
+            ['cols',       'responsiveCols',       'getColClasses'],
+            ['offsets',    'responsiveOffsets',    'getOffsetClasses'],
+            ['order',      'responsiveOrder',      'getOrderClasses'],
+            ['align-self', 'responsiveAlignSelf',  'getAlignSelfClasses'],
+        ];
+
+        $type = self::resolveType($varData);
+        $blnSuppressColumns = $this->suppressesColumns($varData, $table, $skipPaletteCheck);
+
+        $arrClasses = [];
+        foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
+            $strField = $arrFields[$strKey] ?? $strDefaultField;
+            if (!$this->isFieldInPalette($strField, $type, $table, $skipPaletteCheck)) {
+                continue;
+            }
+            if ($blnSuppressColumns && in_array($strKey, ['cols', 'offsets'], true)) {
+                continue;
+            }
+            $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField), $varData));
+        }
+        return $arrClasses;
+    }
+
+    /**
+     * Whether this record's column classes give way to its container.
+     *
+     * An element that sizes itself as a container must not ALSO carry column and offset
+     * classes: the two express competing widths and the container wins. Order and align-self
+     * are unaffected - they still apply to a container-mode element.
+     *
+     * This is the single place that decides it. It used to live in two: an inline
+     * `'tl_content' == $table` branch here (keyed on includePalettes.container membership) and
+     * a `not this.responsiveContainer` conditional in form_fieldsetStart.html.twig. Same rule,
+     * two conditions, two layers - so fixing one silently left the other behind, and the form
+     * path additionally re-applied order/align-self OUTSIDE the palette gate (fail-open, in a
+     * code path that had otherwise moved to fail-closed).
+     *
+     * Membership is now derived from the palette itself: a type that offers responsiveContainer
+     * is by definition container-capable. That is equivalent to the old includePalettes lookup
+     * (element_group is the only tl_content type carrying the field, fieldsetStart the only one
+     * in tl_form_field) while working identically for every table, so form templates no longer
+     * need a rule of their own.
+     *
+     * It answers only "does the container win over the columns", not "do the columns render".
+     * Framework bundles that add their own conditions on column output put them into the
+     * class-generating methods instead: contao-bootstrap gates getColClasses() and
+     * getOffsetClasses() on responsiveOverwriteRowCols, so with the flag unset the parent's
+     * row-cols win and no column classes are emitted although this method returns false. A caller
+     * that needs the full answer has to go through those methods (or getAllResponsiveClasses()),
+     * not this one. Do not fold such conditions in here: the callers below rely on the narrower
+     * meaning.
+     *
+     * Public because it is the authoritative definition of "the container strands this record's
+     * columns": ContainerColumnConflictMigration asks it directly instead of re-deriving
+     * container-capability from $GLOBALS['responsive'][...]['includePalettes']['container']. Those
+     * two answers agree only for as long as LoadDataContainerListener keeps the field and the
+     * config list aligned, so the migration selects exactly the records this method strands rather
+     * than a parallel approximation of them. It applies bootstrap's flag in its own query.
+     */
+    public function suppressesColumns($varData, ?string $table = null, bool $skipPaletteCheck = false): bool
+    {
+        [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_content', __FUNCTION__);
+
+        if (!self::getProp($varData, 'responsiveContainer')) {
+            return false;
+        }
+
+        return $this->isFieldInPalette(
+            'responsiveContainer',
+            self::resolveType($varData),
+            $table,
+            $skipPaletteCheck,
+        );
+    }
+
+    /**
+     * Resolve a container-size key to its CSS classes, optionally gated by palette membership.
+     *
+     * The same value lives under two differently named DCA fields, encoding different
+     * propositions:
+     *   - `responsiveContainer`     (tl_content, tl_form_field): a *mode selector* answering
+     *                               "is this element a container, and if so, what size?" -
+     *                               has a `default` option (= treat as column) and drives
+     *                               column- vs container-mode subpalettes.
+     *   - `responsiveContainerSize` (tl_article, tl_layout):     a *pure size attribute* -
+     *                               those records are always containers; only the size varies.
+     *
+     * Both resolve through the same `arrContainerSizes` map, so the conversion is uniform.
+     * Palette membership however is per-field-name: direct callers pass the field name they
+     * sourced the value from so the gate consults the right DCA entry for the resolved palette.
+     *
+     * Note on the internal {@see self::getAllContainerClasses()} call path: it already gates
+     * each spec entry against the correct field name in its own outer loop, then calls this
+     * method with $skipPaletteCheck = true so the inner gate is not re-applied (it would
+     * otherwise check the wrong field name, `responsiveContainer`, against the row's palette).
+     * The `$field` parameter here therefore matters for *direct* external callers (templates /
+     * hooks / tests) that source the value from a field other than `responsiveContainer`.
+     *
+     * @param string|null $strData          Container-size key looked up in $arrContainerSizes.
+     * @param string|null $type             Record type for palette gating. Null fails the gate (closed).
+     * @param string|null $table            DCA table whose palette is consulted. Null skips the gate, see {@see self::resolveTableArgument()}.
+     * @param string      $field            Name of the DCA field $strData was sourced from.
+     * @param bool         $skipPaletteCheck Bypass the palette gate (typeless / already-gated callers).
+     */
+    public function getContainerClasses($strData, ?string $type = null, ?string $table = null, string $field = 'responsiveContainer', bool $skipPaletteCheck = false): array
     {
         if (!$strData) return [];
+        [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_content', __FUNCTION__);
+        if (!$this->isFieldInPalette($field, $type, $table, $skipPaletteCheck)) {
+            return [];
+        }
 
-        $objConfig = new $GLOBALS['responsive']['config']();
+        $objConfig = $this->getConfig();
         return is_array($objConfig->arrContainerSizes[$strData]) ? $objConfig->arrContainerSizes[$strData] : [$objConfig->arrContainerSizes[$strData]];
     }
 
-    public function getAllContainerClasses($varData, array $arrFields = []): array
+    /**
+     * Resolve article-/layout-level container classes (size + top/bottom spacing).
+     *
+     * Unlike the sibling aggregators, this method operates on the article/layout level: the
+     * fields it reads (`responsiveContainerSize`, `responsiveSpacingTop`, `responsiveSpacingBottom`)
+     * live on `tl_article` and `tl_layout` via the `containerSize` / `space` DCA buckets, not
+     * on `tl_content`. Callers pass `tl_article` (mod_article.html.twig) or `tl_layout`; without a
+     * table the gate is skipped, see {@see self::resolveTableArgument()}.
+     */
+    public function getAllContainerClasses($varData, array $arrFields = [], ?string $table = null, bool $skipPaletteCheck = false): array
     {
-        return
-            array_merge(
-                $this->getContainerClasses(self::getProp($varData, $arrFields['containerSize'] ?? 'responsiveContainerSize'), $varData),
-                $this->getSpacingClasses(self::getProp($varData, $arrFields['spacingTop'] ?? 'responsiveSpacingTop'), 't', $varData),
-                $this->getSpacingClasses(self::getProp($varData, $arrFields['spacingBottom'] ?? 'responsiveSpacingBottom'), 'b', $varData),
+        [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_article', __FUNCTION__);
+
+        $arrSpecs = [
+            ['containerSize', 'responsiveContainerSize', 'getContainerClasses'],
+            ['spacingTop',    'responsiveSpacingTop',    'getSpacingTopClasses'],
+            ['spacingBottom', 'responsiveSpacingBottom', 'getSpacingBottomClasses'],
+        ];
+
+        $type = self::resolveType($varData);
+
+        $arrClasses = [];
+        foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
+            $strField = $arrFields[$strKey] ?? $strDefaultField;
+            if (!$this->isFieldInPalette($strField, $type, $table, $skipPaletteCheck)) {
+                continue;
+            }
+            $varValue = self::getProp($varData, $strField);
+            // getContainerClasses re-gates on its own field name; this spec was already gated
+            // above (on responsiveContainerSize), so skip its inner palette check.
+            $arrClasses = array_merge(
+                $arrClasses,
+                'getContainerClasses' === $strMethod
+                    ? $this->getContainerClasses($varValue, $type, $table, $strField, true)
+                    : $this->$strMethod($varValue)
             );
+        }
+        return $arrClasses;
     }
 
     public function getFlexDirectionClasses($strData): array
@@ -146,15 +439,148 @@ class ResponsiveFrontendService
         return $this->getResponsiveClasses($strData, 'varJustifyContentClasses');
     }
 
-    public function getAllInnerContainerClasses($varData, array $arrFields = []): array
+    /**
+     * Returns whether the record offers its children settings behind the addResponsiveChildren
+     * selector but has it disabled - in which case none of those settings apply.
+     *
+     * Only palettes registered as "children" (see LoadDataContainerListener::addChildrenSettings)
+     * carry that field: for them the values live in a subpalette and are meaningless while the
+     * selector is off. Container palettes carry the same settings unconditionally and have no such
+     * field, so they are unaffected.
+     *
+     * Callers that skip the palette gate ($skipPaletteCheck) have already established their
+     * source, so the check does not apply to them.
+     */
+    protected function hasChildrenSettingsDisabled($varData, string $table, bool $skipPaletteCheck): bool
     {
-        return
-            array_merge(
-                $this->getFlexDirectionClasses(self::getProp($varData, $arrFields['flexDirection'] ?? 'responsiveFlexDirection'), $varData),
-                $this->getFlexWrapClasses(self::getProp($varData, $arrFields['flexWrap'] ?? 'responsiveFlexWrap'), $varData),
-                $this->getAlignItemsClasses(self::getProp($varData, $arrFields['alignItems'] ?? 'responsiveAlignItems'), $varData),
-                $this->getAlignContentClasses(self::getProp($varData, $arrFields['alignContent'] ?? 'responsiveAlignContent'), $varData),
-                $this->getJustifyContentClasses(self::getProp($varData, $arrFields['justifyContent'] ?? 'responsiveJustifyContent'), $varData),
+        if ($skipPaletteCheck || self::getProp($varData, 'addResponsiveChildren')) {
+            return false;
+        }
+
+        return $this->isFieldInPalette('addResponsiveChildren', self::resolveType($varData), $table);
+    }
+
+    public function getAllInnerContainerClasses($varData, array $arrFields = [], ?string $table = null, bool $skipPaletteCheck = false): array
+    {
+        [$table, $skipPaletteCheck] = $this->resolveTableArgument($table, $skipPaletteCheck, 'tl_content', __FUNCTION__);
+
+        if ($this->hasChildrenSettingsDisabled($varData, $table, $skipPaletteCheck)) {
+            return [];
+        }
+
+        $arrSpecs = [
+            ['flexDirection',  'responsiveFlexDirection',  'getFlexDirectionClasses'],
+            ['flexWrap',       'responsiveFlexWrap',       'getFlexWrapClasses'],
+            ['alignItems',     'responsiveAlignItems',     'getAlignItemsClasses'],
+            ['alignContent',   'responsiveAlignContent',   'getAlignContentClasses'],
+            ['justifyContent', 'responsiveJustifyContent', 'getJustifyContentClasses'],
+        ];
+
+        $type = self::resolveType($varData);
+
+        $arrClasses = [];
+        foreach ($arrSpecs as [$strKey, $strDefaultField, $strMethod]) {
+            $strField = $arrFields[$strKey] ?? $strDefaultField;
+            if (!$this->isFieldInPalette($strField, $type, $table, $skipPaletteCheck)) {
+                continue;
+            }
+            $arrClasses = array_merge($arrClasses, $this->$strMethod(self::getProp($varData, $strField), $varData));
+        }
+        return $arrClasses;
+    }
+
+    /**
+     * Returns whether the field is part of the resolved palette.
+     *
+     * Fails closed: a field only renders when it is positively confirmed in the type's palette
+     * for the given table. A missing type, or a type that is not a palette in $table (the usual
+     * symptom of a wrong table / wrong source being passed), returns false - so such mismatches
+     * surface immediately as missing classes instead of silently rendering and lingering.
+     *
+     * Tables without type-keyed palettes (no "type" selector, e.g. tl_article) are gated against
+     * their "default" palette instead; one lacking that too (a wrong or nonexistent $table) also
+     * returns false. Callers that have already established their source can still opt out of the
+     * gate entirely via $skipPaletteCheck.
+     */
+    protected function isFieldInPalette(string $strField, ?string $type, string $table = 'tl_content', bool $skipPaletteCheck = false): bool
+    {
+        if ($skipPaletteCheck) {
+            return true;
+        }
+
+        Controller::loadDataContainer($table);
+
+        // A table only has type-keyed palettes if "type" is a selector - that is what makes
+        // DC_Table::getPalette() resolve palettes by its value. Typeless tables (tl_article,
+        // tl_layout, tl_form) render from "default", so gate against that palette instead: the
+        // record's type is irrelevant there, but a wrong or nonexistent $table still fails closed.
+        if (!\in_array('type', $GLOBALS['TL_DCA'][$table]['palettes']['__selector__'] ?? [], true)) {
+            if (!isset($GLOBALS['TL_DCA'][$table]['palettes']['default'])) {
+                $this->logRejection(
+                    'Responsive field "{field}" cannot be resolved against table "{table}": it has '
+                    .'neither type-keyed palettes nor a "default" palette, so no classes are rendered. '
+                    .'This usually means the wrong $table was passed - check for an outdated '
+                    .'project-level template override.',
+                    $strField,
+                    $table,
+                );
+
+                return false;
+            }
+
+            return PaletteManipulatorExtended::create()->hasField('default', $table, $strField);
+        }
+
+        // Both rejections below are indistinguishable, in the rendered output, from "this record
+        // simply has no responsive settings" - the element just silently loses its classes. That
+        // is precisely how a stale template override goes unnoticed: a pre-1.1 copy of
+        // form_fieldsetStart.html.twig still calls getAllResponsiveClasses(arrConfiguration) with
+        // no table, so it lands here with a null type against tl_content and drops everything.
+        // Announce it instead of failing quietly.
+        if ($type === null || $type === '') {
+            $this->logRejection(
+                'Responsive field "{field}" cannot be resolved without a record type (table '
+                .'"{table}"), so no classes are rendered. Pass the record itself (e.g. "this" rather '
+                .'than a widget configuration array) together with its table, or opt out via '
+                .'$skipPaletteCheck for genuinely typeless data. Check for an outdated project-level '
+                .'template override.',
+                $strField,
+                $table,
             );
+
+            return false;
+        }
+
+        if (!isset($GLOBALS['TL_DCA'][$table]['palettes'][$type])) {
+            $this->logRejection(
+                'Responsive field "{field}" cannot be resolved for type "{type}": table "{table}" has '
+                .'no such palette, so no classes are rendered. This usually means the wrong $table '
+                .'was passed - check for an outdated project-level template override.',
+                $strField,
+                $table,
+                $type,
+            );
+
+            return false;
+        }
+
+        return PaletteManipulatorExtended::create()->hasField($type, $table, $strField);
+    }
+
+    /**
+     * Logs a palette gate rejection as an error: the element silently loses its responsive
+     * classes, which is a broken render rather than a deprecated call. Logged once per
+     * message/table/type, independent of the field.
+     */
+    private function logRejection(string $strMessage, string $strField, string $table, ?string $type = null): void
+    {
+        $strKey = $strMessage.'|'.$table.'|'.$type;
+
+        if (isset($this->arrLoggedRejections[$strKey])) {
+            return;
+        }
+
+        $this->arrLoggedRejections[$strKey] = true;
+        $this->logger?->error($strMessage, ['field' => $strField, 'table' => $table, 'type' => $type]);
     }
 }

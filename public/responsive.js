@@ -1,3 +1,10 @@
+/**
+ * @deprecated Deprecated since kiwi/contao-responsive-base 1.1, to be removed in 2.0, together with
+ *             window.responsiveSize, window.KiwiBootstrap, the "responsiveUpdate" event and
+ *             window.arrBreakpoints:
+ *             - the --responsive-* custom properties are now provided via CSS, available on first paint
+ *             - in JS, use window.KiwiResponsive (current(), config(), up(), down(), onChange())
+ */
 window.responsiveSize = {}
 
 window.KiwiBootstrap = new (function () {

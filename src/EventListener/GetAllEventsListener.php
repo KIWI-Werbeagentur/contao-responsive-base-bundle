@@ -4,18 +4,38 @@ namespace Kiwi\Contao\ResponsiveBaseBundle\EventListener;
 
 use Contao\CoreBundle\DependencyInjection\Attribute\AsHook;
 use Contao\System;
+use Kiwi\Contao\CmxBundle\DataContainer\PaletteManipulatorExtended;
+use Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveModuleClassResolver;
 
 
 #[AsHook('getAllEvents')]
 class GetAllEventsListener
 {
+    public function __construct(
+        protected ResponsiveModuleClassResolver $classResolver
+    )
+    {
+    }
+
     public function __invoke($arrEvents, $arrCalendars, $intStart, $intEnd, $objModule) {
-        if(!$objModule->addResponsiveChildren || !$objModule->responsiveColsItems) return $arrEvents;
+        // This hook fires during compile(), before the getFrontendModule hook runs (and the
+        // reparse there does not recompile) - so the template propagation in
+        // GetFrontendModuleListener cannot reach it. Resolve the children source here with the
+        // same precedence: outermost enabled includer, then the module's own settings. Read
+        // the backref only - GetFrontendModuleListener consumes it afterwards.
+        $arrWrappers = $this->classResolver->collectWrappers($objModule->includedVia ?? null);
+        [$objSource] = $this->classResolver->resolveChildrenSource($objModule, $arrWrappers);
 
-        //Checks if DCA-Palette has Resposnive-Settings for children activated (usually used for lists)
-        if(!in_array($objModule->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container']))) return $arrEvents;
+        if(!$objSource || !$objSource->responsiveColsItems) return $arrEvents;
 
-        $strColumnClasses = implode(" ", System::getContainer()->get('kiwi.contao.responsive.frontend')->getColClasses($objModule->responsiveColsItems));
+        // Checks the runtime DCA palette (true source of truth, picks up palettes added by
+        // third-party bundles) AND the config-level allow-list. Mirrors the gate idiom of
+        // GetFrontendModuleListener.
+        $isField = PaletteManipulatorExtended::create()->hasField($objModule->type, 'tl_module', 'addResponsiveChildren');
+        $hasResponsiveChildren = in_array($objModule->type, array_keys($GLOBALS['responsive']['tl_module']['includePalettes']['container'] ?? []));
+        if (!$isField && !$hasResponsiveChildren) return $arrEvents;
+
+        $strColumnClasses = implode(" ", System::getContainer()->get('kiwi.contao.responsive.frontend')->getColClasses($objSource->responsiveColsItems));
 
         foreach($arrEvents as &$events){
             foreach($events as &$event){

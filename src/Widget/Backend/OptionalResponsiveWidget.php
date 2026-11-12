@@ -18,6 +18,11 @@ class OptionalResponsiveWidget extends ResponsiveWidget
         return "<input type='checkbox' id='{$this->strName}-responsive' name='{$this->strName}-responsive' {$strChecked}/><label for='{$this->strName}-responsive'>{$GLOBALS['TL_LANG']['responsive']['responsive']}</label>{$strWidget}";
     }
 
+    protected function validatesAllBreakpoints(): bool
+    {
+        return (bool) Input::post("{$this->strName}-responsive");
+    }
+
     protected function validator($varInput, $arrValues = [])
     {
         if (Input::post("{$this->strName}-responsive")) {

@@ -1,0 +1,31 @@
+{% extends "@Contao/frontend_module/_base.html.twig" %}
+
+{#
+    Only with a module row, like content_element/_base.html.twig: a template rendered without
+    "data" (custom render, preview) keeps its own attributes, and core's base builds the rest.
+#}
+{% if data|default %}
+    {% set attributes = attrs()
+        .addClass(getModuleResponsiveClasses(data))
+        .mergeWith(attributes|default)
+    %}
+{% endif %}
+
+{#
+    Attributes for the wrapper around a module's own child items, for modules that render those
+    items themselves (e.g. a list of persons): they only know where their items sit, so they render
+    the wrapper and output these attributes on it. The counterpart for modules rendering a legacy
+    template is the "innerClass" the getFrontendModule hook hands over.
+
+    Merges an already existing value, so the module template (and a template overriding it) can add
+    its own attributes at the top and still receive the classes here.
+
+    The classes come from the outermost enabled includer (wrapper module or "module" content
+    element), otherwise the module's own settings - the same source the legacy path uses.
+#}
+{% if data|default %}
+    {% set items_attributes = attrs()
+        .addClass(getModuleChildrenClasses(data))
+        .mergeWith(items_attributes|default)
+    %}
+{% endif %}
