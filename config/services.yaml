@@ -31,8 +31,10 @@ services:
     public: true
     decorates: kiwi.contao.designer.frontend
     decoration_on_invalid: ignore
+    # Positional: a named argument makes Symfony reflect the constructor before the decorator is
+    # dropped, which fails without kiwi/contao-designer (the parent class does not exist)
     arguments:
-      $responsiveFrontendService: '@kiwi.contao.responsive.frontend'
+      - '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Controller\ResponsiveAssetsController:
     public: true
     arguments:
