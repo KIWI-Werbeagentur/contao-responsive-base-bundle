@@ -50,6 +50,13 @@ use Psr\Log\LoggerInterface;
  * the container was being used to fake margins/centering on top of a column, and only one of
  * the two can win. Review the affected pages afterwards.
  *
+ * Left alone are records whose columns are the configured defaults (the values the DCA fills in
+ * on creation, bootstrap: cols xs 12, offset xs none) under a parent without row-cols: their
+ * columns rendered regardless of the flag, but a full-width column without offset next to a
+ * container never changed the box - the container decided width and centering. Switching them
+ * would trade a working container for a no-op column. Under a parent with row-cols the same
+ * defaults are kept in the conversion, as they override the parent's "elements per row".
+ *
  * UPGRADE ONLY (no marker table, no date cutoff)
  * ----------------------------------------------
  * It runs only on the upgrade from 1.0 ({@see DetectsUpgradeFrom10Trait}), which is detected
@@ -253,7 +260,7 @@ final class ContainerColumnConflictMigration extends AbstractMigration
                 }
             }
 
-            if ($this->rendersColumns($row)) {
+            if ($this->rendersColumns($row) && !$this->holdsNeutralColumns($row)) {
                 $ids[] = (int) $row['id'];
             }
         }
@@ -278,6 +285,80 @@ final class ContainerColumnConflictMigration extends AbstractMigration
         ];
 
         return [] !== array_filter($classes, static fn ($c): bool => '' !== trim((string) $c));
+    }
+
+    /**
+     * Whether the record's columns are the configured defaults under a parent that offers no
+     * row-cols for them to override - full width without offset, which next to a container never
+     * changed the box. "No row-cols" is asked of the frontend service like everything else: the
+     * columns still render with the override flag cleared (bootstrap's ptable exception; without
+     * contao-bootstrap there is no flag and the base methods render anyway).
+     *
+     * @param array<string, mixed> $row
+     */
+    private function holdsNeutralColumns(array $row): bool
+    {
+        $config = $this->responsiveFrontendService->getConfig();
+
+        $colsDefaults = property_exists($config, 'arrColsDefaults') ? $config->__get('arrColsDefaults') : null;
+        $offsetsDefaults = property_exists($config, 'arrOffsetsDefaults') ? $config->__get('arrOffsetsDefaults') : null;
+
+        if (!\is_array($colsDefaults) || [] === $colsDefaults) {
+            return false;
+        }
+
+        // Defaults compared as stored: a record saved before the defaults changed is not neutral
+        if (!$this->matchesDefaults($row['responsiveCols'] ?? null, $colsDefaults)) {
+            return false;
+        }
+
+        // No offsets at all renders nothing either
+        $offsets = $this->normalizeValues($row['responsiveOffsets'] ?? null);
+
+        if ([] !== $offsets && !$this->matchesDefaults($row['responsiveOffsets'] ?? null, (array) $offsetsDefaults)) {
+            return false;
+        }
+
+        return $this->rendersColumns(['responsiveOverwriteRowCols' => ''] + $row);
+    }
+
+    /**
+     * @param array<string, mixed> $defaults
+     */
+    private function matchesDefaults(mixed $value, array $defaults): bool
+    {
+        return $this->normalizeValues($value) === $this->normalizeValues(serialize($defaults));
+    }
+
+    /**
+     * Breakpoint => value as strings, empty selections dropped and keys sorted, so i:12 and
+     * s:2:"12" compare equal.
+     *
+     * @return array<string, string>
+     */
+    private function normalizeValues(mixed $value): array
+    {
+        if (!\is_string($value) || '' === $value) {
+            return [];
+        }
+
+        $decoded = @unserialize($value, ['allowed_classes' => false]);
+
+        if (!\is_array($decoded)) {
+            return [];
+        }
+
+        $values = [];
+
+        foreach ($decoded as $breakpoint => $selection) {
+            if (null !== $selection && '' !== (string) $selection) {
+                $values[(string) $breakpoint] = (string) $selection;
+            }
+        }
+
+        ksort($values);
+
+        return $values;
     }
 
     private function tableExists(string $table): bool
