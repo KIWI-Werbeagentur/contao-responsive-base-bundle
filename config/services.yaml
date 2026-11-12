@@ -5,6 +5,8 @@ services:
   kiwi.contao.responsive.frontend:
     public: true
     class: Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService
+  # For autowiring, e.g. project subclasses of ResponsiveDesignerFrontendService or ResponsiveBreakpoints
+  Kiwi\Contao\ResponsiveBaseBundle\Service\ResponsiveFrontendService: '@kiwi.contao.responsive.frontend'
   Kiwi\Contao\ResponsiveBaseBundle\Migration\ContainerColumnConflictMigration:
     arguments:
       - '@database_connection'
