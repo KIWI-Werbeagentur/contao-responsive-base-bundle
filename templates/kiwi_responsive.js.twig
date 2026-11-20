@@ -1,0 +1,56 @@
+{#
+    Inline script (see ResponsiveAssetsListener), available synchronously to all later scripts.
+
+    window.KiwiResponsive - breakpoint helper based on the configured breakpoints:
+        KiwiResponsive.breakpoints   the configuration, e.g. {xs: {breakpoint: 0, ...}, sm: {breakpoint: 576, ...}}
+        KiwiResponsive.current()     key of the active breakpoint, e.g. "lg"
+        KiwiResponsive.config()      settings of the active breakpoint, e.g. {breakpoint: 992, modifier: "-lg", container: "960px"}
+        KiwiResponsive.up('lg')      true from lg upwards (like media-breakpoint-up)
+        KiwiResponsive.down('lg')    true below lg (like media-breakpoint-down in Bootstrap 5)
+        KiwiResponsive.onChange(cb)  calls cb({key, prevKey}) whenever the active breakpoint changes,
+                                     returns a function to remove the callback again. With
+                                     onChange(cb, {immediate: true}), cb is also called right away
+                                     (prevKey: null), for code that has to run now and on every change.
+
+    For measurements, prefer the actual element (e.g. getBoundingClientRect() of the container) over
+    computing widths from the config: the container can be "100%" and the gutters come from CSS.
+
+    window.arrBreakpoints is deprecated (to be removed in 2.0): it is only used by responsive.js.
+#}
+(function () {
+    const breakpoints = Object.freeze({{ breakpoints|raw }});
+    const keys = Object.keys(breakpoints).sort((a, b) => breakpoints[a].breakpoint - breakpoints[b].breakpoint);
+    const queries = Object.create(null);
+    keys.forEach(key => queries[key] = window.matchMedia(`(min-width: ${breakpoints[key].breakpoint}px)`));
+
+    const up = key => {
+        if (!queries[key]) throw new Error(`Unknown breakpoint "${key}"`);
+        return queries[key].matches;
+    };
+    const current = () => keys.reduce((active, key) => queries[key].matches ? key : active, keys[0]);
+
+    const listeners = new Set();
+    let active = current();
+    Object.values(queries).forEach(query => query.addEventListener('change', () => {
+        const key = current();
+        if (key === active) return;
+        const prevKey = active;
+        active = key;
+        listeners.forEach(cb => cb({key, prevKey}));
+    }));
+
+    window.KiwiResponsive = Object.freeze({
+        breakpoints,
+        current,
+        up,
+        config: () => breakpoints[current()],
+        down: key => !up(key),
+        onChange(cb, {immediate = false} = {}) {
+            listeners.add(cb);
+            if (immediate) cb({key: current(), prevKey: null});
+            return () => listeners.delete(cb);
+        },
+    });
+
+    window.arrBreakpoints = {{ breakpoints|raw }};
+})();

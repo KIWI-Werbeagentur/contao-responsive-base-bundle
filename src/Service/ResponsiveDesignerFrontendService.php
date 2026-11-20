@@ -13,6 +13,14 @@ class ResponsiveDesignerFrontendService extends DesignerFrontendService
     protected $strBreakpoint = "";
     protected $arrBreakpoints = [];
 
+    /**
+     * The responsive frontend service supplies the configuration, built once per request, as
+     * resolveValue() runs for every placeholder of every design class.
+     */
+    public function __construct(private readonly ResponsiveFrontendService $responsiveFrontendService)
+    {
+    }
+
     public function resolveValue($strName, &$strValue)
     {
         parent::resolveValue($strName, $strValue);
@@ -20,7 +28,7 @@ class ResponsiveDesignerFrontendService extends DesignerFrontendService
         switch ($strName) {
             case 'modifiersAll':
                 $arrReturn = [];
-                foreach ((new $GLOBALS['responsive']['config']())->arrBreakpoints as $strKey => $arrBreakpoint) {
+                foreach ($this->responsiveFrontendService->getConfig()->arrBreakpoints as $strKey => $arrBreakpoint) {
                     $arrReturn[] = str_replace('{{modifier}}', $strKey, $GLOBALS['design']['modifiers']['pattern']);
                 }
                 $strValue = implode($GLOBALS['design']['modifiers']['delimiter'], $arrReturn);
@@ -34,7 +42,8 @@ class ResponsiveDesignerFrontendService extends DesignerFrontendService
                 break;
             default:
                 if ($GLOBALS['responsive'] ?? false) {
-                    if (isset((new $GLOBALS['responsive']['config']())->arrBreakpoints[$this->strBreakpoint][$strName]) ?? false) $strValue = (new $GLOBALS['responsive']['config']())->arrBreakpoints[$this->strBreakpoint][$strName];
+                    $arrBreakpoints = $this->responsiveFrontendService->getConfig()->arrBreakpoints;
+                    if (isset($arrBreakpoints[$this->strBreakpoint][$strName])) $strValue = $arrBreakpoints[$this->strBreakpoint][$strName];
                 }
                 break;
         }
@@ -51,7 +60,7 @@ class ResponsiveDesignerFrontendService extends DesignerFrontendService
         if (array_key_exists(0, $arrStyles)) {
             $arrReturn[] = $this->getClasses($arrStyles[0], $strMapping, $strField);
         } else {
-            foreach (array_reverse((new $GLOBALS['responsive']['config']())->arrBreakpoints) ?? [] as $strBreakpoint => $arrBreakpoint) {
+            foreach (array_reverse($this->responsiveFrontendService->getConfig()->arrBreakpoints) as $strBreakpoint => $arrBreakpoint) {
                 if ($arrStyles[$strBreakpoint] ?? false) {
                     $this->strBreakpoint = $strBreakpoint;
                     $arrReturn[] = $this->getClasses($arrStyles[$strBreakpoint], $strMapping, $strField);

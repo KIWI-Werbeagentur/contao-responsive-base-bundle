@@ -19,6 +19,14 @@
     white-space: nowrap;
 }
 
+/* core sizes labels for a single line (height: 16px); in the narrow breakpoint columns they wrap
+   and would overlap the following field */
+.responsive-widget h3,
+.responsive-widget .tl_checkbox_single_container {
+    height: auto;
+    min-height: 16px;
+}
+
 input:not(:checked) ~ .responsive-widget > div:not(:first-of-type) {
     display: none;
 }
