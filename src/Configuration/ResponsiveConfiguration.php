@@ -75,6 +75,7 @@ abstract class ResponsiveConfiguration
 
     protected array $arrAlignmentSelf = [
         'default' => 'default',
+        'auto' => 'auto',
         'stretch' => 'stretch',
         'baseline' => 'baseline',
         'start' => 'start',
@@ -113,6 +114,7 @@ abstract class ResponsiveConfiguration
         ],
         'flexItems' => [
                 'default' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-stretch.svg",
+                'auto' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-stretch.svg",
                 'stretch' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-stretch.svg",
                 'start' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-start.svg",
                 'center' => "/bundles/kiwiresponsivebase/icons/flex-items/flex-items-center.svg",
