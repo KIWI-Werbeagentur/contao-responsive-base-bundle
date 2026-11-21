@@ -422,29 +422,29 @@ class ResponsiveFrontendService implements ResetInterface
         return $arrClasses;
     }
 
-    public function getFlexDirectionClasses(?string $strData, $arrOptions = []): array
+    public function getFlexDirectionClasses(?string $strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varFlexDirectionClasses', $arrOptions);
+        return $this->getResponsiveClasses($strData, 'varFlexDirectionClasses');
     }
 
-    public function getFlexWrapClasses(?string $strData, array $arrOptions = []): array
+    public function getFlexWrapClasses(?string $strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varFlexWrapClasses', $arrOptions);
+        return $this->getResponsiveClasses($strData, 'varFlexWrapClasses');
     }
 
-    public function getAlignItemsClasses(?string $strData, array $arrOptions = []): array
+    public function getAlignItemsClasses(?string $strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varAlignItemsClasses', $arrOptions);
+        return $this->getResponsiveClasses($strData, 'varAlignItemsClasses');
     }
 
-    public function getAlignContentClasses(?string $strData, array $arrOptions = []): array
+    public function getAlignContentClasses(?string $strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varAlignContentClasses', $arrOptions);
+        return $this->getResponsiveClasses($strData, 'varAlignContentClasses');
     }
 
-    public function getJustifyContentClasses(?string $strData, array $arrOptions = []): array
+    public function getJustifyContentClasses(?string $strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varJustifyContentClasses', $arrOptions);
+        return $this->getResponsiveClasses($strData, 'varJustifyContentClasses');
     }
 
     /**
