@@ -125,6 +125,19 @@ class ResponsiveFrontendService implements ResetInterface
             $excludeValues = $arrOptions['excludeValues'] ?? [];
             unset($arrOptions['excludeValues']);
 
+            // The reset value maps to a class restoring the CSS default, which Bootstrap's
+            // utilities set with !important. It only renders where a smaller breakpoint set a
+            // class it has to cancel: without one it would be the first !important on the
+            // element and block theme rules from that breakpoint upward.
+            $strResetValue = $arrOptions['resetValue'] ?? null;
+            unset($arrOptions['resetValue']);
+            $blnOverridden = false;
+
+            if (null !== $strResetValue) {
+                $arrPositions = array_flip(array_keys($objConfig->arrBreakpoints));
+                uksort($arrValues, static fn ($a, $b) => ($arrPositions[$a] ?? PHP_INT_MAX) <=> ($arrPositions[$b] ?? PHP_INT_MAX));
+            }
+
             foreach ($arrValues as $strBreakpoint => $varValue) {
                 if (\in_array($varValue, $excludeValues, true)) {
                     continue;
@@ -152,6 +165,18 @@ class ResponsiveFrontendService implements ResetInterface
                     return $arrOptions[$name] ?? $matched;
                 }, $strClass);
 
+                if (null !== $strResetValue) {
+                    if ($strResetValue === (string) $varValue) {
+                        if (!$blnOverridden) {
+                            continue;
+                        }
+
+                        $blnOverridden = false;
+                    } elseif ($strClass !== '') {
+                        $blnOverridden = true;
+                    }
+                }
+
                 if ($strClass !== '') {
                     $arrClasses[] = $strClass;
                 }
@@ -172,12 +197,12 @@ class ResponsiveFrontendService implements ResetInterface
 
     public function getOrderClasses($strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varOrderClasses');
+        return $this->getResponsiveClasses($strData, 'varOrderClasses', ['resetValue' => ResponsiveConfiguration::FLEX_DEFAULT]);
     }
 
     public function getAlignSelfClasses($strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varAlignSelfClasses');
+        return $this->getResponsiveClasses($strData, 'varAlignSelfClasses', ['resetValue' => ResponsiveConfiguration::FLEX_DEFAULT]);
     }
 
     public function getSpacingClasses(?string $strData, string $strDirection = "", array $arrOptions = []): array
@@ -424,27 +449,27 @@ class ResponsiveFrontendService implements ResetInterface
 
     public function getFlexDirectionClasses(?string $strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varFlexDirectionClasses');
+        return $this->getResponsiveClasses($strData, 'varFlexDirectionClasses', ['resetValue' => ResponsiveConfiguration::FLEX_DEFAULT]);
     }
 
     public function getFlexWrapClasses(?string $strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varFlexWrapClasses');
+        return $this->getResponsiveClasses($strData, 'varFlexWrapClasses', ['resetValue' => ResponsiveConfiguration::FLEX_DEFAULT]);
     }
 
     public function getAlignItemsClasses(?string $strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varAlignItemsClasses');
+        return $this->getResponsiveClasses($strData, 'varAlignItemsClasses', ['resetValue' => ResponsiveConfiguration::FLEX_DEFAULT]);
     }
 
     public function getAlignContentClasses(?string $strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varAlignContentClasses');
+        return $this->getResponsiveClasses($strData, 'varAlignContentClasses', ['resetValue' => ResponsiveConfiguration::FLEX_DEFAULT]);
     }
 
     public function getJustifyContentClasses(?string $strData): array
     {
-        return $this->getResponsiveClasses($strData, 'varJustifyContentClasses');
+        return $this->getResponsiveClasses($strData, 'varJustifyContentClasses', ['resetValue' => ResponsiveConfiguration::FLEX_DEFAULT]);
     }
 
     /**

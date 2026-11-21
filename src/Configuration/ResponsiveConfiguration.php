@@ -8,6 +8,12 @@ abstract class ResponsiveConfiguration
 {
     public const string SPACING_NO_OP = 'noop';
 
+    /**
+     * Flex option meaning "no setting": renders nothing on its own, and on a larger
+     * breakpoint the class restoring the CSS default when a smaller breakpoint set one.
+     */
+    public const string FLEX_DEFAULT = 'default';
+
     protected array|string $varColClasses;
     protected array|string $varOffsetClasses;
     protected array|string $varAlignItemsClasses;
