@@ -94,6 +94,16 @@ class ResponsiveWidget extends Widget
                 $objWidget->value = self::INHERIT_OPTION_VALUE;
             } elseif (
                 !($this->arrDca['eval']['includeBlankOption'] ?? false)
+                && \in_array(ResponsiveConfiguration::SPACING_NO_OP, array_column($arrOpts, 'value'), true)
+            ) {
+                // The no-op option renders nothing, exactly like the empty value, so it is the
+                // faithful preselection. The DCA default would rewrite a field the frontend has
+                // been rendering as "nothing" (e.g. stored before the field existed) to whatever
+                // the default renders as soon as the record is saved for any other reason. New
+                // records are unaffected: they are created with the DCA default.
+                $objWidget->value = ResponsiveConfiguration::SPACING_NO_OP;
+            } elseif (
+                !($this->arrDca['eval']['includeBlankOption'] ?? false)
                 && ($varDefault = $this->arrDca['default'][$strBreakpoint] ?? null) !== null
                 && $varDefault !== ''
             ) {
